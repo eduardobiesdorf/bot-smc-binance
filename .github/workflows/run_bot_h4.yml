@@ -39,18 +39,23 @@ jobs:
 
       - name: Rodar
         run: |
+          set -o pipefail
           ARGS="--inicio ${{ inputs.inicio }} --custo-pct ${{ inputs.custo_pct }}"
           [ -n "${{ inputs.fim }}" ] && ARGS="$ARGS --fim ${{ inputs.fim }}"
           case "${{ inputs.modo }}" in
             filtros)    ARGS="$ARGS --filtros" ;;
             montecarlo) ARGS="$ARGS --montecarlo 100 --mc-bloco 20" ;;
           esac
-          python backtest_h4.py $ARGS ${{ inputs.extra }} | tee resultado.txt
+          python -u backtest_h4.py $ARGS ${{ inputs.extra }} 2>&1 | tee resultado.txt
 
       - name: Resumo no job
         if: always()
         run: |
-          { echo '```'; cat resultado.txt; echo '```'; } >> $GITHUB_STEP_SUMMARY
+          if [ -s resultado.txt ]; then
+            { echo '```'; cat resultado.txt; echo '```'; } >> $GITHUB_STEP_SUMMARY
+          else
+            echo '**resultado.txt VAZIO** - veja o log do passo "Rodar".' >> $GITHUB_STEP_SUMMARY
+          fi
 
       - name: Artefatos
         if: always()

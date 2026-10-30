@@ -1,0 +1,6 @@
+__pycache__/
+*.pyc
+resultado.txt
+download.log
+trades_*.csv
+momentum_periodos.csv

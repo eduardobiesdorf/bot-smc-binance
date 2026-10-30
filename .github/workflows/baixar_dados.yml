@@ -1,0 +1,60 @@
+name: Baixar dados
+
+# Baixa o historico da Binance e COMMITA os CSVs em dados/.
+# Roda uma vez (ou quando quiser atualizar) -- depois os backtests leem do disco.
+
+on:
+  workflow_dispatch:
+    inputs:
+      inicio:
+        description: 'Data inicial (YYYY-MM-DD)'
+        required: true
+        default: '2021-01-01'
+      intervalos:
+        description: 'Intervalos separados por virgula (1d / 1d,4h)'
+        required: true
+        default: '1d'
+        type: choice
+        options: ['1d', '1d,4h', '4h']
+      ativos:
+        description: 'Pares separados por virgula (vazio = universo padrao de 50)'
+        required: false
+        default: ''
+
+permissions:
+  contents: write
+
+jobs:
+  baixar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install requests
+
+      - name: Baixar
+        run: |
+          set -o pipefail
+          ARGS="--inicio ${{ inputs.inicio }} --intervalos ${{ inputs.intervalos }}"
+          [ -n "${{ inputs.ativos }}" ] && ARGS="$ARGS --ativos ${{ inputs.ativos }}"
+          python -u baixar_dados.py $ARGS 2>&1 | tee download.log
+
+      - name: Commitar os CSVs
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A dados/
+          if git diff --cached --quiet; then
+            echo "Nada mudou." >> $GITHUB_STEP_SUMMARY
+          else
+            git commit -m "dados: historico ${{ inputs.intervalos }} desde ${{ inputs.inicio }}"
+            git push
+            echo "CSVs commitados em dados/" >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Resumo
+        if: always()
+        run: |
+          { echo '```'; tail -40 download.log; echo '```'; } >> $GITHUB_STEP_SUMMARY
