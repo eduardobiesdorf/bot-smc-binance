@@ -1,0 +1,24 @@
+name: Backtest H1 SMC
+
+on:
+  workflow_dispatch: # Permite executar manualmente a qualquer momento pelo GitHub
+
+jobs:
+  run-backtest-h1:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout do Repositório
+        uses: actions/checkout@v4
+
+      - name: Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Instalar Dependências
+        run: |
+          pip install requests
+
+      - name: Executar Backtest H1
+        run: |
+          python backtest_h1.py

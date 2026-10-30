@@ -1,0 +1,83 @@
+name: Backtest Momentum
+
+on:
+  workflow_dispatch:
+    inputs:
+      inicio:
+        description: 'Data inicial (YYYY-MM-DD)'
+        required: true
+        default: '2023-01-01'
+      fim:
+        description: 'Data final (vazio = hoje)'
+        required: false
+        default: ''
+      modo:
+        description: 'o que rodar'
+        required: true
+        default: 'completo'
+        type: choice
+        options: [completo, unica, montecarlo, grade]
+      lookback:
+        description: 'Dias do sinal de momentum'
+        required: false
+        default: '30'
+      rebal:
+        description: 'Dias entre rebalanceamentos'
+        required: false
+        default: '7'
+      n_pos:
+        description: 'Posicoes em CADA ponta'
+        required: false
+        default: '8'
+      custo_pct:
+        description: 'Taxa + slippage por unidade de giro, em %'
+        required: false
+        default: '0.10'
+      extra:
+        description: 'Flags extras (ex: --so-comprado --peso invvol --split 2025-01-01)'
+        required: false
+        default: ''
+
+jobs:
+  backtest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install requests
+
+      - name: Rodar
+        run: |
+          set -o pipefail          # sem isso, um erro do python fica mascarado pelo tee
+          ARGS="--inicio ${{ inputs.inicio }} --lookback ${{ inputs.lookback }}"
+          ARGS="$ARGS --rebal ${{ inputs.rebal }} --n-pos ${{ inputs.n_pos }}"
+          ARGS="$ARGS --custo-pct ${{ inputs.custo_pct }}"
+          [ -n "${{ inputs.fim }}" ] && ARGS="$ARGS --fim ${{ inputs.fim }}"
+          case "${{ inputs.modo }}" in
+            completo)   ARGS="$ARGS --completo --montecarlo 200" ;;
+            montecarlo) ARGS="$ARGS --montecarlo 200" ;;
+            grade)      ARGS="$ARGS --grade" ;;
+          esac
+          # -u = sem buffer | 2>&1 = stderr tambem vai para o arquivo
+          python -u backteste_momentum.py $ARGS ${{ inputs.extra }} 2>&1 | tee resultado.txt
+
+      - name: Resumo no job
+        if: always()
+        run: |
+          if [ -s resultado.txt ]; then
+            { echo '```'; cat resultado.txt; echo '```'; } >> $GITHUB_STEP_SUMMARY
+          else
+            echo '**resultado.txt veio VAZIO** — veja o log do passo "Rodar".' \
+              >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Artefatos
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backtest-momentum
+          path: |
+            resultado.txt
+            momentum_periodos.csv

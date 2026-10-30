@@ -1,0 +1,192 @@
+# -*- coding: utf-8 -*-
+import time
+import requests
+
+ATIVOS = [
+    'BTCUSDT', 'ETHUSDT', 'SOLUSDT', 'XRPUSDT', 'DOGEUSDT',
+    'ADAUSDT', 'AVAXUSDT', 'SUIUSDT', 'LINKUSDT', 'NEARUSDT',
+    'TRXUSDT', 'DOTUSDT', 'POLUSDT', 'LTCUSDT', 'BCHUSDT',
+    'UNIUSDT', 'SHIBUSDT', 'ETCUSDT', 'FILUSDT'
+]
+
+def identificar_swing_points(candles, lookback=16):
+    highs = [float(c[2]) for c in candles]
+    lows = [float(c[3]) for c in candles]
+    return max(highs[-lookback:]), min(lows[-lookback:])
+
+def buscar_candles_historicos(base_url, simbolo, interval='2h', total_velas=2160):
+    candles = []
+    end_time = None
+    
+    while len(candles) < total_velas:
+        params = {'symbol': simbolo, 'interval': interval, 'limit': 1000}
+        if end_time:
+            params['endTime'] = end_time
+            
+        r = requests.get(f"{base_url}/klines", params=params, timeout=15)
+        if not r.ok:
+            break
+        
+        lote = r.json()
+        if not lote:
+            break
+            
+        candles = lote + candles
+        end_time = lote[0][0] - 1
+        time.sleep(0.05)
+        
+    return candles[-total_velas:]
+
+def executar_backtest_h2():
+    print("=== INÍCIO DO BACKTEST (H2 | 6 MESES / 2.160 VELAS) ===")
+    base_url = "https://data-api.binance.vision/api/v3"
+    
+    total_sinais_geral = 0
+    total_ativados_geral = 0
+    total_wins_geral = 0
+    total_losses_geral = 0
+    soma_rr_geral = 0
+    contador_rr = 0
+
+    for simbolo_par in ATIVOS:
+        simbolo_fmt = simbolo_par.replace('USDT', '/USDT')
+        candles = buscar_candles_historicos(base_url, simbolo_par, interval='2h', total_velas=2160)
+        
+        if not candles or len(candles) < 50:
+            print(f"[{simbolo_fmt}] Dados insuficientes.")
+            continue
+
+        sinais_ativo = 0
+        ativados_ativo = 0
+        wins_ativo = 0
+        losses_ativo = 0
+        soma_rr_ativo = 0
+
+        for i in range(25, len(candles) - 1):
+            subset = candles[:i+1]
+            vela_atual = subset[-2]
+            
+            t_open = float(vela_atual[1])
+            t_high = float(vela_atual[2])
+            t_low = float(vela_atual[3])
+            t_close = float(vela_atual[4])
+
+            corpo = abs(t_close - t_open)
+            tamanho_total = t_high - t_low
+            if tamanho_total == 0 or (corpo / tamanho_total) <= 0.4:
+                continue
+
+            is_bullish = t_close > t_open
+            is_bearish = t_close < t_open
+
+            sub_candles = subset[-18:-2]
+            if len(sub_candles) < 16:
+                continue
+                
+            macro_high, macro_low = identificar_swing_points(sub_candles, lookback=16)
+            
+            is_choch_bullish = is_bullish and t_close > macro_high
+            is_choch_bearish = is_bearish and t_close < macro_low
+
+            if not (is_choch_bullish or is_choch_bearish):
+                continue
+
+            sinais_ativo += 1
+
+            ob_vela = None
+            for k in range(len(subset) - 3, max(0, len(subset) - 12), -1):
+                c_op = float(subset[k][1])
+                c_cl = float(subset[k][4])
+                if is_choch_bullish and c_cl < c_op:
+                    ob_vela = subset[k]
+                    break
+                elif is_choch_bearish and c_cl > c_op:
+                    ob_vela = subset[k]
+                    break
+            
+            if ob_vela is None:
+                ob_vela = vela_atual
+
+            ob_high = float(ob_vela[2])
+            ob_low = float(ob_vela[3])
+
+            if is_choch_bullish:
+                entrada = ob_low
+                stop_loss = ob_low - (ob_high - ob_low) * 1.05
+                take_profit = macro_high
+                is_buy = True
+            else:
+                entrada = ob_high
+                stop_loss = ob_high + (ob_high - ob_low) * 1.05
+                take_profit = macro_low
+                is_buy = False
+
+            risco = abs(entrada - stop_loss)
+            retorno = abs(take_profit - entrada)
+            if risco <= 0:
+                continue
+            rr = retorno / risco
+
+            ativou = False
+            venceu = False
+            perdeu = False
+
+            for f_idx in range(i + 1, min(len(candles), i + 30)): # Janela de velas H2 para resolução
+                f_high = float(candles[f_idx][2])
+                f_low = float(candles[f_idx][3])
+
+                if not ativou:
+                    if is_buy and f_low <= entrada:
+                        ativou = True
+                    elif not is_buy and f_high >= entrada:
+                        ativou = True
+
+                if ativou:
+                    if is_buy:
+                        if f_low <= stop_loss:
+                            perdeu = True
+                            break
+                        if f_high >= take_profit:
+                            venceu = True
+                            break
+                    else:
+                        if f_high >= stop_loss:
+                            perdeu = True
+                            break
+                        if f_low <= take_profit:
+                            venceu = True
+                            break
+
+            if ativou:
+                ativados_ativo += 1
+                soma_rr_ativo += rr
+                soma_rr_geral += rr
+                contador_rr += 1
+                if venceu:
+                    wins_ativo += 1
+                elif perdeu:
+                    losses_ativo += 1
+                else:
+                    losses_ativo += 1
+
+        total_sinais_geral += sinais_ativo
+        total_ativados_geral += ativados_ativo
+        total_wins_geral += wins_ativo
+        total_losses_geral += losses_ativo
+
+        win_rate_ativo = (wins_ativo / ativados_ativo * 100) if ativados_ativo > 0 else 0
+        media_rr_ativo = (soma_rr_ativo / ativados_ativo) if ativados_ativo > 0 else 0
+
+        print(f"[{simbolo_fmt}] Sinais: {sinais_ativo} | Ativados: {ativados_ativo} | Wins: {wins_ativo}, Loss: {losses_ativo} | Win Rate: {win_rate_ativo:.1f}% | Média R:R: 1:{media_rr_ativo:.2f}")
+
+    win_rate_global = (total_wins_geral / total_ativados_geral * 100) if total_ativados_geral > 0 else 0
+    media_rr_global = (soma_rr_geral / contador_rr) if contador_rr > 0 else 0
+
+    print("\n=== RESUMO GERAL DO BACKTEST (H2 - 6 MESES) ===")
+    print(f"Total de Sinais Detectados (Gatilhos): {total_sinais_geral}")
+    print(f"Ordens Ativadas: {total_ativados_geral}")
+    print(f"Wins: {total_wins_geral} | Losses: {total_losses_geral} | Win Rate Global: {win_rate_global:.2f}%")
+    print(f"Média Geral de Risco-Retorno: 1:{media_rr_global:.2f}")
+
+if __name__ == "__main__":
+    executar_backtest_h2()

@@ -1,0 +1,24 @@
+name: Backtest H2 SMC
+
+on:
+  workflow_dispatch:
+
+jobs:
+  run-backtest-h2:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout do Repositório
+        uses: actions/checkout@v4
+
+      - name: Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Instalar Dependências
+        run: |
+          pip install requests
+
+      - name: Executar Backtest H2
+        run: |
+          python backtest_h2.py
