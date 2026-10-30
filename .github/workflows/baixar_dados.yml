@@ -15,7 +15,7 @@ on:
         required: true
         default: '1d'
         type: choice
-        options: ['1d', '1d,4h', '4h', '1h', '30m', '15m', '1h,30m', '1h,15m']
+        options: ['1d', '1d,4h', '4h', '1h', '30m', '15m', '1h,30m', '1h,15m', '5m', '30m,5m']
       ativos:
         description: 'Pares separados por virgula (vazio = universo padrao de 50)'
         required: false

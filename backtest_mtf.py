@@ -96,6 +96,8 @@ def tipico(c):
 # ------------------------------------------------------------------ sinal
 def gerar(h1, m15, cfg):
     n = len(h1)
+    # duracao da barra de estrutura, deduzida dos dados
+    dur_ms = h1[1][0] - h1[0][0] if n > 1 else 3600000
     a = atr(h1, cfg['atr_periodo'])
     altas, baixas = pivos(h1, cfg['pivo_esq'], cfg['pivo_dir'])
     tempos15 = [x[0] for x in m15]
@@ -137,7 +139,7 @@ def gerar(h1, m15, cfg):
         if desloc <= 0 or desloc / a[i] < cfg['sigma']:
             continue
 
-        t = montar(h1, m15, tempos15, a15, i, ancora, compra, cfg)
+        t = montar(h1, m15, tempos15, a15, i, ancora, compra, cfg, dur_ms)
         if t:
             t['evento'] = evento
             trades.append(t)
@@ -145,7 +147,7 @@ def gerar(h1, m15, cfg):
     return trades
 
 
-def montar(h1, m15, tempos15, a15, i, ancora, compra, cfg):
+def montar(h1, m15, tempos15, a15, i, ancora, compra, cfg, dur_ms=3600000):
     n = len(h1)
     pv = vv = 0.0
     for k in range(ancora, i + 1):
@@ -178,7 +180,7 @@ def montar(h1, m15, tempos15, a15, i, ancora, compra, cfg):
                 afastou += 1
             elif afastou >= cfg['afasta_min']:
                 # ---- desce para o 15min DENTRO desta barra de H1
-                t0, t1 = h1[k][0], h1[k][0] + 3600000
+                t0, t1 = h1[k][0], h1[k][0] + dur_ms
                 p0 = bisect.bisect_left(tempos15, t0)
                 p1 = bisect.bisect_left(tempos15, t1)
                 for m in range(p0, min(p1, len(m15) - 1)):
