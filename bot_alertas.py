@@ -242,7 +242,8 @@ def diag(linha):
 
 
 def enviar(texto, html=True):
-    tok, chat = os.getenv("TELEGRAM_TOKEN"), os.getenv("TELEGRAM_CHAT_ID")
+    tok = os.getenv("TELEGRAM_TOKEN") or os.getenv("TOKEN_TELEGRAM")
+    chat = os.getenv("TELEGRAM_CHAT_ID") or os.getenv("CHAT_ID_TELEGRAM")
     diag(f"TOKEN: {'definido, ' + str(len(tok)) + ' chars' if tok else 'AUSENTE'}"
          f" | CHAT_ID: {'definido, ' + str(len(chat)) + ' chars' if chat else 'AUSENTE'}")
     if not tok or not chat:

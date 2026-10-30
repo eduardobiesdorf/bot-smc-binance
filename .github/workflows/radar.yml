@@ -59,8 +59,9 @@ jobs:
 
       - name: Escanear
         env:
-          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
-          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          # aceita os dois padroes de nome de secret
+          TELEGRAM_TOKEN: ${{ secrets.TOKEN_TELEGRAM || secrets.TELEGRAM_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.CHAT_ID_TELEGRAM || secrets.TELEGRAM_CHAT_ID }}
         run: |
           set -o pipefail
           ARGS="--tf-estrutura ${{ inputs.tf_estrutura || '30m' }}"
