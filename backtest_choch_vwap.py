@@ -190,6 +190,73 @@ def montar(velas, i, ancora, compra, a, cfg):
         if (compra and vwap <= base) or (not compra and vwap >= base):
             return None
 
+        # ===================================================================
+        # MODO REJEICAO: o reteste FALHA e opera-se a favor da falha.
+        #   1. preco volta na VWAP e FECHA do lado errado  -> reteste falhou
+        #   2. volta para testar a VWAP de novo, agora por baixo
+        #   3. REJEITA (perfura e fecha de volta do lado errado, corpo forte)
+        #   4. entra na direcao OPOSTA ao CHOCH, alvo no ultimo fundo
+        # ===================================================================
+        if cfg['modo'] == 'rejeicao':
+            falhou = False
+            jg = None
+            vw_ref = vwap
+            pv2, vv2 = pv, vv
+            for k in range(j, min(n - 1, j + cfg['janela_falha']) + 1):
+                o, h, l, cl = velas[k][1], velas[k][2], velas[k][3], velas[k][4]
+                rng = h - l
+                if not falhou:
+                    # fechou do lado errado da VWAP -> reteste falhou
+                    if (compra and cl < vw_ref) or (not compra and cl > vw_ref):
+                        falhou = True
+                else:
+                    # voltou a tocar a VWAP por baixo (compra) / por cima (venda)
+                    toca = h >= vw_ref if compra else l <= vw_ref
+                    if toca and rng > 0:
+                        rejeitou = (cl < vw_ref and cl < o) if compra else \
+                                   (cl > vw_ref and cl > o)
+                        if rejeitou and abs(cl - o) / rng >= cfg['corpo_min']:
+                            jg = k
+                            break
+                    # se fechou de volta do lado do CHOCH, a falha foi desfeita
+                    if (compra and cl > vw_ref) or (not compra and cl < vw_ref):
+                        return None
+                pv2 += tipico(velas[k]) * velas[k][5]
+                vv2 += velas[k][5]
+                vw_ref = pv2 / max(vv2, 1e-12)
+            if jg is None or jg + 1 >= n:
+                return None
+
+            compra = not compra              # VIRA A MAO
+            entrada = velas[jg + 1][1]
+            stop_ref = velas[jg][3] if compra else velas[jg][2]
+            jg = jg + 1
+            if cfg['stop'] == 'atr':
+                stop = entrada - a[jg - 1] * cfg['stop_atr'] if compra else \
+                       entrada + a[jg - 1] * cfg['stop_atr']
+            else:   # referenciado na vela de rejeicao
+                stop = stop_ref - a[jg - 1] * cfg['stop_atr'] * 0.2 if compra else \
+                       stop_ref + a[jg - 1] * cfg['stop_atr'] * 0.2
+            risco = abs(entrada - stop)
+            if risco <= 0:
+                return None
+            # alvo = o ultimo fundo deixado (a ancora estrutural)
+            alvo = base if cfg['alvo'] == 'topo' else \
+                   entrada + risco * cfg['rr_fixo'] * (1 if compra else -1)
+            if (compra and alvo <= entrada) or (not compra and alvo >= entrada):
+                return None
+            rr = abs(alvo - entrada) / risco
+            if rr < cfg['rr_min'] or (cfg['rr_max'] and rr > cfg['rr_max']):
+                return None
+            res, dur, r_bruto = simular(velas, jg, compra, entrada, stop, alvo, cfg)
+            custo = (entrada * cfg['custo_pct'] / 100) / risco
+            return {'data': datetime.fromtimestamp(velas[jg][0] / 1000, timezone.utc)
+                            .strftime('%Y-%m-%d %H:%M'),
+                    'lado': 'compra' if compra else 'venda',
+                    'entrada': entrada, 'stop': stop, 'alvo': alvo, 'rr': rr,
+                    'espera': j - i, 'ancora': i - ancora, 'confirma': jg - j,
+                    'resultado': res, 'barras': (jg - i) + dur, 'r': r_bruto - custo}
+
         # ---- GATILHO: tocar a VWAP nao basta. Espera a vela de impulsao
         # que REAGE nela -- toca/perfura e fecha de volta do lado certo,
         # com corpo expressivo. Sem isso, nao ha entrada.
@@ -388,6 +455,12 @@ def main():
                     help='barras minimas entre a ancora e a quebra')
     ap.add_argument('--alvo', choices=['topo', 'rr_fixo'], default='topo')
     ap.add_argument('--rr-fixo', type=float, default=2.0)
+    ap.add_argument('--modo', choices=['reteste', 'rejeicao'], default='reteste',
+                    help='reteste = entra a favor do CHOCH quando a VWAP segura | '
+                         'rejeicao = o reteste falha, volta e rejeita -> vira a mao, '
+                         'alvo no ultimo fundo')
+    ap.add_argument('--janela-falha', type=int, default=20,
+                    help='barras para a falha + nova rejeicao acontecerem')
     ap.add_argument('--gatilho', choices=['toque', 'impulsao'], default='impulsao',
                     help='toque = so encostar na VWAP | impulsao = exige vela de '
                          'reacao fechando do lado certo, com corpo expressivo')
@@ -416,6 +489,7 @@ def main():
     cfg = {k: getattr(a, k) for k in
            ('pivo_esq', 'pivo_dir', 'evento', 'sigma', 'impulso_min', 'alvo',
             'gatilho', 'corpo_min', 'confirma_max', 'fundo_janela',
+            'modo', 'janela_falha',
             'rr_fixo', 'stop', 'stop_atr', 'rr_min', 'rr_max', 'espera_max',
             'tempo_max', 'atr_periodo', 'lado', 'parcial_em', 'parcial_frac',
             'breakeven', 'custo_pct')}
@@ -432,7 +506,7 @@ def main():
           f"{d0:%Y-%m-%d} -> {d1:%Y-%m-%d}")
     print(f"pivo {a.pivo_esq}/{a.pivo_dir} | evento={a.evento} | impulso>={a.sigma} ATR "
           f"| fundo das ultimas {a.fundo_janela} barras")
-    print(f"gatilho={a.gatilho} (corpo>={a.corpo_min:.0%}, ate {a.confirma_max} barras) "
+    print(f"modo={a.modo} | gatilho={a.gatilho} (corpo>={a.corpo_min:.0%}) "
           f"| alvo={a.alvo} | stop={a.stop} | espera {a.espera_max} barras")
     print("=" * 84)
 
