@@ -1,8 +1,9 @@
-2026-10-30 21:11 UTC
+2026-10-30 21:28 UTC
 ativos escaneados: 50
 GATILHOS: 6
 CENARIOS: 9
-novos (nao repetidos): 2
+novos (nao repetidos): 0
+descartados por idade: 6 -> NEARUSDT (15.2h), DOGEUSDT (13.2h), LINKUSDT (7.0h), WLDUSDT (13.5h), AAVEUSDT (7.0h), ADAUSDT (11.7h)
 
 GATILHO  NEARUSDT     compra  vela 30/10 03:15
   RADAR  UNIUSDT      compra  vela 30/10 18:00
