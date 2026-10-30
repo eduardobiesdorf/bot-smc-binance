@@ -1,10 +1,9 @@
-2026-10-30 22:45 UTC
+2026-10-30 23:15 UTC
 ativos escaneados: 50
 GATILHOS: 0
-CENARIOS: 3
+CENARIOS: 2
 novos (nao repetidos): 1
 descartados por idade: 0
 
-  RADAR  ENAUSDT      venda   vela 30/10 19:30
-  RADAR  GOOGLBUSDT   compra  vela 30/10 19:30
-  RADAR  USDEUSDT     venda   vela 30/10 19:30
+  RADAR  BEAMXUSDT    compra  vela 30/10 20:00
+  RADAR  GOOGLBUSDT   compra  vela 30/10 20:00
