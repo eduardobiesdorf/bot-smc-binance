@@ -48,11 +48,22 @@ jobs:
           git add -A dados/
           if git diff --cached --quiet; then
             echo "Nada mudou." >> $GITHUB_STEP_SUMMARY
-          else
-            git commit -m "dados: historico ${{ inputs.intervalos }} desde ${{ inputs.inicio }}"
-            git push
-            echo "CSVs commitados em dados/" >> $GITHUB_STEP_SUMMARY
+            exit 0
           fi
+          git commit -m "dados: ${{ inputs.intervalos }} desde ${{ inputs.inicio }}"
+          # o repo pode ter recebido commits enquanto o download rodava:
+          # rebase e tenta de novo em vez de falhar com non-fast-forward
+          for tentativa in 1 2 3 4 5; do
+            if git push origin HEAD:main; then
+              echo "CSVs commitados em dados/ (tentativa $tentativa)" >> $GITHUB_STEP_SUMMARY
+              exit 0
+            fi
+            echo "push rejeitado, rebase e nova tentativa ($tentativa)"
+            git pull --rebase --autostash origin main || exit 1
+            sleep $((tentativa * 5))
+          done
+          echo "FALHOU o push depois de 5 tentativas" >> $GITHUB_STEP_SUMMARY
+          exit 1
 
       - name: Resumo
         if: always()
