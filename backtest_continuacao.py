@@ -199,13 +199,11 @@ def gerar(velas, cfg):
                 continue
             alvo = entrada + risco * cfg['rr'] * (1 if compra else -1)
 
-            res, dur = simular(velas, i, compra, entrada, stop, alvo, cfg)
+            res, dur, r_bruto = simular(velas, i, compra, entrada, stop, alvo, cfg)
             if res == 'nao_ativou':
                 continue
             custo = (entrada * cfg['custo_pct'] / 100) / risco
-            r = (cfg['rr'] - custo) if res == 'win' else \
-                (-1.0 - custo) if res == 'loss' else \
-                (parcial(velas, i + dur, compra, entrada, risco) - custo)
+            r = r_bruto - custo
 
             trades.append({
                 'data': datetime.fromtimestamp(velas[i][0] / 1000, timezone.utc)
@@ -226,35 +224,67 @@ def parcial(velas, j, compra, entrada, risco):
 
 
 def simular(velas, i, compra, entrada, stop, alvo, cfg):
+    """
+    Devolve (resultado, barras, R).
+    Saida parcial e stop no zero a zero mudam o FORMATO da distribuicao:
+    muitos trades passam a terminar em ~0 em vez de -1R, o que encurta
+    drasticamente as sequencias de perda sem jogar fora a cauda.
+    """
+    risco = abs(entrada - stop)
     ativado = False
+    parcial_feita = False
+    r_travado = 0.0
+    stop_atual = stop
     limite_fill = min(len(velas) - 1, i + cfg['espera_max'])
+    limite_saida = len(velas) - 1
+
     for j in range(i + 1, len(velas)):
         hi, lo = velas[j][2], velas[j][3]
+
         if not ativado:
             if j > limite_fill:
-                return 'nao_ativou', j - i
+                return 'nao_ativou', j - i, 0.0
             if (compra and lo <= entrada) or (not compra and hi >= entrada):
                 ativado = True
-                if (compra and lo <= stop) or (not compra and hi >= stop):
-                    return 'loss', j - i
                 limite_saida = min(len(velas) - 1, j + cfg['tempo_max'])
+                if (compra and lo <= stop_atual) or (not compra and hi >= stop_atual):
+                    return 'loss', j - i, -1.0
             continue
-        bate_stop = lo <= stop if compra else hi >= stop
+
+        em_r_alta = (hi - entrada) / risco if compra else (entrada - lo) / risco
+        bate_stop = lo <= stop_atual if compra else hi >= stop_atual
         bate_alvo = hi >= alvo if compra else lo <= alvo
+
+        # parcial antes de avaliar stop (conservador: so se nao bateu stop na barra)
+        if cfg['parcial_em'] > 0 and not parcial_feita and em_r_alta >= cfg['parcial_em'] \
+                and not bate_stop:
+            parcial_feita = True
+            r_travado += cfg['parcial_frac'] * cfg['parcial_em']
+            if cfg['breakeven']:
+                stop_atual = entrada
+                bate_stop = lo <= stop_atual if compra else hi >= stop_atual
+
+        resto = 1.0 - (cfg['parcial_frac'] if parcial_feita else 0.0)
+
         if bate_stop and bate_alvo:
-            return 'loss', j - i
+            perda = 0.0 if (parcial_feita and cfg['breakeven']) else -1.0
+            return ('be' if perda == 0 else 'loss'), j - i, r_travado + resto * perda
         if bate_stop:
-            return 'loss', j - i
+            perda = 0.0 if (parcial_feita and cfg['breakeven']) else -1.0
+            return ('be' if perda == 0 else 'loss'), j - i, r_travado + resto * perda
         if bate_alvo:
-            return 'win', j - i
+            return 'win', j - i, r_travado + resto * cfg['rr']
         if j >= limite_saida:
-            return 'tempo', j - i
-    return ('tempo' if ativado else 'nao_ativou'), len(velas) - 1 - i
+            saida = velas[j][4]
+            pr = ((saida - entrada) if compra else (entrada - saida)) / risco
+            return 'tempo', j - i, r_travado + resto * pr
+
+    return ('tempo' if ativado else 'nao_ativou'), len(velas) - 1 - i, r_travado
 
 
 # ------------------------------------------------------------------ metricas
 def medir(trades):
-    fech = [t for t in trades if t['resultado'] in ('win', 'loss', 'tempo')]
+    fech = [t for t in trades if t['resultado'] in ('win', 'loss', 'tempo', 'be')]
     if len(fech) < 10:
         return None
     w = sum(1 for t in fech if t['resultado'] == 'win')
@@ -267,13 +297,22 @@ def medir(trades):
         acc += t['r']
         pico = max(pico, acc)
         dd = min(dd, acc - pico)
+    ordenados = sorted(fech, key=lambda x: x['data'])
+    pior = atual = 0
+    for t in ordenados:
+        if t['r'] < -0.05:
+            atual += 1
+            pior = max(pior, atual)
+        else:
+            atual = 0
+    nao_perde = sum(1 for t in fech if t['r'] > -0.05) / len(fech) * 100
     return {'n': len(fech), 'w': w, 'wr': w / len(fech) * 100, 'exp': m,
-            'total': sum(rs), 'z': m / se, 'dd': dd,
-            'ic': (m - 1.96 * se, m + 1.96 * se)}
+            'total': sum(rs), 'z': m / se, 'dd': dd, 'seq': pior,
+            'nao_perde': nao_perde, 'ic': (m - 1.96 * se, m + 1.96 * se)}
 
 
 def medir_dia(trades):
-    fech = [t for t in trades if t['resultado'] in ('win', 'loss', 'tempo')]
+    fech = [t for t in trades if t['resultado'] in ('win', 'loss', 'tempo', 'be')]
     if len(fech) < 5:
         return None
     pd = {}
@@ -292,7 +331,7 @@ def por_ano(trades):
     """A tabela que decide: um ano bom entre cinco ruins NAO e edge."""
     ag = {}
     for t in trades:
-        if t['resultado'] in ('win', 'loss', 'tempo'):
+        if t['resultado'] in ('win', 'loss', 'tempo', 'be'):
             a = t['data'][:4]
             ag.setdefault(a, []).append(t['r'])
     return {a: (len(v), sum(v), sum(v) / len(v)) for a, v in sorted(ag.items())}
@@ -366,6 +405,12 @@ def main():
     ap.add_argument('--tempo-max', type=int, default=48, help='barras no trade')
     ap.add_argument('--atr-periodo', type=int, default=14)
     ap.add_argument('--lado', choices=['ambos', 'compra', 'venda'], default='ambos')
+    ap.add_argument('--parcial-em', type=float, default=0.0,
+                    help='fecha parte da posicao ao atingir X R (0 = desligado)')
+    ap.add_argument('--parcial-frac', type=float, default=0.5,
+                    help='fracao fechada na parcial')
+    ap.add_argument('--breakeven', action='store_true',
+                    help='apos a parcial, move o stop para o preco de entrada')
     ap.add_argument('--custo-pct', type=float, default=0.10)
     ap.add_argument('--painel', action='store_true')
     ap.add_argument('--montecarlo', type=int, default=0)
@@ -374,7 +419,8 @@ def main():
     cfg = {k: getattr(a, k) for k in
            ('ma_longa', 'ma_curta', 'ma_inclinada', 'rompimento', 'poi', 'poc_janela',
             'ob_busca', 'dist_max', 'vol_mult', 'stop_atr', 'rr', 'espera_max',
-            'tempo_max', 'atr_periodo', 'lado', 'custo_pct')}
+            'tempo_max', 'atr_periodo', 'lado', 'custo_pct',
+            'parcial_em', 'parcial_frac', 'breakeven')}
 
     ativos = {x.strip().upper() for x in a.ativos.split(',') if x.strip()} or None
     dados = carregar(a.tf, ativos)
@@ -413,6 +459,8 @@ def main():
     md = medir_dia(todos)
     print(f"\nTOTAL: {m['n']} operacoes | WR {m['wr']:.1f}% | exp {m['exp']:+.3f}R | "
           f"{m['total']:+.1f}R | maxDD {m['dd']:.1f}R")
+    print(f"  nao perdeu em {m['nao_perde']:.1f}% dos trades | "
+          f"maior sequencia de perdas: {m['seq']}")
     print(f"  z {m['z']:+.2f} | IC95% [{m['ic'][0]:+.3f} , {m['ic'][1]:+.3f}]"
           + ("  >> dentro do acaso" if abs(m['z']) < 1.96 else "  (significativo)"))
     if md:
