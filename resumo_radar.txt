@@ -1,8 +1,8 @@
-2026-10-30 21:10 UTC
-ativos escaneados: 20
-GATILHOS: 4
-CENARIOS: 2
-novos (nao repetidos): 6
+2026-10-30 21:11 UTC
+ativos escaneados: 50
+GATILHOS: 6
+CENARIOS: 9
+novos (nao repetidos): 2
 
 GATILHO  NEARUSDT     compra  vela 30/10 03:15
   RADAR  UNIUSDT      compra  vela 30/10 18:00
@@ -10,3 +10,12 @@ GATILHO  NEARUSDT     compra  vela 30/10 03:15
 GATILHO  DOGEUSDT     compra  vela 30/10 05:15
 GATILHO  LINKUSDT     compra  vela 30/10 11:30
 GATILHO  WLDUSDT      compra  vela 30/10 05:00
+GATILHO  AAVEUSDT     compra  vela 30/10 11:30
+GATILHO  ADAUSDT      compra  vela 30/10 06:45
+  RADAR  GOOGLBUSDT   compra  vela 30/10 18:00
+  RADAR  BEAMXUSDT    compra  vela 30/10 18:00
+  RADAR  ZROUSDT      compra  vela 30/10 18:00
+  RADAR  ARBUSDT      compra  vela 30/10 18:00
+  RADAR  XLMUSDT      compra  vela 30/10 18:00
+  RADAR  XLMUSDT      venda   vela 30/10 18:00
+  RADAR  BCHUSDT      compra  vela 30/10 18:00
