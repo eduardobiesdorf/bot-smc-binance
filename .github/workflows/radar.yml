@@ -18,6 +18,27 @@ on:
         required: false
         default: false
         type: boolean
+      ping:
+        description: 'Só manda uma mensagem de teste no Telegram'
+        required: false
+        default: false
+        type: boolean
+      tf_estrutura:
+        description: 'Timeframe da estrutura'
+        required: false
+        default: '30m'
+        type: choice
+        options: ['30m', '1h', '15m']
+      tf_gatilho:
+        description: 'Timeframe do gatilho'
+        required: false
+        default: '15m'
+        type: choice
+        options: ['15m', '5m', '30m']
+      rr_fixo:
+        description: 'Alvo fixo (múltiplo de risco)'
+        required: false
+        default: '2.0'
 
 permissions:
   contents: write
@@ -42,9 +63,12 @@ jobs:
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
         run: |
           set -o pipefail
-          ARGS=""
+          ARGS="--tf-estrutura ${{ inputs.tf_estrutura || '30m' }}"
+          ARGS="$ARGS --tf-gatilho ${{ inputs.tf_gatilho || '15m' }}"
+          ARGS="$ARGS --rr-fixo ${{ inputs.rr_fixo || '2.0' }}"
           [ "${{ inputs.so_gatilho }}" = "true" ] && ARGS="$ARGS --so-gatilho"
           [ "${{ inputs.teste }}" = "true" ] && ARGS="$ARGS --teste"
+          [ "${{ inputs.ping }}" = "true" ] && ARGS="$ARGS --ping"
           python -u bot_alertas.py $ARGS 2>&1 | tee radar.log
 
       - name: Guardar o estado (evita alerta repetido)

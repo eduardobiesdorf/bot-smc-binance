@@ -39,9 +39,12 @@ ATIVOS = ['BTCUSDT', 'ETHUSDT', 'SOLUSDT', 'BNBUSDT', 'XRPUSDT',
 BASE_URL = "https://data-api.binance.vision/api/v3"
 ESTADO = "alertas_enviados.json"
 
+MS_TF = {'1h': 3600000, '30m': 1800000, '15m': 900000, '5m': 300000}
+
 CFG = dict(pivo_esq=3, pivo_dir=3, sigma=1.5, impulso_min=2, afasta_min=1,
-           corpo_min=0.5, stop_buffer=2.0, rr_fixo=4.0, espera_max=30,
-           janela_falha=20, atr_periodo=14)
+           corpo_min=0.5, stop_buffer=2.0, rr_fixo=2.0, espera_max=30,
+           janela_falha=20, atr_periodo=14,
+           tf_estrutura='30m', tf_gatilho='15m')
 
 
 # ------------------------------------------------------------------ dados
@@ -136,14 +139,15 @@ def analisar(h1, m15, cfg):
         if desloc <= 0 or desloc / a[i] < cfg['sigma']:
             continue
 
-        est = acompanhar(h1, m15, t15, a15, i, ancora, compra, cfg)
+        est = acompanhar(h1, m15, t15, a15, i, ancora, compra, cfg,
+                         MS_TF[cfg['tf_estrutura']])
         if est:
             est.update(choch_ms=h1[i][0], ancora_ms=h1[ancora][0])
             vivos.append(est)
     return vivos
 
 
-def acompanhar(h1, m15, t15, a15, i, ancora, compra, cfg):
+def acompanhar(h1, m15, t15, a15, i, ancora, compra, cfg, dur_ms):
     n = len(h1)
     pv = vv = 0.0
     for k in range(ancora, i + 1):
@@ -172,7 +176,7 @@ def acompanhar(h1, m15, t15, a15, i, ancora, compra, cfg):
             if fora:
                 afastou += 1
             elif afastou >= cfg['afasta_min']:
-                t0, t1 = h1[k][0], h1[k][0] + 3600000
+                t0, t1 = h1[k][0], h1[k][0] + dur_ms
                 p0 = bisect.bisect_left(t15, t0)
                 p1 = bisect.bisect_left(t15, t1)
                 for m in range(p0, min(p1, len(m15))):
@@ -193,7 +197,8 @@ def acompanhar(h1, m15, t15, a15, i, ancora, compra, cfg):
     if falhou and afastou >= cfg['afasta_min']:
         return {'fase': 'radar', 'lado': 'venda' if compra else 'compra',
                 'vwap': vw, 'alvo_ref': base, 'preco': h1[-1][4],
-                'tf_leitura': 'H1', 'fecha_ms': h1[-1][0] + 3600000,
+                'tf_leitura': cfg['tf_estrutura'].upper(),
+                'fecha_ms': h1[-1][0] + dur_ms,
                 'dist': abs(h1[-1][4] - vw) / max(h1[-1][4], 1e-12) * 100}
     return None
 
@@ -216,7 +221,8 @@ def montar_gatilho(m15, a15, m, compra, base, vw, cfg):
             'alvo_estrut': alvo_estrut, 'rr_estrut': rr_e,
             'alvo_fixo': alvo_fixo, 'rr_fixo': cfg['rr_fixo'],
             'risco_pct': risco / entrada * 100,
-            'tf_leitura': '15min', 'fecha_ms': m15[m][0] + 900000,
+            'tf_leitura': cfg['tf_gatilho'],
+            'fecha_ms': m15[m][0] + MS_TF[cfg['tf_gatilho']],
             'vela_ms': m15[m][0]}
 
 
@@ -295,7 +301,25 @@ def main():
     ap.add_argument('--teste', action='store_true', help='nao envia, so imprime')
     ap.add_argument('--so-gatilho', action='store_true', help='nao manda RADAR')
     ap.add_argument('--ativos', default='')
+    ap.add_argument('--tf-estrutura', default=CFG['tf_estrutura'],
+                    choices=list(MS_TF))
+    ap.add_argument('--tf-gatilho', default=CFG['tf_gatilho'], choices=list(MS_TF))
+    ap.add_argument('--rr-fixo', type=float, default=CFG['rr_fixo'])
+    ap.add_argument('--stop-buffer', type=float, default=CFG['stop_buffer'])
+    ap.add_argument('--ping', action='store_true',
+                    help='manda uma mensagem de teste no Telegram e sai')
     a = ap.parse_args()
+
+    CFG.update(tf_estrutura=a.tf_estrutura, tf_gatilho=a.tf_gatilho,
+               rr_fixo=a.rr_fixo, stop_buffer=a.stop_buffer)
+
+    if a.ping:
+        ok = enviar("<b>Radar SMC — teste de conexão</b>\n"
+                    f"Estrutura: <b>{a.tf_estrutura}</b> | "
+                    f"Gatilho: <b>{a.tf_gatilho}</b> | Alvo: <b>1:{a.rr_fixo:.0f}</b>\n"
+                    "<i>Se você recebeu isto, as chaves estão certas.</i>")
+        print("ping enviado" if ok else "ping NAO enviado")
+        return
 
     ativos = [x.strip().upper() for x in a.ativos.split(',') if x.strip()] or ATIVOS
     try:
@@ -304,13 +328,14 @@ def main():
         enviados = set()
 
     agora = datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M UTC')
-    print(f"=== Radar SMC | {agora} | {len(ativos)} ativos")
+    print(f"=== Radar SMC | {agora} | {len(ativos)} ativos | "
+          f"{CFG['tf_estrutura']}+{CFG['tf_gatilho']} | alvo 1:{CFG['rr_fixo']:.0f}")
     novos = 0
 
     for sim in ativos:
         try:
-            h1 = buscar(sim, '1h', 400)
-            m15 = buscar(sim, '15m', 500)
+            h1 = buscar(sim, CFG['tf_estrutura'], 400)
+            m15 = buscar(sim, CFG['tf_gatilho'], 600)
         except Exception as e:
             print(f"[{sim}] erro ao buscar: {e}")
             continue
