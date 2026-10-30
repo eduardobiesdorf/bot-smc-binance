@@ -58,6 +58,26 @@ def buscar(simbolo, interval, limite=500):
             for c in r.json() if int(c[6]) < agora]       # so velas FECHADAS
 
 
+def top_pares(n=20):
+    """Os n pares USDT com maior volume em 24h, direto da Binance."""
+    r = requests.get(f"{BASE_URL}/ticker/24hr", timeout=40)
+    r.raise_for_status()
+    # fora: stablecoin contra stablecoin (volume alto, movimento nenhum)
+    fora = {'USDC', 'FDUSD', 'TUSD', 'BUSD', 'DAI', 'USDP', 'AEUR', 'EURI',
+            'EUR', 'XUSD', 'USD1', 'PYUSD'}
+    cand = []
+    for d in r.json():
+        s = d.get('symbol', '')
+        if not s.endswith('USDT') or s[:-4] in fora:
+            continue
+        try:
+            cand.append((float(d['quoteVolume']), s))
+        except (KeyError, ValueError):
+            continue
+    cand.sort(reverse=True)
+    return [x[1] for x in cand[:n]]
+
+
 def atr(v, p=14):
     tr = [v[0][2] - v[0][3]]
     for k in range(1, len(v)):
@@ -323,6 +343,9 @@ def main():
     ap.add_argument('--tf-gatilho', default=CFG['tf_gatilho'], choices=list(MS_TF))
     ap.add_argument('--rr-fixo', type=float, default=CFG['rr_fixo'])
     ap.add_argument('--stop-buffer', type=float, default=CFG['stop_buffer'])
+    ap.add_argument('--top', type=int, default=0,
+                    help='usa os N pares USDT de maior volume em 24h '
+                         '(ignora a lista fixa)')
     ap.add_argument('--ping', action='store_true',
                     help='manda uma mensagem de teste no Telegram e sai')
     a = ap.parse_args()
@@ -338,7 +361,15 @@ def main():
         print("ping enviado" if ok else "ping NAO enviado")
         return
 
-    ativos = [x.strip().upper() for x in a.ativos.split(',') if x.strip()] or ATIVOS
+    if a.top:
+        try:
+            ativos = top_pares(a.top)
+            print(f"Top {a.top} por volume 24h: {', '.join(x.replace('USDT','') for x in ativos)}")
+        except Exception as e:
+            print(f"Falha ao buscar o ranking ({e}) -- usando a lista fixa")
+            ativos = ATIVOS
+    else:
+        ativos = [x.strip().upper() for x in a.ativos.split(',') if x.strip()] or ATIVOS
     try:
         enviados = set(json.load(open(ESTADO)))
     except Exception:
