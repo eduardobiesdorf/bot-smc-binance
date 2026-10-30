@@ -136,6 +136,16 @@ def gerar(velas, cfg):
                  max(jan, key=lambda k: velas[k][2])
         if i - ancora < cfg['impulso_min']:
             continue
+        # a ancora precisa ser um FUNDO de verdade, nao meio de tendencia:
+        # tem de ser a minima das ultimas N barras antes dela
+        if cfg['fundo_janela'] > 0:
+            ini_f = max(0, ancora - cfg['fundo_janela'])
+            if compra:
+                if any(velas[k][3] < velas[ancora][3] for k in range(ini_f, ancora)):
+                    continue
+            else:
+                if any(velas[k][2] > velas[ancora][2] for k in range(ini_f, ancora)):
+                    continue
         desloc = (velas[i][4] - velas[ancora][3]) if compra else \
                  (velas[ancora][2] - velas[i][4])
         if desloc <= 0 or desloc / a[i] < cfg['sigma']:
@@ -180,12 +190,44 @@ def montar(velas, i, ancora, compra, a, cfg):
         if (compra and vwap <= base) or (not compra and vwap >= base):
             return None
 
-        entrada = vwap
-        if cfg['stop'] == 'estrutura':
-            stop = base - a[j - 1] * 0.1 if compra else base + a[j - 1] * 0.1
+        # ---- GATILHO: tocar a VWAP nao basta. Espera a vela de impulsao
+        # que REAGE nela -- toca/perfura e fecha de volta do lado certo,
+        # com corpo expressivo. Sem isso, nao ha entrada.
+        if cfg['gatilho'] == 'toque':
+            jg, entrada = j, vwap
+            stop_ref = vwap
         else:
-            stop = entrada - a[j - 1] * cfg['stop_atr'] if compra else \
-                   entrada + a[j - 1] * cfg['stop_atr']
+            jg = None
+            for k in range(j, min(n - 1, j + cfg['confirma_max']) + 1):
+                o, h, l, cl = velas[k][1], velas[k][2], velas[k][3], velas[k][4]
+                rng = h - l
+                if rng <= 0:
+                    continue
+                corpo_ok = abs(cl - o) / rng >= cfg['corpo_min']
+                if compra:
+                    reagiu = l <= vwap and cl > vwap and cl > o
+                else:
+                    reagiu = h >= vwap and cl < vwap and cl < o
+                if reagiu and corpo_ok:
+                    jg = k
+                    break
+                # se fechou do lado errado da VWAP, o reteste falhou
+                if (compra and cl < vwap) or (not compra and cl > vwap):
+                    return None
+            if jg is None or jg + 1 >= n:
+                return None
+            # entrada executavel: abertura da barra SEGUINTE a confirmacao
+            entrada = velas[jg + 1][1]
+            stop_ref = velas[jg][3] if compra else velas[jg][2]
+            jg = jg + 1
+
+        if cfg['stop'] == 'estrutura':
+            stop = base - a[jg - 1] * 0.1 if compra else base + a[jg - 1] * 0.1
+        elif cfg['stop'] == 'gatilho':
+            stop = stop_ref - a[jg - 1] * 0.2 if compra else stop_ref + a[jg - 1] * 0.2
+        else:
+            stop = entrada - a[jg - 1] * cfg['stop_atr'] if compra else \
+                   entrada + a[jg - 1] * cfg['stop_atr']
         risco = abs(entrada - stop)
         if risco <= 0:
             return None
@@ -197,14 +239,14 @@ def montar(velas, i, ancora, compra, a, cfg):
         if rr < cfg['rr_min'] or (cfg['rr_max'] and rr > cfg['rr_max']):
             return None
 
-        res, dur, r_bruto = simular(velas, j, compra, entrada, stop, alvo, cfg)
+        res, dur, r_bruto = simular(velas, jg, compra, entrada, stop, alvo, cfg)
         custo = (entrada * cfg['custo_pct'] / 100) / risco
-        return {'data': datetime.fromtimestamp(velas[j][0] / 1000, timezone.utc)
+        return {'data': datetime.fromtimestamp(velas[jg][0] / 1000, timezone.utc)
                         .strftime('%Y-%m-%d %H:%M'),
                 'lado': 'compra' if compra else 'venda',
                 'entrada': entrada, 'stop': stop, 'alvo': alvo, 'rr': rr,
-                'espera': j - i, 'ancora': i - ancora,
-                'resultado': res, 'barras': (j - i) + dur, 'r': r_bruto - custo}
+                'espera': j - i, 'ancora': i - ancora, 'confirma': jg - j,
+                'resultado': res, 'barras': (jg - i) + dur, 'r': r_bruto - custo}
     return None
 
 
@@ -346,7 +388,16 @@ def main():
                     help='barras minimas entre a ancora e a quebra')
     ap.add_argument('--alvo', choices=['topo', 'rr_fixo'], default='topo')
     ap.add_argument('--rr-fixo', type=float, default=2.0)
-    ap.add_argument('--stop', choices=['atr', 'estrutura'], default='atr')
+    ap.add_argument('--gatilho', choices=['toque', 'impulsao'], default='impulsao',
+                    help='toque = so encostar na VWAP | impulsao = exige vela de '
+                         'reacao fechando do lado certo, com corpo expressivo')
+    ap.add_argument('--corpo-min', type=float, default=0.5,
+                    help='corpo/range minimo da vela de impulsao')
+    ap.add_argument('--confirma-max', type=int, default=3,
+                    help='barras de tolerancia para a confirmacao aparecer')
+    ap.add_argument('--fundo-janela', type=int, default=50,
+                    help='a ancora tem de ser a minima das N barras anteriores (0=off)')
+    ap.add_argument('--stop', choices=['atr', 'estrutura', 'gatilho'], default='gatilho')
     ap.add_argument('--stop-atr', type=float, default=1.0)
     ap.add_argument('--rr-min', type=float, default=0.3)
     ap.add_argument('--rr-max', type=float, default=0.0)
@@ -364,6 +415,7 @@ def main():
 
     cfg = {k: getattr(a, k) for k in
            ('pivo_esq', 'pivo_dir', 'evento', 'sigma', 'impulso_min', 'alvo',
+            'gatilho', 'corpo_min', 'confirma_max', 'fundo_janela',
             'rr_fixo', 'stop', 'stop_atr', 'rr_min', 'rr_max', 'espera_max',
             'tempo_max', 'atr_periodo', 'lado', 'parcial_em', 'parcial_frac',
             'breakeven', 'custo_pct')}
@@ -379,6 +431,8 @@ def main():
     print(f"CHOCH -> VWAP ANCORADA NO FUNDO -> RETESTE | {a.tf} | {len(dados)} pares | "
           f"{d0:%Y-%m-%d} -> {d1:%Y-%m-%d}")
     print(f"pivo {a.pivo_esq}/{a.pivo_dir} | evento={a.evento} | impulso>={a.sigma} ATR "
+          f"| fundo das ultimas {a.fundo_janela} barras")
+    print(f"gatilho={a.gatilho} (corpo>={a.corpo_min:.0%}, ate {a.confirma_max} barras) "
           f"| alvo={a.alvo} | stop={a.stop} | espera {a.espera_max} barras")
     print("=" * 84)
 
