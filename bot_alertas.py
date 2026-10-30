@@ -231,22 +231,38 @@ def fmt(x):
     return f"{x:,.8f}".rstrip('0').rstrip('.') if x < 1 else f"{x:,.4f}".rstrip('0').rstrip('.')
 
 
-def enviar(texto):
+def diag(linha):
+    """Grava diagnostico num arquivo que o workflow commita (logs sao inacessiveis)."""
+    print(linha, flush=True)
+    try:
+        with open("diagnostico_telegram.txt", "a", encoding="utf-8") as f:
+            f.write(linha + "\n")
+    except Exception:
+        pass
+
+
+def enviar(texto, html=True):
     tok, chat = os.getenv("TELEGRAM_TOKEN"), os.getenv("TELEGRAM_CHAT_ID")
+    diag(f"TOKEN: {'definido, ' + str(len(tok)) + ' chars' if tok else 'AUSENTE'}"
+         f" | CHAT_ID: {'definido, ' + str(len(chat)) + ' chars' if chat else 'AUSENTE'}")
     if not tok or not chat:
-        print("SEM TELEGRAM_TOKEN/TELEGRAM_CHAT_ID -- so imprimindo")
-        print(texto)
+        diag("-> sem credenciais, nada enviado")
         return False
+    dados = {'chat_id': chat, 'text': texto}
+    if html:
+        dados['parse_mode'] = 'HTML'
     try:
         r = requests.post(f"https://api.telegram.org/bot{tok}/sendMessage",
-                          data={'chat_id': chat, 'text': texto,
-                                'parse_mode': 'HTML'}, timeout=20)
-        if not r.ok:
-            print(f"ERRO Telegram {r.status_code}: {r.text[:200]}")
-            return False
-        return True
+                          data=dados, timeout=20)
+        diag(f"HTTP {r.status_code}: {r.text[:300]}")
+        if not r.ok and html:
+            diag("-> tentando de novo SEM formatacao HTML")
+            return enviar(texto.replace('<b>', '').replace('</b>', '')
+                          .replace('<i>', '').replace('</i>', '')
+                          .replace('<code>', '').replace('</code>', ''), html=False)
+        return r.ok
     except Exception as e:
-        print(f"ERRO de rede no Telegram: {e}")
+        diag(f"ERRO de rede: {e}")
         return False
 
 
