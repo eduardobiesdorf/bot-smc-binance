@@ -1,0 +1,63 @@
+name: Backtest Reversao
+
+on:
+  workflow_dispatch:
+    inputs:
+      tf:
+        description: 'Timeframe (le os CSVs de dados/)'
+        required: true
+        default: '1h'
+        type: choice
+        options: ['1h', '30m', '4h']
+      modo:
+        description: 'o que rodar'
+        required: true
+        default: 'painel'
+        type: choice
+        options: [painel, unica, montecarlo]
+      custo_pct:
+        description: 'Taxa + slippage por operacao, em % do preco'
+        required: false
+        default: '0.10'
+      extra:
+        description: 'Flags extras (ex: --sigma 3 --lado venda --alvo retorno_total)'
+        required: false
+        default: ''
+
+jobs:
+  backtest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Rodar
+        run: |
+          set -o pipefail
+          ARGS="--tf ${{ inputs.tf }} --custo-pct ${{ inputs.custo_pct }}"
+          case "${{ inputs.modo }}" in
+            painel)     ARGS="$ARGS --painel" ;;
+            montecarlo) ARGS="$ARGS --montecarlo 200" ;;
+            unica)      ARGS="$ARGS --trimestres" ;;
+          esac
+          python -u backtest_reversao.py $ARGS ${{ inputs.extra }} 2>&1 | tee resultado.txt
+
+      - name: Resumo no job
+        if: always()
+        run: |
+          if [ -s resultado.txt ]; then
+            { echo '```'; cat resultado.txt; echo '```'; } >> $GITHUB_STEP_SUMMARY
+          else
+            echo '**resultado.txt VAZIO** - veja o log do passo "Rodar".' >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Artefatos
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backtest-reversao
+          path: |
+            resultado.txt
+            trades_reversao.csv
