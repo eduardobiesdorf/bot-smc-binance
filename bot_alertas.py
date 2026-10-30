@@ -44,7 +44,8 @@ IDADE_MAX_VELAS = 3   # o gatilho so vale se a vela fechou ha ate N velas
 MS_TF = {'1h': 3600000, '30m': 1800000, '15m': 900000, '5m': 300000}
 
 CFG = dict(pivo_esq=3, pivo_dir=3, sigma=1.5, impulso_min=2, afasta_min=1,
-           corpo_min=0.5, stop_buffer=2.0, rr_fixo=2.0, espera_max=30,
+           corpo_min=0.5, stop_buffer=2.0, rr_fixo=2.0, rr_min=1.2,
+           espera_max=30,
            janela_falha=20, atr_periodo=14,
            tf_estrutura='30m', tf_gatilho='15m')
 
@@ -238,6 +239,10 @@ def montar_gatilho(m15, a15, m, compra, base, vw, cfg):
     alvo_estrut = base
     alvo_fixo = entrada + risco * cfg['rr_fixo'] * (1 if compra else -1)
     rr_e = abs(alvo_estrut - entrada) / risco
+    # geometria ruim: o alvo estrutural esta perto demais do stop.
+    # Arriscar 1 para buscar menos de 1,2 nao compensa nem a taxa.
+    if rr_e < cfg['rr_min']:
+        return None
     return {'fase': 'gatilho', 'lado': 'compra' if compra else 'venda',
             'vwap': vw, 'entrada': entrada, 'stop': stop,
             'alvo_estrut': alvo_estrut, 'rr_estrut': rr_e,
@@ -379,6 +384,8 @@ def main():
     ap.add_argument('--tf-gatilho', default=CFG['tf_gatilho'], choices=list(MS_TF))
     ap.add_argument('--rr-fixo', type=float, default=CFG['rr_fixo'])
     ap.add_argument('--stop-buffer', type=float, default=CFG['stop_buffer'])
+    ap.add_argument('--rr-min', type=float, default=CFG['rr_min'],
+                    help='descarta gatilho cujo alvo estrutural de R:R abaixo disto')
     ap.add_argument('--top', type=int, default=0,
                     help='usa os N pares USDT de maior volume em 24h '
                          '(ignora a lista fixa)')
@@ -387,7 +394,7 @@ def main():
     a = ap.parse_args()
 
     CFG.update(tf_estrutura=a.tf_estrutura, tf_gatilho=a.tf_gatilho,
-               rr_fixo=a.rr_fixo, stop_buffer=a.stop_buffer)
+               rr_fixo=a.rr_fixo, stop_buffer=a.stop_buffer, rr_min=a.rr_min)
 
     if a.ping:
         ok = enviar("<b>Radar SMC — teste de conexão</b>\n"

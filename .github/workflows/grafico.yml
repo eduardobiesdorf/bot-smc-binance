@@ -1,0 +1,37 @@
+name: Grafico do setup
+
+on:
+  workflow_dispatch:
+    inputs:
+      ativo:
+        description: 'Par (ex: XLMUSDT)'
+        required: true
+        default: 'XLMUSDT'
+      tf_estrutura:
+        description: 'Timeframe da estrutura'
+        required: false
+        default: '30m'
+        type: choice
+        options: ['30m', '1h', '15m']
+
+jobs:
+  grafico:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install requests matplotlib
+      - name: Desenhar e enviar
+        env:
+          TELEGRAM_TOKEN: ${{ secrets.TOKEN_TELEGRAM || secrets.TELEGRAM_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.CHAT_ID_TELEGRAM || secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          set -o pipefail
+          python -u grafico_setup.py --ativo ${{ inputs.ativo }} \
+            --tf-estrutura ${{ inputs.tf_estrutura }} 2>&1 | tee grafico.log
+      - name: Resumo
+        if: always()
+        run: |
+          { echo '```'; cat grafico.log; echo '```'; } >> $GITHUB_STEP_SUMMARY
