@@ -1,0 +1,67 @@
+name: Radar SMC (alertas)
+
+# Escaneia a cesta e manda os gatilhos no Telegram.
+# NAO opera -- e so radar para voce olhar o grafico.
+
+on:
+  schedule:
+    - cron: '*/15 * * * *'     # a cada 15 min (o Actions costuma atrasar alguns minutos)
+  workflow_dispatch:
+    inputs:
+      so_gatilho:
+        description: 'Mandar só GATILHO (sem os avisos de RADAR)'
+        required: false
+        default: false
+        type: boolean
+      teste:
+        description: 'Modo teste: imprime e não envia'
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: write
+
+concurrency:
+  group: radar
+  cancel-in-progress: false
+
+jobs:
+  radar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install requests
+
+      - name: Escanear
+        env:
+          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          set -o pipefail
+          ARGS=""
+          [ "${{ inputs.so_gatilho }}" = "true" ] && ARGS="$ARGS --so-gatilho"
+          [ "${{ inputs.teste }}" = "true" ] && ARGS="$ARGS --teste"
+          python -u bot_alertas.py $ARGS 2>&1 | tee radar.log
+
+      - name: Guardar o estado (evita alerta repetido)
+        if: always()
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A alertas_enviados.json 2>/dev/null || true
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m "radar: estado dos alertas [skip ci]"
+          for t in 1 2 3; do
+            git push origin HEAD:main && exit 0
+            git pull --rebase --autostash origin main || exit 0
+            sleep $((t * 4))
+          done
+
+      - name: Resumo
+        if: always()
+        run: |
+          { echo '```'; tail -30 radar.log; echo '```'; } >> $GITHUB_STEP_SUMMARY
