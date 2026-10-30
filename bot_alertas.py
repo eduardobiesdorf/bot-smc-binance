@@ -27,7 +27,9 @@ import bisect
 import json
 import os
 import time
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
+
+BRT = timezone(timedelta(hours=-3))      # horario de Brasilia
 
 import requests
 
@@ -190,7 +192,8 @@ def acompanhar(h1, m15, t15, a15, i, ancora, compra, cfg):
     vw = pv / max(vv, 1e-12)
     if falhou and afastou >= cfg['afasta_min']:
         return {'fase': 'radar', 'lado': 'venda' if compra else 'compra',
-                'vwap': vw, 'alvo_ref': base,
+                'vwap': vw, 'alvo_ref': base, 'preco': h1[-1][4],
+                'tf_leitura': 'H1', 'fecha_ms': h1[-1][0] + 3600000,
                 'dist': abs(h1[-1][4] - vw) / max(h1[-1][4], 1e-12) * 100}
     return None
 
@@ -213,6 +216,7 @@ def montar_gatilho(m15, a15, m, compra, base, vw, cfg):
             'alvo_estrut': alvo_estrut, 'rr_estrut': rr_e,
             'alvo_fixo': alvo_fixo, 'rr_fixo': cfg['rr_fixo'],
             'risco_pct': risco / entrada * 100,
+            'tf_leitura': '15min', 'fecha_ms': m15[m][0] + 900000,
             'vela_ms': m15[m][0]}
 
 
@@ -240,27 +244,51 @@ def enviar(texto):
         return False
 
 
+def quando(ms):
+    """Fechamento da vela, em Brasilia e UTC."""
+    d = datetime.fromtimestamp(ms / 1000, BRT)
+    u = datetime.fromtimestamp(ms / 1000, timezone.utc)
+    return f"{d:%d/%m %H:%M} BRT  ({u:%H:%M} UTC)"
+
+
+def cabecalho(sim, e, titulo, sub):
+    lado = "COMPRA" if e['lado'] == 'compra' else "VENDA"
+    return (f"<b>{titulo} — {sim.replace('USDT','/USDT')}</b>\n"
+            f"<b>Direção: {lado}</b>\n"
+            f"<i>{sub}</i>\n\n"
+            f"Leitura no <b>{e['tf_leitura']}</b>\n"
+            f"Vela que gerou: <b>{quando(e['fecha_ms'])}</b>\n"
+            f"{'─'*26}\n")
+
+
 def msg_gatilho(sim, e):
-    seta = "COMPRA" if e['lado'] == 'compra' else "VENDA"
-    return (f"<b>GATILHO — {sim.replace('USDT','/USDT')} — {seta}</b>\n"
-            f"<i>rejeição na VWAP ancorada (15min)</i>\n\n"
-            f"Entrada: <code>{fmt(e['entrada'])}</code>\n"
-            f"Stop:    <code>{fmt(e['stop'])}</code>  ({e['risco_pct']:.2f}% do preço)\n"
-            f"Alvo estrutural: <code>{fmt(e['alvo_estrut'])}</code>  "
-            f"(R:R 1:{e['rr_estrut']:.2f})\n"
-            f"Alvo fixo 1:{e['rr_fixo']:.0f}: <code>{fmt(e['alvo_fixo'])}</code>\n"
-            f"VWAP: <code>{fmt(e['vwap'])}</code>\n\n"
-            f"<i>Confira o contexto no gráfico antes de operar.</i>")
+    alvo2 = (f"Alvo fixo 1:{e['rr_fixo']:.0f}:  <code>{fmt(e['alvo_fixo'])}</code>\n"
+             if e['rr_fixo'] else "")
+    return (cabecalho(sim, e, "GATILHO", "a vela de rejeição na VWAP já fechou") +
+            f"Entrada:  <code>{fmt(e['entrada'])}</code>\n"
+            f"Stop:     <code>{fmt(e['stop'])}</code>\n"
+            f"Risco:    {e['risco_pct']:.2f}% do preço\n\n"
+            f"Alvo estrutural (último fundo/topo):\n"
+            f"          <code>{fmt(e['alvo_estrut'])}</code>  "
+            f"→ <b>R:R 1:{e['rr_estrut']:.2f}</b>\n"
+            f"{alvo2}\n"
+            f"VWAP ancorada: <code>{fmt(e['vwap'])}</code>\n"
+            f"{'─'*26}\n"
+            f"<i>Confira o contexto no gráfico antes de operar. "
+            f"O backtest deste setup empata no líquido — ele serve como "
+            f"radar, não como ordem.</i>")
 
 
 def msg_radar(sim, e):
-    seta = "COMPRA" if e['lado'] == 'compra' else "VENDA"
-    return (f"<b>RADAR — {sim.replace('USDT','/USDT')} — possível {seta}</b>\n"
-            f"<i>reteste da VWAP falhou, preço se afastou — "
-            f"aguardando a rejeição</i>\n\n"
-            f"VWAP: <code>{fmt(e['vwap'])}</code>  "
-            f"(preço a {e['dist']:.2f}% dela)\n"
-            f"Alvo de referência: <code>{fmt(e['alvo_ref'])}</code>")
+    return (cabecalho(sim, e, "CENÁRIO", "reteste da VWAP falhou e o preço se afastou "
+                      "— falta a vela de rejeição") +
+            f"Preço agora: <code>{fmt(e['preco'])}</code>\n"
+            f"VWAP ancorada: <code>{fmt(e['vwap'])}</code>\n"
+            f"Distância até a VWAP: {e['dist']:.2f}%\n\n"
+            f"Alvo de referência: <code>{fmt(e['alvo_ref'])}</code>\n"
+            f"{'─'*26}\n"
+            f"<i>Ainda NÃO é entrada. O gatilho só vale quando uma vela de "
+            f"15min tocar a VWAP e fechar de volta com corpo forte.</i>")
 
 
 # ------------------------------------------------------------------ main
