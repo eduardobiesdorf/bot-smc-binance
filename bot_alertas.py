@@ -245,10 +245,8 @@ def enviar(texto):
 
 
 def quando(ms):
-    """Fechamento da vela, em Brasilia e UTC."""
-    d = datetime.fromtimestamp(ms / 1000, BRT)
-    u = datetime.fromtimestamp(ms / 1000, timezone.utc)
-    return f"{d:%d/%m %H:%M} BRT  ({u:%H:%M} UTC)"
+    """Fechamento da vela, no horario de Brasilia."""
+    return f"{datetime.fromtimestamp(ms / 1000, BRT):%d/%m %H:%M}"
 
 
 def cabecalho(sim, e, titulo, sub):
