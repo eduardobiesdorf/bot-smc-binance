@@ -225,6 +225,48 @@ def medir(trades):
             'ic': (media - 1.96 * se, media + 1.96 * se)}
 
 
+def medir_por_dia(trades):
+    """
+    Em panico, TODOS os pares disparam juntos: as operacoes nao sao
+    independentes. A unidade correta de amostra e o DIA de evento.
+    """
+    fech = [t for t in trades if t['resultado'] in ('win', 'loss', 'tempo')]
+    if len(fech) < 5:
+        return None
+    por_dia = {}
+    for t in fech:
+        d = t['data'][:10]
+        por_dia.setdefault(d, []).append(t['r'])
+    dias = {d: sum(v) / len(v) for d, v in por_dia.items()}
+    vals = list(dias.values())
+    if len(vals) < 3:
+        return None
+    media = sum(vals) / len(vals)
+    dp = statistics.stdev(vals) if len(vals) > 1 else 0
+    se = dp / math.sqrt(len(vals)) if dp else 1e-9
+    soma_dia = {d: sum(v) for d, v in por_dia.items()}
+    top3 = sorted(soma_dia.values(), reverse=True)[:3]
+    return {'dias': len(vals), 'por_dia': len(fech) / len(vals), 'media': media,
+            'z': media / se, 'ic': (media - 1.96 * se, media + 1.96 * se),
+            'top3': sum(top3), 'total': sum(soma_dia.values())}
+
+
+def imprimir_dias(md):
+    if not md:
+        print("  (eventos insuficientes para a conta por dia)")
+        return
+    print(f"\n  AMOSTRA REAL -- cada DIA de evento conta uma vez")
+    print(f"    {md['dias']} dias de evento | {md['por_dia']:.1f} pares por dia em media")
+    print(f"    media {md['media']:+.3f}R por dia | z {md['z']:+.2f} | "
+          f"IC95% [{md['ic'][0]:+.3f} , {md['ic'][1]:+.3f}]")
+    print("    " + (">> dentro do acaso" if abs(md['z']) < 1.96 else "(significativo)"))
+    resto = md['total'] - md['top3']
+    print(f"    os 3 melhores dias somam {md['top3']:+.1f}R | "
+          f"os outros {md['dias']-3} dias somam {resto:+.1f}R")
+    if md['total'] > 0 and resto <= 0:
+        print("    >> SEM esses 3 dias a estrategia e PERDEDORA: sao eventos, nao edge")
+
+
 def imprimir(m, titulo):
     if not m:
         print(f"{titulo}: operacoes insuficientes")
@@ -238,18 +280,19 @@ def imprimir(m, titulo):
     print("  >> dentro do acaso" if abs(m['z']) < 1.96 else "  (significativo)")
 
 
-def linha(nome, m):
+def linha(nome, m, md=None):
     if not m:
         print(f"{nome:>22} |     -")
         return
+    extra = f" {md['dias']:>5} {md['z']:>+6.2f}" if md else ""
     print(f"{nome:>22} | {m['n']:>5} {m['wr']:>6.1f}% 1:{m['rr_w']:>5.2f} "
-          f"{m['exp']:>+7.3f}R {m['total']:>+8.1f}R {m['z']:>+6.2f}")
+          f"{m['exp']:>+7.3f}R {m['total']:>+8.1f}R {m['z']:>+6.2f}{extra}")
 
 
 def cabecalho():
     print(f"\n{'configuracao':>22} | {'n':>5} {'WR':>7} {'RRwin':>7} {'exp':>8} "
-          f"{'total':>9} {'z':>6}")
-    print("-" * 70)
+          f"{'total':>9} {'z':>6} {'dias':>5} {'z/dia':>6}")
+    print("-" * 84)
 
 
 # ------------------------------------------------------------------ main
@@ -277,7 +320,7 @@ def main():
                     help='pico de volume exigido (0 = nao exige)')
     ap.add_argument('--vol-janela', type=int, default=50)
     ap.add_argument('--atr-periodo', type=int, default=14)
-    ap.add_argument('--lado', choices=['ambos', 'venda', 'compra'], default='ambos',
+    ap.add_argument('--lado', choices=['ambos', 'venda', 'compra'], default='compra',
                     help='venda = so opera contra movimento de ALTA')
     ap.add_argument('--alvo', choices=['retorno_total', 'fib50', 'rr_fixo'],
                     default='fib50')
@@ -323,8 +366,10 @@ def main():
             for sig, alvo in itertools.product((2.0, 3.0, 4.0, 5.0),
                                                ('retorno_total', 'fib50', 'rr_fixo')):
                 c = dict(cfg, sigma=sig, alvo=alvo, lado=lado)
-                linha(f"{sig:.0f}ATR {alvo}", medir(rodar_tudo(dados, c)))
-        print("\nOlhe a EXPECTATIVA, nao o win rate. E compare o n de cada linha.")
+                t = rodar_tudo(dados, c)
+                linha(f"{sig:.0f}ATR {alvo}", medir(t), medir_por_dia(t))
+        print("\nOlhe z/dia, NAO o z por operacao. Em panico os 10 pares disparam")
+        print("juntos, entao 10 operacoes sao 1 evento. O z por operacao mente.")
         return
 
     cabecalho()
@@ -333,6 +378,7 @@ def main():
     imprimir(m, "TOTAL")
     if not m:
         return
+    imprimir_dias(medir_por_dia(todos))
 
     if a.trimestres:
         print("\nPOR TRIMESTRE")
