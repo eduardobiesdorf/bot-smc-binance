@@ -38,6 +38,7 @@ ATIVOS = ['BTCUSDT', 'ETHUSDT', 'SOLUSDT', 'BNBUSDT', 'XRPUSDT',
 
 BASE_URL = "https://data-api.binance.vision/api/v3"
 ESTADO = "alertas_enviados.json"
+LIMIAR_GRUPO = 3   # a partir daqui, agrupa num unico aviso
 
 MS_TF = {'1h': 3600000, '30m': 1800000, '15m': 900000, '5m': 300000}
 
@@ -320,6 +321,38 @@ def msg_gatilho(sim, e):
             f"radar, não como ordem.</i>")
 
 
+def msg_bloco_gatilhos(itens):
+    """Varios gatilhos do mesmo lado = UM evento de mercado, nao N apostas."""
+    lado = itens[0][1]['lado']
+    seta = "COMPRA" if lado == 'compra' else "VENDA"
+    linhas = []
+    for sim, e in itens:
+        linhas.append(
+            f"<b>{sim.replace('USDT','')}</b>  ent <code>{fmt(e['entrada'])}</code>"
+            f"  stop <code>{fmt(e['stop'])}</code>"
+            f"  alvo <code>{fmt(e['alvo_estrut'])}</code>"
+            f"  (1:{e['rr_estrut']:.1f})")
+    return (f"<b>{len(itens)} GATILHOS DE {seta} AO MESMO TEMPO</b>\n"
+            f"<i>leitura {itens[0][1]['tf_leitura']} — "
+            f"vela {quando(itens[0][1]['fecha_ms'])}</i>\n"
+            f"{'─'*26}\n" + "\n".join(linhas) + f"\n{'─'*26}\n"
+            f"<b>Cuidado:</b> sinais simultâneos no mesmo sentido costumam ser "
+            f"<b>o mesmo evento de mercado</b> visto em vários pares — não são "
+            f"apostas independentes.\n"
+            f"<i>Se operar, trate como UMA posição e divida o risco entre elas. "
+            f"Se o mercado virar, todas stopam juntas.</i>")
+
+
+def msg_bloco_cenarios(itens):
+    linhas = [f"<b>{sim.replace('USDT','')}</b>  {e['lado']}  "
+              f"VWAP <code>{fmt(e['vwap'])}</code>  ({e['dist']:.1f}% de distância)"
+              for sim, e in itens]
+    return (f"<b>CENÁRIOS — {len(itens)} setups se formando</b>\n"
+            f"<i>reteste da VWAP falhou, aguardando a rejeição</i>\n"
+            f"{'─'*26}\n" + "\n".join(linhas) + f"\n{'─'*26}\n"
+            f"<i>Ainda não é entrada. Serve para você já abrir o gráfico.</i>")
+
+
 def msg_radar(sim, e):
     return (cabecalho(sim, e, "CENÁRIO", "reteste da VWAP falhou e o preço se afastou "
                       "— falta a vela de rejeição") +
@@ -378,6 +411,7 @@ def main():
     agora = datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M UTC')
     n_gat = n_cen = 0
     achados = []
+    pendentes = []
     print(f"=== Radar SMC | {agora} | {len(ativos)} ativos | "
           f"{CFG['tf_estrutura']}+{CFG['tf_gatilho']} | alvo 1:{CFG['rr_fixo']:.0f}")
     novos = 0
@@ -403,14 +437,37 @@ def main():
                 continue
             chave = (f"{sim}-{e['fase']}-{e.get('vela_ms', e['choch_ms'])}"
                      f"-{e['lado']}")
-            if chave in enviados:
-                continue
-            texto = msg_gatilho(sim, e) if e['fase'] == 'gatilho' else msg_radar(sim, e)
-            print(f"\n--- {chave}\n{texto}")
-            if a.teste or enviar(texto):
-                enviados.add(chave)
-                novos += 1
+            if chave not in enviados:
+                pendentes.append((sim, e, chave))
         time.sleep(0.15)
+
+    # ---- despacho: agrupa quando ha varios sinais iguais ao mesmo tempo
+    gat_c = [(s_, e) for s_, e, _ in pendentes
+             if e['fase'] == 'gatilho' and e['lado'] == 'compra']
+    gat_v = [(s_, e) for s_, e, _ in pendentes
+             if e['fase'] == 'gatilho' and e['lado'] == 'venda']
+    cen = [(s_, e) for s_, e, _ in pendentes if e['fase'] == 'radar']
+
+    def despachar(texto):
+        nonlocal novos
+        print("\n" + texto[:400])
+        if a.teste or enviar(texto):
+            novos += 1
+
+    for grupo in (gat_c, gat_v):
+        if len(grupo) >= LIMIAR_GRUPO:
+            despachar(msg_bloco_gatilhos(grupo))
+        else:
+            for s_, e in grupo:
+                despachar(msg_gatilho(s_, e))
+    if cen:
+        if len(cen) >= LIMIAR_GRUPO:
+            despachar(msg_bloco_cenarios(cen))
+        else:
+            for s_, e in cen:
+                despachar(msg_radar(s_, e))
+    for _, _, ch in pendentes:
+        enviados.add(ch)
 
     if not a.teste:
         json.dump(sorted(enviados)[-3000:], open(ESTADO, 'w'))

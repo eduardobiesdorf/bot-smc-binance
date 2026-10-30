@@ -71,7 +71,7 @@ jobs:
           ARGS="--tf-estrutura ${{ inputs.tf_estrutura || '30m' }}"
           ARGS="$ARGS --tf-gatilho ${{ inputs.tf_gatilho || '15m' }}"
           ARGS="$ARGS --rr-fixo ${{ inputs.rr_fixo || '2.0' }}"
-          ARGS="$ARGS --top ${{ inputs.top || '20' }}"
+          ARGS="$ARGS --top ${{ inputs.top || '50' }}"
           [ "${{ inputs.so_gatilho }}" = "true" ] && ARGS="$ARGS --so-gatilho"
           [ "${{ inputs.teste }}" = "true" ] && ARGS="$ARGS --teste"
           [ "${{ inputs.ping }}" = "true" ] && ARGS="$ARGS --ping"
