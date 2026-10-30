@@ -37,7 +37,8 @@ UNIVERSO = [
 BASE_URL = "https://data-api.binance.vision/api/v3"
 PASTA = "dados"
 
-MS = {'1d': 86400000, '4h': 14400000, '1h': 3600000, '15m': 900000}
+MS = {'1d': 86400000, '4h': 14400000, '1h': 3600000,
+      '30m': 1800000, '15m': 900000}
 
 
 def ms_data(d):
