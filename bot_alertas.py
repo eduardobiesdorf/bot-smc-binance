@@ -376,6 +376,8 @@ def main():
         enviados = set()
 
     agora = datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M UTC')
+    n_gat = n_cen = 0
+    achados = []
     print(f"=== Radar SMC | {agora} | {len(ativos)} ativos | "
           f"{CFG['tf_estrutura']}+{CFG['tf_gatilho']} | alvo 1:{CFG['rr_fixo']:.0f}")
     novos = 0
@@ -391,6 +393,12 @@ def main():
             continue
 
         for e in analisar(h1, m15, CFG):
+            if e['fase'] == 'gatilho':
+                n_gat += 1
+            else:
+                n_cen += 1
+            achados.append(f"{e['fase'].upper():>7}  {sim:<12} {e['lado']:<7}"
+                           f" vela {quando(e['fecha_ms'])}")
             if e['fase'] == 'radar' and a.so_gatilho:
                 continue
             chave = (f"{sim}-{e['fase']}-{e.get('vela_ms', e['choch_ms'])}"
@@ -406,7 +414,17 @@ def main():
 
     if not a.teste:
         json.dump(sorted(enviados)[-3000:], open(ESTADO, 'w'))
-    print(f"\nAlertas novos: {novos}")
+    print(f"\nAlertas novos: {novos}  (gatilhos {n_gat} | cenarios {n_cen})")
+    try:
+        with open("resumo_radar.txt", "w", encoding="utf-8") as f:
+            f.write(f"{agora}\n"
+                    f"ativos escaneados: {len(ativos)}\n"
+                    f"GATILHOS: {n_gat}\n"
+                    f"CENARIOS: {n_cen}\n"
+                    f"novos (nao repetidos): {novos}\n\n"
+                    + "\n".join(achados))
+    except Exception:
+        pass
 
 
 if __name__ == "__main__":
