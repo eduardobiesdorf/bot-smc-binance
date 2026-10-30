@@ -199,6 +199,7 @@ def montar(velas, i, ancora, compra, a, cfg):
         # ===================================================================
         if cfg['modo'] == 'rejeicao':
             falhou = False
+            afastou = 0          # barras em que o preco REALMENTE saiu da VWAP
             jg = None
             vw_ref = vwap
             pv2, vv2 = pv, vv
@@ -206,19 +207,22 @@ def montar(velas, i, ancora, compra, a, cfg):
                 o, h, l, cl = velas[k][1], velas[k][2], velas[k][3], velas[k][4]
                 rng = h - l
                 if not falhou:
-                    # fechou do lado errado da VWAP -> reteste falhou
                     if (compra and cl < vw_ref) or (not compra and cl > vw_ref):
                         falhou = True
                 else:
-                    # voltou a tocar a VWAP por baixo (compra) / por cima (venda)
-                    toca = h >= vw_ref if compra else l <= vw_ref
-                    if toca and rng > 0:
+                    # so conta como RETORNO se antes o preco se afastou da VWAP:
+                    # pelo menos N barras inteiras do lado de fora dela.
+                    # Sem isso, "falhou" e "rejeitou" caem em barras vizinhas e
+                    # o preco nunca voltou a testar nada.
+                    fora = (h < vw_ref) if compra else (l > vw_ref)
+                    if fora:
+                        afastou += 1
+                    elif afastou >= cfg['afasta_min'] and rng > 0:
                         rejeitou = (cl < vw_ref and cl < o) if compra else \
                                    (cl > vw_ref and cl > o)
                         if rejeitou and abs(cl - o) / rng >= cfg['corpo_min']:
                             jg = k
                             break
-                    # se fechou de volta do lado do CHOCH, a falha foi desfeita
                     if (compra and cl > vw_ref) or (not compra and cl < vw_ref):
                         return None
                 pv2 += tipico(velas[k]) * velas[k][5]
@@ -459,6 +463,9 @@ def main():
                     help='reteste = entra a favor do CHOCH quando a VWAP segura | '
                          'rejeicao = o reteste falha, volta e rejeita -> vira a mao, '
                          'alvo no ultimo fundo')
+    ap.add_argument('--afasta-min', type=int, default=1,
+                    help='barras inteiras fora da VWAP entre a falha e a rejeicao -- '
+                         'garante que o preco saiu e VOLTOU para testar de novo')
     ap.add_argument('--janela-falha', type=int, default=20,
                     help='barras para a falha + nova rejeicao acontecerem')
     ap.add_argument('--gatilho', choices=['toque', 'impulsao'], default='impulsao',
@@ -489,7 +496,7 @@ def main():
     cfg = {k: getattr(a, k) for k in
            ('pivo_esq', 'pivo_dir', 'evento', 'sigma', 'impulso_min', 'alvo',
             'gatilho', 'corpo_min', 'confirma_max', 'fundo_janela',
-            'modo', 'janela_falha',
+            'modo', 'janela_falha', 'afasta_min',
             'rr_fixo', 'stop', 'stop_atr', 'rr_min', 'rr_max', 'espera_max',
             'tempo_max', 'atr_periodo', 'lado', 'parcial_em', 'parcial_frac',
             'breakeven', 'custo_pct')}
