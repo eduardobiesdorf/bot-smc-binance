@@ -4,3 +4,5 @@ resultado.txt
 download.log
 trades_*.csv
 momentum_periodos.csv
+local/radar.log
+local/*.log
