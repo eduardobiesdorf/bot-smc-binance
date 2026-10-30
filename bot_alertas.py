@@ -45,6 +45,7 @@ MS_TF = {'1h': 3600000, '30m': 1800000, '15m': 900000, '5m': 300000}
 
 CFG = dict(pivo_esq=3, pivo_dir=3, sigma=1.5, impulso_min=2, afasta_min=1,
            corpo_min=0.5, stop_buffer=2.0, rr_fixo=2.0, rr_min=1.2,
+           topo_janela=10,
            espera_max=30,
            janela_falha=20, atr_periodo=14,
            tf_estrutura='30m', tf_gatilho='15m')
@@ -97,15 +98,24 @@ def atr(v, p=14):
     return out
 
 
-def pivos(v, esq, dir_):
+def pivos(v, esq, dir_, janela=0):
+    """Topos e fundos por fractal.
+
+    'janela' exige que o pivo seja TOPO RELEVANTE: a maxima tem de ser a
+    maior das 'janela' barras anteriores (e a minima, a menor). Sem isso,
+    pivo de 3/3 marca qualquer ondulacao como topo e o CHOCH perde o
+    sentido estrutural -- foi o que ancorou a VWAP no lugar errado.
+    """
     altas, baixas = {}, {}
-    for k in range(esq, len(v) - dir_):
+    for k in range(max(esq, janela), len(v) - dir_):
         h, l = v[k][2], v[k][3]
         if (all(v[k - m][2] < h for m in range(1, esq + 1)) and
-                all(v[k + m][2] <= h for m in range(1, dir_ + 1))):
+                all(v[k + m][2] <= h for m in range(1, dir_ + 1)) and
+                (not janela or h >= max(v[j][2] for j in range(k - janela, k)))):
             altas.setdefault(k + dir_, []).append((k, h))
         if (all(v[k - m][3] > l for m in range(1, esq + 1)) and
-                all(v[k + m][3] >= l for m in range(1, dir_ + 1))):
+                all(v[k + m][3] >= l for m in range(1, dir_ + 1)) and
+                (not janela or l <= min(v[j][3] for j in range(k - janela, k)))):
             baixas.setdefault(k + dir_, []).append((k, l))
     return altas, baixas
 
@@ -123,7 +133,8 @@ def analisar(h1, m15, cfg):
     """
     n = len(h1)
     a = atr(h1, cfg['atr_periodo'])
-    altas, baixas = pivos(h1, cfg['pivo_esq'], cfg['pivo_dir'])
+    altas, baixas = pivos(h1, cfg['pivo_esq'], cfg['pivo_dir'],
+                          cfg.get('topo_janela', 0))
     a15 = atr(m15, 14)
     t15 = [x[0] for x in m15]
     sh = sl = None
@@ -384,6 +395,9 @@ def main():
     ap.add_argument('--tf-gatilho', default=CFG['tf_gatilho'], choices=list(MS_TF))
     ap.add_argument('--rr-fixo', type=float, default=CFG['rr_fixo'])
     ap.add_argument('--stop-buffer', type=float, default=CFG['stop_buffer'])
+    ap.add_argument('--topo-janela', type=int, default=CFG['topo_janela'],
+                    help='o topo/fundo do CHOCH tem de ser o extremo das N '
+                         'barras anteriores (0 = pivo simples)')
     ap.add_argument('--rr-min', type=float, default=CFG['rr_min'],
                     help='descarta gatilho cujo alvo estrutural de R:R abaixo disto')
     ap.add_argument('--top', type=int, default=0,
@@ -394,7 +408,8 @@ def main():
     a = ap.parse_args()
 
     CFG.update(tf_estrutura=a.tf_estrutura, tf_gatilho=a.tf_gatilho,
-               rr_fixo=a.rr_fixo, stop_buffer=a.stop_buffer, rr_min=a.rr_min)
+               rr_fixo=a.rr_fixo, stop_buffer=a.stop_buffer, rr_min=a.rr_min,
+               topo_janela=a.topo_janela)
 
     if a.ping:
         ok = enviar("<b>Radar SMC — teste de conexão</b>\n"

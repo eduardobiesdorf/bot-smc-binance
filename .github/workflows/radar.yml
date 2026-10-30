@@ -38,6 +38,14 @@ on:
         default: '15m'
         type: choice
         options: ['15m', '5m', '30m']
+      topo_janela:
+        description: 'Topo do CHOCH tem de ser o extremo das N barras (0 = desliga)'
+        required: false
+        default: '10'
+      rr_min:
+        description: 'R:R minimo do alvo estrutural'
+        required: false
+        default: '1.2'
       rr_fixo:
         description: 'Alvo fixo (múltiplo de risco)'
         required: false
@@ -74,6 +82,8 @@ jobs:
           ARGS="--tf-estrutura ${{ inputs.tf_estrutura || '30m' }}"
           ARGS="$ARGS --tf-gatilho ${{ inputs.tf_gatilho || '15m' }}"
           ARGS="$ARGS --rr-fixo ${{ inputs.rr_fixo || '2.0' }}"
+          ARGS="$ARGS --topo-janela ${{ inputs.topo_janela || '10' }}"
+          ARGS="$ARGS --rr-min ${{ inputs.rr_min || '1.2' }}"
           ARGS="$ARGS --top ${{ inputs.top || '50' }}"
           [ "${{ inputs.so_gatilho }}" = "true" ] && ARGS="$ARGS --so-gatilho"
           [ "${{ inputs.teste }}" = "true" ] && ARGS="$ARGS --teste"
