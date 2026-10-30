@@ -5,7 +5,10 @@ name: Radar SMC (alertas)
 
 on:
   schedule:
-    - cron: '*/15 * * * *'     # a cada 15 min (o Actions costuma atrasar alguns minutos)
+    # Logo apos o fechamento de cada vela de 15min (00/15/30/45).
+    # Os minutos 2/17/32/47 fogem do topo da hora, onde a fila do Actions
+    # e mais longa. O Actions AINDA assim atrasa -- ver nota no README.
+    - cron: '2,17,32,47 * * * *'
   workflow_dispatch:
     inputs:
       so_gatilho:
