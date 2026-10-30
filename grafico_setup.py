@@ -64,7 +64,10 @@ def desenhar(sim, h, m, cfg, caminho):
         return None
     i, anc, compra_orig = ultimo
 
-    est = ba.analisar(h, m, cfg)
+    # o grafico e para CONFERIR, nao para filtrar: desliga o rr_min para que
+    # um setup reprovado por geometria ruim ainda apareca desenhado.
+    cfg_ver = dict(cfg, rr_min=0.0)
+    est = ba.analisar(h, m, cfg_ver)
     gat = next((e for e in est if e['fase'] == 'gatilho'), None)
 
     fig, ax = plt.subplots(figsize=(14, 7.5))
@@ -104,12 +107,27 @@ def desenhar(sim, h, m, cfg, caminho):
         alv, rr = gat['alvo_estrut'], gat['rr_estrut']
         ax.axhspan(min(ent, stp), max(ent, stp), color=VERM, alpha=.10, zorder=0)
         ax.axhspan(min(ent, alv), max(ent, alv), color=VERDE, alpha=.08, zorder=0)
-        for y, t_, c_ in [(ent, f"entrada {ent:.6g}", ROXO),
-                          (stp, f"stop {stp:.6g}", VERM),
-                          (alv, f"alvo {alv:.6g}  (R:R 1:{rr:.2f})", VERDE)]:
-            ax.axhline(y, color=c_, lw=1.5, zorder=4)
+        linhas = [(ent, f"entrada {ent:.6g}", ROXO),
+                  (stp, f"stop {stp:.6g}   (risco 1R)", VERM),
+                  (alv, f"alvo estrutural {alv:.6g}   R:R 1:{rr:.2f}", VERDE)]
+        if 'alvo_fixo' in gat:
+            linhas.append((gat['alvo_fixo'],
+                           f"alvo fixo 1:{cfg['rr_fixo']:.0f}  {gat['alvo_fixo']:.6g}",
+                           CINZA))
+        for y, t_, c_ in linhas:
+            ax.axhline(y, color=c_, lw=1.5,
+                       ls='--' if c_ == CINZA else '-', zorder=4)
             ax.text(len(jan) - .5, y, f"  {t_}", color=c_, fontsize=9.5,
                     va='center', fontweight='bold')
+        # a distancia entrada->stop e entrada->alvo, lado a lado
+        ax.annotate("", (len(jan) + 1.5, ent), (len(jan) + 1.5, stp),
+                    arrowprops=dict(arrowstyle='<->', color=VERM, lw=1.3))
+        ax.annotate("", (len(jan) + 3.5, ent), (len(jan) + 3.5, alv),
+                    arrowprops=dict(arrowstyle='<->', color=VERDE, lw=1.3))
+        ax.text(len(jan) + 1.7, (ent + stp) / 2, "1R", color=VERM,
+                fontsize=9, fontweight='bold')
+        ax.text(len(jan) + 3.7, (ent + alv) / 2, f"{rr:.2f}R", color=VERDE,
+                fontsize=9, fontweight='bold')
         lado = "VENDA" if gat['lado'] == 'venda' else "COMPRA"
         titulo += f" — GATILHO DE {lado} — R:R 1:{rr:.2f}"
         if rr < 1.2:
@@ -164,8 +182,11 @@ def main():
         leg = (f"<b>{sim.replace('USDT','/USDT')}</b> — "
                f"{'VENDA' if gat['lado']=='venda' else 'COMPRA'}  |  "
                f"R:R estrutural <b>1:{gat['rr_estrut']:.2f}</b>")
-        if gat['rr_estrut'] < 1.2:
-            leg += "\n⚠️ geometria ruim: o alvo está perto demais do stop"
+        if gat['rr_estrut'] < ba.CFG['rr_min']:
+            leg += (f"\n⚠️ <b>reprovado</b>: arrisca 1R para buscar "
+                    f"{gat['rr_estrut']:.2f}R. A taxa ida+volta come ~0,1R, "
+                    f"e com 1:1 você precisaria de mais de 50% de acerto só "
+                    f"para empatar. O radar não manda mais este formato.")
     else:
         leg = f"<b>{sim.replace('USDT','/USDT')}</b> — estrutura atual (sem gatilho ativo)"
     enviar_foto(caminho, leg)
