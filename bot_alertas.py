@@ -39,6 +39,7 @@ ATIVOS = ['BTCUSDT', 'ETHUSDT', 'SOLUSDT', 'BNBUSDT', 'XRPUSDT',
 BASE_URL = "https://data-api.binance.vision/api/v3"
 ESTADO = "alertas_enviados.json"
 LIMIAR_GRUPO = 3   # a partir daqui, agrupa num unico aviso
+IDADE_MAX_VELAS = 3   # o gatilho so vale se a vela fechou ha ate N velas
 
 MS_TF = {'1h': 3600000, '30m': 1800000, '15m': 900000, '5m': 300000}
 
@@ -299,7 +300,9 @@ def cabecalho(sim, e, titulo, sub):
             f"<b>Direção: {lado}</b>\n"
             f"<i>{sub}</i>\n\n"
             f"Leitura no <b>{e['tf_leitura']}</b>\n"
-            f"Vela que gerou: <b>{quando(e['fecha_ms'])}</b>\n"
+            f"Vela que gerou: <b>{quando(e['fecha_ms'])}</b>"
+            + (f"  <i>({(time.time()*1000 - e['fecha_ms'])/60000:.0f} min atrás)</i>"
+               if e['fase'] == 'gatilho' else "") + "\n"
             f"{'─'*26}\n")
 
 
@@ -412,6 +415,7 @@ def main():
     n_gat = n_cen = 0
     achados = []
     pendentes = []
+    vencidos = []
     print(f"=== Radar SMC | {agora} | {len(ativos)} ativos | "
           f"{CFG['tf_estrutura']}+{CFG['tf_gatilho']} | alvo 1:{CFG['rr_fixo']:.0f}")
     novos = 0
@@ -435,6 +439,14 @@ def main():
                            f" vela {quando(e['fecha_ms'])}")
             if e['fase'] == 'radar' and a.so_gatilho:
                 continue
+            # GATILHO velho nao serve: o preco ja saiu do nivel ha muito tempo.
+            # So vale se a vela de rejeicao fechou nas ultimas N velas.
+            if e['fase'] == 'gatilho':
+                idade_ms = int(time.time() * 1000) - e['fecha_ms']
+                limite_ms = IDADE_MAX_VELAS * MS_TF[CFG['tf_gatilho']]
+                if idade_ms > limite_ms:
+                    vencidos.append(f"{sim} ({idade_ms/3600000:.1f}h)")
+                    continue
             chave = (f"{sim}-{e['fase']}-{e.get('vela_ms', e['choch_ms'])}"
                      f"-{e['lado']}")
             if chave not in enviados:
@@ -472,13 +484,18 @@ def main():
     if not a.teste:
         json.dump(sorted(enviados)[-3000:], open(ESTADO, 'w'))
     print(f"\nAlertas novos: {novos}  (gatilhos {n_gat} | cenarios {n_cen})")
+    if vencidos:
+        print(f"Gatilhos descartados por idade ({len(vencidos)}): "
+              f"{', '.join(vencidos)}")
     try:
         with open("resumo_radar.txt", "w", encoding="utf-8") as f:
             f.write(f"{agora}\n"
                     f"ativos escaneados: {len(ativos)}\n"
                     f"GATILHOS: {n_gat}\n"
                     f"CENARIOS: {n_cen}\n"
-                    f"novos (nao repetidos): {novos}\n\n"
+                    f"novos (nao repetidos): {novos}\n"
+                    f"descartados por idade: {len(vencidos)}"
+                    + (f" -> {', '.join(vencidos)}" if vencidos else "") + "\n\n"
                     + "\n".join(achados))
     except Exception:
         pass
