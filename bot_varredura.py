@@ -370,6 +370,8 @@ def main():
     ap.add_argument('--so-gatilho', action='store_true')
     ap.add_argument('--teste', action='store_true')
     ap.add_argument('--ping', action='store_true')
+    ap.add_argument('--exemplos', type=int, default=2,
+                    help='quantos gatilhos do historico mandar no ping')
     a = ap.parse_args()
     CFG['rr_min'] = a.rr_min
 
@@ -380,7 +382,7 @@ def main():
         enviar(f"✅ bot da varredura vivo — {datetime.now(BRT):%d/%m %H:%M}")
         # manda tambem o gatilho mais recente do historico, so para voce ver
         # o formato da mensagem e para eu confirmar que a imagem passa.
-        melhor = None
+        achados = []
         for sim in UNIVERSO[:a.top]:
             try:
                 h = buscar(sim, '1h', 400)
@@ -393,16 +395,19 @@ def main():
             for imp in achar_impulsos(h, a_, mv, CFG):
                 g = seguir(h, a_, imp, CFG)
                 if g and g['fase'] == 'gatilho':
-                    if melhor is None or g['vela_ms'] > melhor[1]['vela_ms']:
-                        melhor = (sim, g, h)
-        if melhor:
-            sim, g, h = melhor
-            manda_com_grafico(sim, g, h[:g['idx'] + 1],
-                              "🧪 <i>exemplo do histórico, não é alerta de "
-                              "agora</i>\n\n" + msg_gatilho(sim, g))
-            diag(f"exemplo enviado: {sim}")
-        else:
-            diag("nenhum gatilho no histórico recente para o exemplo")
+                    achados.append((g['vela_ms'], sim, g, h))
+        achados.sort(reverse=True, key=lambda x: x[0])
+        if not achados:
+            diag("nenhum gatilho no historico recente")
+            enviar("nenhum gatilho no histórico recente dos 20 pares")
+            return
+        for _, sim, g, h in achados[:a.exemplos]:
+            idade = (int(time.time() * 1000) - g['vela_ms']) / 3600000
+            manda_com_grafico(
+                sim, g, h[:g['idx'] + 1],
+                f"🧪 <i>gatilho do histórico, {idade:.0f}h atrás — "
+                f"não é alerta de agora</i>\n\n" + msg_gatilho(sim, g))
+            diag(f"exemplo enviado: {sim} ({idade:.0f}h)")
         return
 
     vistos = carregar()

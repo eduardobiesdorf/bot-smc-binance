@@ -33,8 +33,12 @@ on:
         required: false
         default: false
         type: boolean
+      exemplos:
+        description: 'Com ping: quantos gatilhos do histórico mandar'
+        required: false
+        default: '2'
       ping:
-        description: 'Só manda uma mensagem de teste no Telegram'
+        description: 'Manda os últimos gatilhos do histórico, com gráfico'
         required: false
         default: false
         type: boolean
@@ -67,6 +71,7 @@ jobs:
           [ "${{ inputs.dinamico }}" = "true" ] && ARGS="$ARGS --dinamico"
           [ "${{ inputs.so_gatilho }}" = "true" ] && ARGS="$ARGS --so-gatilho"
           [ "${{ inputs.teste }}" = "true" ] && ARGS="$ARGS --teste"
+          ARGS="$ARGS --exemplos ${{ inputs.exemplos || '2' }}"
           [ "${{ inputs.ping }}" = "true" ] && ARGS="$ARGS --ping"
           python -u bot_varredura.py $ARGS 2>&1 | tee varredura.log
 
