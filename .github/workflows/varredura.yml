@@ -11,9 +11,14 @@ on:
   workflow_dispatch:
     inputs:
       top:
-        description: 'Quantos pares USDT de maior volume escanear'
+        description: 'Quantos pares escanear (da lista fixa de 20)'
         required: false
         default: '20'
+      dinamico:
+        description: 'Rankear por volume de 24h em vez da lista fixa'
+        required: false
+        default: false
+        type: boolean
       rr_min:
         description: 'R:R mínimo para mandar o gatilho'
         required: false
@@ -59,6 +64,7 @@ jobs:
           set -o pipefail
           ARGS="--top ${{ inputs.top || '20' }}"
           ARGS="$ARGS --rr-min ${{ inputs.rr_min || '1.2' }}"
+          [ "${{ inputs.dinamico }}" = "true" ] && ARGS="$ARGS --dinamico"
           [ "${{ inputs.so_gatilho }}" = "true" ] && ARGS="$ARGS --so-gatilho"
           [ "${{ inputs.teste }}" = "true" ] && ARGS="$ARGS --teste"
           [ "${{ inputs.ping }}" = "true" ] && ARGS="$ARGS --ping"

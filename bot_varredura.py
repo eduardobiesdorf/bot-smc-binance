@@ -63,16 +63,28 @@ def buscar(simbolo, interval='1h', limite=400):
 # na Binance levam um B no fim do ticker (SNDKB = SanDisk, INTCB = Intel,
 # CRCLB = Circle). Elas seguem o pregao de Nova York, ficam paradas no fim
 # de semana e nao tem a liquidez que esse setup procura.
+# Os 20 pares em que a estrategia foi medida (maior volume mediano em
+# 2025-2026). O bot roda nesta lista por padrao, para que o que esta no ar
+# seja exatamente o que foi validado. Com --dinamico ele volta a rankear
+# por volume de 24h, filtrando o que nao e cripto.
+UNIVERSO = ['BTCUSDT', 'ETHUSDT', 'SOLUSDT', 'XRPUSDT', 'DOGEUSDT',
+            'BNBUSDT', 'ADAUSDT', 'LINKUSDT', 'SUIUSDT', 'AVAXUSDT',
+            'TRXUSDT', 'NEARUSDT', 'LTCUSDT', 'UNIUSDT', 'DOTUSDT',
+            'AAVEUSDT', 'XLMUSDT', 'HBARUSDT', 'BCHUSDT', 'ONDOUSDT']
+
 STABLE = {'USDC', 'FDUSD', 'TUSD', 'BUSD', 'DAI', 'USDP', 'AEUR', 'EURI',
           'EUR', 'XUSD', 'USD1', 'PYUSD'}
 COMMODITY = {'XAUT', 'PAXG', 'XAGT'}
+# acoes tokenizadas: seguem o pregao de Nova York, nao sao cripto
+ACOES = {'SNDKB', 'INTCB', 'CRCLB', 'NVDAB', 'TSLAB', 'AAPLB', 'MSTRB',
+         'COINB', 'METAB', 'AMZNB', 'GOOGLB', 'MSFTB', 'HOODB', 'PLTRB'}
 
 
 def candidatos(n=60):
     """Pares USDT por volume de 24h, ja sem stablecoin e commodity."""
     r = requests.get(f"{BASE_URL}/ticker/24hr", timeout=40)
     r.raise_for_status()
-    fora = STABLE | COMMODITY
+    fora = STABLE | COMMODITY | ACOES
     cand = []
     for d in r.json():
         s = d.get('symbol', '')
@@ -339,6 +351,8 @@ def salvar(ch):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--top', type=int, default=20)
+    ap.add_argument('--dinamico', action='store_true',
+                    help='rankear por volume de 24h em vez da lista fixa')
     ap.add_argument('--rr-min', type=float, default=CFG['rr_min'])
     ap.add_argument('--so-gatilho', action='store_true')
     ap.add_argument('--teste', action='store_true')
@@ -357,7 +371,8 @@ def main():
     gatilhos, cenarios, linhas = [], [], []
     usados, descartados = [], []
 
-    for sim in candidatos(a.top * 3):
+    fila = candidatos(a.top * 3) if a.dinamico else UNIVERSO[:a.top]
+    for sim in fila:
         if len(usados) >= a.top:
             break
         try:
