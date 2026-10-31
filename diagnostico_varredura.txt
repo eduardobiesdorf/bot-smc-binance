@@ -1,4 +1,5 @@
-início 31/10 00:34 BRT
+início 31/10 00:37 BRT
 TOKEN: ok 46 chars | CHAT_ID: ok 10 chars
-HTTP 200: {"ok":true,"result":{"message_id":90,"from":{"id":9205915638,"is_bot":true,"first_name":"SMC Trading Bot","username":"smc_crypto_alerts_bot"},"chat":{"id":[removido],"first_name":"Eduardo","last_name"
-exemplo enviado: SUIUSDT
+HTTP 200: {"ok":true,"result":{"message_id":95,"from":{"id":9205915638,"is_bot":true,"first_name":"SMC Trading Bot","username":"smc_crypto_alerts_bot"},"chat":{"id":[removido],"first_name":"Eduardo","last_name"
+exemplo enviado: SUIUSDT (35h)
+exemplo enviado: AVAXUSDT (35h)
