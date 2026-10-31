@@ -35,11 +35,14 @@ from datetime import datetime, timedelta, timezone
 
 import requests
 
+import grafico_varredura as graf
+
 BRT = timezone(timedelta(hours=-3))
 BASE_URL = "https://data-api.binance.vision/api/v3"
 ESTADO = "varredura_enviados.json"
 DIAG = "diagnostico_varredura.txt"
 RESUMO = "resumo_varredura.txt"
+MAX_CENARIOS = 4   # no maximo 4 imagens de radar por rodada
 
 CFG = dict(imp_min=3, imp_max=8, sigma=2.5, frac_direcao=0.7, corpo_imp=0.5,
            vol_mult=1.5, vol_periodo=20, atr_periodo=14, estrut_janela=30,
@@ -250,17 +253,19 @@ def seguir(h, a, imp, cfg):
                     entrada=ent, stop=stop, alvo=alvo, rr=rr, idx=k,
                     vela_ms=h[k][0], risco_pct=risco / ent * 100,
                     tipo='martelo' if martelo and not impulsao else 'impulsão',
-                    imp=imp, varrido=True)
+                    imp=imp, varredura=k_varreu)
 
     # chegou ao fim sem gatilho: ainda esta armado?
     if varreu:
         return dict(fase='cenario', lado='compra' if compra else 'venda',
                     imp=imp, alvo=alvo, preco=h[-1][4], vela_ms=h[-1][0],
+                    varredura=k_varreu,
                     nota='limpou o order block, esperando a reversão')
     perto = abs(h[-1][4] - (base if compra else topo)) / max(a[-1], 1e-12)
     if perto <= 1.0:
         return dict(fase='cenario', lado='compra' if compra else 'venda',
                     imp=imp, alvo=alvo, preco=h[-1][4], vela_ms=h[-1][0],
+                    varredura=None,
                     nota='chegou no order block, esperando a limpeza')
     return None
 
@@ -321,14 +326,22 @@ def msg_gatilho(sim, g):
         f"<b>R:R 1:{g['rr']:.2f}</b>")
 
 
-def msg_cenario(itens):
-    linhas = ["👀 <b>De olho</b>\n"]
-    for sim, c in itens:
-        linhas.append(
-            f"<b>{sim.replace('USDT','/USDT')}</b> {c['lado']} — {c['nota']}\n"
-            f"   preço <code>{fmt(c['preco'])}</code> · "
-            f"alvo <code>{fmt(c['alvo'])}</code>")
-    return "\n".join(linhas)
+def msg_cenario(sim, c):
+    return (f"👀 <b>{sim.replace('USDT', '/USDT')}</b> — de olho ({c['lado']})\n"
+            f"{c['nota']}\n\n"
+            f"preço  <code>{fmt(c['preco'])}</code>\n"
+            f"alvo   <code>{fmt(c['alvo'])}</code>")
+
+
+def manda_com_grafico(sim, e, h, texto):
+    """Tenta mandar a imagem com a legenda. Se falhar, manda so o texto."""
+    caminho = f"/tmp/{sim}_{e['fase']}.png"
+    try:
+        if graf.desenhar(sim, h, e, caminho) and graf.enviar_foto(caminho, texto):
+            return True
+    except Exception as ex:
+        diag(f"{sim}: nao consegui desenhar ({ex})")
+    return enviar(texto)
 
 
 # ------------------------------------------------------------------ main
@@ -402,11 +415,11 @@ def main():
             if achou['idx'] != len(h) - 1:
                 diag(f"{sim}: gatilho antigo ({len(h)-1-achou['idx']} velas atrás)")
                 continue
-            gatilhos.append((sim, achou))
+            gatilhos.append((sim, achou, h))
             linhas.append(f"GATILHO {sim} {achou['lado']} "
                           f"R:R 1:{achou['rr']:.2f} risco {achou['risco_pct']:.2f}%")
         else:
-            cenarios.append((sim, achou))
+            cenarios.append((sim, achou, h))
             linhas.append(f"radar   {sim} {achou['lado']} — {achou['nota']}")
 
     diag(f"pares ({len(usados)}): {', '.join(usados)}")
@@ -421,27 +434,30 @@ def main():
         pass
 
     novos = []
-    for sim, g in gatilhos:
+    for sim, g, h in gatilhos:
         chave = f"{sim}-{g['vela_ms']}"
         if chave in vistos:
             continue
         vistos.add(chave)
-        novos.append((sim, g))
+        novos.append((sim, g, h))
 
     if a.teste:
-        for sim, g in novos:
+        for sim, g, _ in novos:
             print(msg_gatilho(sim, g), "\n")
-        if cenarios and not a.so_gatilho:
-            print(msg_cenario(cenarios))
+        for sim, c, _ in cenarios[:MAX_CENARIOS]:
+            print(msg_cenario(sim, c), "\n")
         return
 
-    for sim, g in novos:
-        enviar(msg_gatilho(sim, g))
-    if cenarios and not a.so_gatilho:
-        chave = "cenarios-" + str(max(c['vela_ms'] for _, c in cenarios))
-        if chave not in vistos:
+    for sim, g, h in novos:
+        manda_com_grafico(sim, g, h, msg_gatilho(sim, g))
+
+    if not a.so_gatilho:
+        for sim, c, h in cenarios[:MAX_CENARIOS]:
+            chave = f"cen-{sim}-{c['vela_ms']}"
+            if chave in vistos:
+                continue
             vistos.add(chave)
-            enviar(msg_cenario(cenarios))
+            manda_com_grafico(sim, c, h, msg_cenario(sim, c))
     salvar(vistos)
     diag(f"enviados {len(novos)} gatilhos")
 
