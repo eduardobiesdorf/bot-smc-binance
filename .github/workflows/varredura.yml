@@ -7,7 +7,12 @@ on:
   schedule:
     # Logo apos o fechamento de cada vela de 1 hora. O minuto 7 foge do
     # topo da hora, onde a fila do Actions e mais longa.
-    - cron: '7 * * * *'
+    # Tres horarios por hora: o Actions atrasa de 25 a 45 min na conta
+    # gratuita, e a fila de cada disparo e independente. Vale o primeiro
+    # que executar -- o estado em varredura_enviados.json evita repetir.
+    - cron: '1 * * * *'
+    - cron: '11 * * * *'
+    - cron: '21 * * * *'
   workflow_dispatch:
     inputs:
       top:

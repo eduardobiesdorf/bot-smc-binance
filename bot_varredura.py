@@ -323,7 +323,9 @@ def msg_gatilho(sim, g):
         f"stop     <code>{fmt(g['stop'])}</code>   "
         f"risco <b>{g['risco_pct']:.2f}%</b>\n"
         f"alvo     <code>{fmt(g['alvo'])}</code>   "
-        f"<b>R:R 1:{g['rr']:.2f}</b>")
+        f"<b>R:R 1:{g['rr']:.2f}</b>\n\n"
+        f"<i>ordem limitada em {fmt(g['entrada'])}, válida ~4h. "
+        f"A mercado o preço já correu e a vantagem some.</i>")
 
 
 def msg_cenario(sim, c):
