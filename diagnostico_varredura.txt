@@ -1,12 +1,12 @@
-início 31/10 00:43 BRT
-BNBUSDT: gatilho antigo (48 velas atrás)
-ADAUSDT: gatilho antigo (34 velas atrás)
-LINKUSDT: gatilho antigo (34 velas atrás)
-SUIUSDT: gatilho antigo (33 velas atrás)
-AVAXUSDT: gatilho antigo (33 velas atrás)
-TRXUSDT: gatilho antigo (181 velas atrás)
-NEARUSDT: gatilho antigo (128 velas atrás)
-BCHUSDT: gatilho antigo (125 velas atrás)
+início 31/10 01:42 BRT
+BNBUSDT: gatilho antigo (49 velas atrás)
+ADAUSDT: gatilho antigo (35 velas atrás)
+LINKUSDT: gatilho antigo (35 velas atrás)
+SUIUSDT: gatilho antigo (34 velas atrás)
+AVAXUSDT: gatilho antigo (34 velas atrás)
+TRXUSDT: gatilho antigo (182 velas atrás)
+NEARUSDT: gatilho antigo (129 velas atrás)
+BCHUSDT: gatilho antigo (126 velas atrás)
 pares (20): BTCUSDT, ETHUSDT, SOLUSDT, XRPUSDT, DOGEUSDT, BNBUSDT, ADAUSDT, LINKUSDT, SUIUSDT, AVAXUSDT, TRXUSDT, NEARUSDT, LTCUSDT, UNIUSDT, DOTUSDT, AAVEUSDT, XLMUSDT, HBARUSDT, BCHUSDT, ONDOUSDT
 gatilhos 0 | cenários 0
 enviados 0 gatilhos
