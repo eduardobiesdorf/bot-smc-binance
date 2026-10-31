@@ -45,7 +45,7 @@ CFG = dict(imp_min=3, imp_max=8, sigma=2.5, frac_direcao=0.7, corpo_imp=0.5,
            vol_mult=1.5, vol_periodo=20, atr_periodo=14, estrut_janela=30,
            ob_busca=6, furo_atr=0.0, furo_max=2.5, corpo_min=0.5,
            pavio_min=0.5, espera_max=60, stop_folga=0.10, rr_min=1.2,
-           risco_min_pct=0.0)
+           risco_min_pct=0.0, max_espera_gatilho=4)
 
 
 # ------------------------------------------------------------------ dados
@@ -59,11 +59,20 @@ def buscar(simbolo, interval='1h', limite=400):
              float(c[5])] for c in r.json() if int(c[6]) < agora]
 
 
-def top_pares(n=20):
+# Nao sao cripto: stablecoins, commodities e acoes tokenizadas. As acoes
+# na Binance levam um B no fim do ticker (SNDKB = SanDisk, INTCB = Intel,
+# CRCLB = Circle). Elas seguem o pregao de Nova York, ficam paradas no fim
+# de semana e nao tem a liquidez que esse setup procura.
+STABLE = {'USDC', 'FDUSD', 'TUSD', 'BUSD', 'DAI', 'USDP', 'AEUR', 'EURI',
+          'EUR', 'XUSD', 'USD1', 'PYUSD'}
+COMMODITY = {'XAUT', 'PAXG', 'XAGT'}
+
+
+def candidatos(n=60):
+    """Pares USDT por volume de 24h, ja sem stablecoin e commodity."""
     r = requests.get(f"{BASE_URL}/ticker/24hr", timeout=40)
     r.raise_for_status()
-    fora = {'USDC', 'FDUSD', 'TUSD', 'BUSD', 'DAI', 'USDP', 'AEUR', 'EURI',
-            'EUR', 'XUSD', 'USD1', 'PYUSD'}
+    fora = STABLE | COMMODITY
     cand = []
     for d in r.json():
         s = d.get('symbol', '')
@@ -75,6 +84,16 @@ def top_pares(n=20):
             continue
     cand.sort(reverse=True)
     return [x[1] for x in cand[:n]]
+
+
+def negocia_sempre(h, limite=0.03):
+    """Cripto negocia 24/7. Acao tokenizada tem horas mortas no fim de
+    semana e fora do pregao -- velas com volume zero ou sem amplitude.
+    Esse teste pega qualquer tokenizada nova sem eu precisar listar."""
+    if len(h) < 200:
+        return False
+    mortas = sum(1 for c in h[-300:] if c[5] <= 0 or c[2] <= c[3])
+    return mortas / len(h[-300:]) <= limite
 
 
 # ------------------------------------------------------------------ calculo
@@ -169,7 +188,7 @@ def seguir(h, a, imp, cfg):
     limite = base - a[fim] * cfg['furo_atr'] if compra else \
              topo + a[fim] * cfg['furo_atr']
     alvo = imp['topo']
-    varreu, extremo = False, None
+    varreu, extremo, k_varreu = False, None, None
 
     for k in range(fim + 1, len(h)):
         if k - fim > cfg['espera_max']:
@@ -180,10 +199,13 @@ def seguir(h, a, imp, cfg):
             if (hi >= alvo) if compra else (lo <= alvo):
                 return None            # ja foi ao alvo, acabou
             if (lo <= limite) if compra else (hi >= limite):
-                varreu, extremo = True, (lo if compra else hi)
+                varreu, extremo, k_varreu = True, (lo if compra else hi), k
             else:
                 continue
 
+        # reacao tardia nao e caca a stop: ate 4 velas depois da varredura
+        if k - k_varreu > cfg['max_espera_gatilho']:
+            return None
         extremo = min(extremo, lo) if compra else max(extremo, hi)
         fmax = base - a[fim] * cfg['furo_max'] if compra else \
                topo + a[fim] * cfg['furo_max']
@@ -331,12 +353,13 @@ def main():
         enviar(f"✅ bot da varredura vivo — {datetime.now(BRT):%d/%m %H:%M}")
         return
 
-    pares = top_pares(a.top)
-    diag(f"pares: {', '.join(pares)}")
     vistos = carregar()
     gatilhos, cenarios, linhas = [], [], []
+    usados, descartados = [], []
 
-    for sim in pares:
+    for sim in candidatos(a.top * 3):
+        if len(usados) >= a.top:
+            break
         try:
             h = buscar(sim, '1h', 400)
         except Exception as e:
@@ -344,6 +367,10 @@ def main():
             continue
         if len(h) < 150:
             continue
+        if not negocia_sempre(h):
+            descartados.append(sim)
+            continue
+        usados.append(sim)
         a_ = atr(h, CFG['atr_periodo'])
         mv = media_volume(h, CFG['vol_periodo'])
         achou = None
@@ -367,6 +394,9 @@ def main():
             cenarios.append((sim, achou))
             linhas.append(f"radar   {sim} {achou['lado']} — {achou['nota']}")
 
+    diag(f"pares ({len(usados)}): {', '.join(usados)}")
+    if descartados:
+        diag(f"descartados (não negociam 24/7): {', '.join(descartados)}")
     diag(f"gatilhos {len(gatilhos)} | cenários {len(cenarios)}")
     try:
         with open(RESUMO, "w", encoding="utf-8") as f:
