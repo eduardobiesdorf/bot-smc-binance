@@ -14,10 +14,6 @@ on:
         description: 'Quantos pares USDT de maior volume escanear'
         required: false
         default: '20'
-      posicao:
-        description: 'Tamanho da posição em USD (só para mostrar o risco)'
-        required: false
-        default: '200'
       rr_min:
         description: 'R:R mínimo para mandar o gatilho'
         required: false
@@ -62,7 +58,6 @@ jobs:
         run: |
           set -o pipefail
           ARGS="--top ${{ inputs.top || '20' }}"
-          ARGS="$ARGS --posicao ${{ inputs.posicao || '200' }}"
           ARGS="$ARGS --rr-min ${{ inputs.rr_min || '1.2' }}"
           [ "${{ inputs.so_gatilho }}" = "true" ] && ARGS="$ARGS --so-gatilho"
           [ "${{ inputs.teste }}" = "true" ] && ARGS="$ARGS --teste"

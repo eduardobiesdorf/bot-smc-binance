@@ -222,12 +222,12 @@ def seguir(h, a, imp, cfg):
     if varreu:
         return dict(fase='cenario', lado='compra' if compra else 'venda',
                     imp=imp, alvo=alvo, preco=h[-1][4], vela_ms=h[-1][0],
-                    nota='varreu o order block, esperando a vela de reversão')
+                    nota='limpou o order block, esperando a reversão')
     perto = abs(h[-1][4] - (base if compra else topo)) / max(a[-1], 1e-12)
     if perto <= 1.0:
         return dict(fase='cenario', lado='compra' if compra else 'venda',
                     imp=imp, alvo=alvo, preco=h[-1][4], vela_ms=h[-1][0],
-                    nota='preço chegou no order block, esperando a varredura')
+                    nota='chegou no order block, esperando a limpeza')
     return None
 
 
@@ -274,37 +274,26 @@ def quando(ms):
     return f"{datetime.fromtimestamp(ms / 1000, BRT):%d/%m %H:%M}"
 
 
-def msg_gatilho(sim, g, posicao):
-    imp = g['imp']
+def msg_gatilho(sim, g):
     seta = "🟢" if g['lado'] == 'compra' else "🔴"
-    risco_usd = g['risco_pct'] / 100 * posicao
-    ganho_usd = risco_usd * g['rr']
-    par = sim.replace('USDT', '/USDT')
     return (
-        f"{seta} <b>{par}</b> — VARREDURA DO ORDER BLOCK\n"
-        f"<b>{g['lado'].upper()}</b> · gatilho de {g['tipo']}\n"
-        f"vela de H1 fechada às <b>{quando(g['vela_ms'])}</b>\n\n"
+        f"{seta} <b>{sim.replace('USDT', '/USDT')}</b> — "
+        f"<b>{g['lado'].upper()}</b>\n"
+        f"vela de H1 fechada às {quando(g['vela_ms'])}\n\n"
         f"entrada  <code>{fmt(g['entrada'])}</code>\n"
-        f"stop     <code>{fmt(g['stop'])}</code>   ({g['risco_pct']:.2f}%)\n"
+        f"stop     <code>{fmt(g['stop'])}</code>   "
+        f"risco <b>{g['risco_pct']:.2f}%</b>\n"
         f"alvo     <code>{fmt(g['alvo'])}</code>   "
-        f"<b>R:R 1:{g['rr']:.2f}</b>\n\n"
-        f"<i>impulso: {imp['fim']-imp['ini']+1} velas, "
-        f"{imp['tam_atr']:.1f} ATR, volume {imp['vol_rel']:.1f}× a média</i>\n"
-        f"<i>order block: {fmt(imp['ob_base'])} – {fmt(imp['ob_topo'])}</i>\n\n"
-        f"com posição de ${posicao:.0f}: risco <b>${risco_usd:.2f}</b>, "
-        f"alvo <b>${ganho_usd:.2f}</b>\n"
-        f"<i>confira o contexto no gráfico antes de entrar</i>")
+        f"<b>R:R 1:{g['rr']:.2f}</b>")
 
 
 def msg_cenario(itens):
-    linhas = ["👀 <b>No radar</b> (ainda sem gatilho)\n"]
+    linhas = ["👀 <b>De olho</b>\n"]
     for sim, c in itens:
         linhas.append(
-            f"<b>{sim.replace('USDT','/USDT')}</b> {c['lado']} · "
-            f"{c['nota']}\n"
+            f"<b>{sim.replace('USDT','/USDT')}</b> {c['lado']} — {c['nota']}\n"
             f"   preço <code>{fmt(c['preco'])}</code> · "
-            f"alvo <code>{fmt(c['alvo'])}</code> · "
-            f"OB {fmt(c['imp']['ob_base'])}–{fmt(c['imp']['ob_topo'])}")
+            f"alvo <code>{fmt(c['alvo'])}</code>")
     return "\n".join(linhas)
 
 
@@ -328,8 +317,6 @@ def salvar(ch):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--top', type=int, default=20)
-    ap.add_argument('--posicao', type=float, default=200.0,
-                    help='tamanho da posicao em USD, so para mostrar o risco')
     ap.add_argument('--rr-min', type=float, default=CFG['rr_min'])
     ap.add_argument('--so-gatilho', action='store_true')
     ap.add_argument('--teste', action='store_true')
@@ -398,13 +385,13 @@ def main():
 
     if a.teste:
         for sim, g in novos:
-            print(msg_gatilho(sim, g, a.posicao), "\n")
+            print(msg_gatilho(sim, g), "\n")
         if cenarios and not a.so_gatilho:
             print(msg_cenario(cenarios))
         return
 
     for sim, g in novos:
-        enviar(msg_gatilho(sim, g, a.posicao))
+        enviar(msg_gatilho(sim, g))
     if cenarios and not a.so_gatilho:
         chave = "cenarios-" + str(max(c['vela_ms'] for _, c in cenarios))
         if chave not in vistos:
