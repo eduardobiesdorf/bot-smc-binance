@@ -1,0 +1,71 @@
+name: Baixar futuros (USD-M)
+
+# Pega o historico de USD-M Futures no CDN publico da Binance.
+# A API fapi.binance.com recusa IP dos EUA, onde ficam os runners.
+
+on:
+  workflow_dispatch:
+    inputs:
+      inicio:
+        description: 'Mês inicial (YYYY-MM)'
+        required: true
+        default: '2025-01'
+      intervalo:
+        description: 'Intervalo'
+        required: true
+        default: '1h'
+        type: choice
+        options: ['1h', '4h', '15m', '30m', '2h', '1d']
+      top:
+        description: 'Quantos pares gravar (os de maior volume em futuros)'
+        required: false
+        default: '60'
+      ativos:
+        description: 'Pares separados por vírgula (vazio = ranquear sozinho)'
+        required: false
+        default: ''
+
+permissions:
+  contents: write
+
+jobs:
+  baixar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install requests
+
+      - name: Baixar
+        run: |
+          set -o pipefail
+          ARGS="--inicio ${{ inputs.inicio }} --intervalo ${{ inputs.intervalo }}"
+          ARGS="$ARGS --top ${{ inputs.top || '60' }}"
+          [ -n "${{ inputs.ativos }}" ] && ARGS="$ARGS --ativos ${{ inputs.ativos }}"
+          python -u baixar_futuros.py $ARGS 2>&1 | tee futuros.log
+
+      - name: Commitar
+        if: always()
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A dados_fut/ diagnostico_futuros.txt 2>/dev/null || true
+          if git diff --cached --quiet; then
+            echo "Nada mudou." >> $GITHUB_STEP_SUMMARY
+            exit 0
+          fi
+          git commit -m "dados de futuros: ${{ inputs.intervalo }} desde ${{ inputs.inicio }}"
+          for t in 1 2 3 4 5; do
+            git push origin HEAD:main && exit 0
+            git pull --rebase --autostash origin main || exit 1
+            sleep $((t * 5))
+          done
+          exit 1
+
+      - name: Resumo
+        if: always()
+        run: |
+          { echo '```'; tail -70 futuros.log; echo '```'; } >> $GITHUB_STEP_SUMMARY

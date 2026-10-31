@@ -1,0 +1,172 @@
+# -*- coding: utf-8 -*-
+"""
+Baixa o historico de USD-M Futures do repositorio publico da Binance.
+
+Por que nao usar a API: fapi.binance.com recusa IP dos Estados Unidos, e
+os runners do GitHub ficam la. Ja data.binance.vision e um CDN publico
+sem bloqueio, com o mesmo dado em arquivos mensais.
+
+    https://data.binance.vision/data/futures/um/monthly/klines/
+        BTCUSDT/1h/BTCUSDT-1h-2025-01.zip
+
+Uso:
+    python baixar_futuros.py --inicio 2025-01 --intervalo 1h --top 60
+"""
+import argparse
+import csv
+import io
+import os
+import time
+import zipfile
+from datetime import datetime, timezone
+
+import requests
+
+CDN = "https://data.binance.vision/data/futures/um/monthly/klines"
+SPOT = "https://data-api.binance.vision/api/v3"
+PASTA = "dados_fut"
+DIAG = "diagnostico_futuros.txt"
+
+FORA = {'USDC', 'FDUSD', 'TUSD', 'BUSD', 'DAI', 'USDP', 'AEUR', 'EURI',
+        'EUR', 'XUSD', 'USD1', 'PYUSD', 'XAUT', 'PAXG', 'XAGT'}
+
+
+def diag(linha):
+    print(linha, flush=True)
+    try:
+        with open(DIAG, "a", encoding="utf-8") as f:
+            f.write(linha + "\n")
+    except Exception:
+        pass
+
+
+def candidatos(n):
+    """A lista de candidatos vem do volume do SPOT, que e acessivel daqui.
+    O ranking de verdade e refeito depois, com o volume dos futuros."""
+    r = requests.get(f"{SPOT}/ticker/24hr", timeout=60)
+    r.raise_for_status()
+    cand = []
+    for d in r.json():
+        s = d.get('symbol', '')
+        if not s.endswith('USDT'):
+            continue
+        base = s[:-4]
+        if base in FORA:
+            continue
+        # acao tokenizada no spot: ticker + B. Nao existe em futuros.
+        if 4 <= len(base) <= 6 and base.endswith('B') and base[:-1].isalpha():
+            continue
+        try:
+            cand.append((float(d['quoteVolume']), s))
+        except (KeyError, ValueError):
+            continue
+    cand.sort(reverse=True)
+    return [s for _, s in cand[:n]]
+
+
+def meses(ini, fim):
+    a, m = int(ini[:4]), int(ini[5:7])
+    fa, fm = int(fim[:4]), int(fim[5:7])
+    out = []
+    while (a, m) <= (fa, fm):
+        out.append(f"{a:04d}-{m:02d}")
+        m += 1
+        if m > 12:
+            a, m = a + 1, 1
+    return out
+
+
+def baixar_mes(sim, iv, mes):
+    url = f"{CDN}/{sim}/{iv}/{sim}-{iv}-{mes}.zip"
+    for tent in range(3):
+        try:
+            r = requests.get(url, timeout=120)
+        except Exception as e:
+            time.sleep(2 + tent * 3)
+            continue
+        if r.status_code == 404:
+            return None                       # mes nao existe para esse par
+        if not r.ok:
+            time.sleep(2 + tent * 3)
+            continue
+        with zipfile.ZipFile(io.BytesIO(r.content)) as z:
+            nome = z.namelist()[0]
+            txt = z.read(nome).decode('utf-8', 'ignore')
+        linhas = []
+        for row in csv.reader(io.StringIO(txt)):
+            if not row or not row[0] or not row[0][0].isdigit():
+                continue                      # cabecalho das versoes novas
+            try:
+                t = int(row[0])
+                # alguns arquivos vem com o tempo em microssegundos
+                if t > 10 ** 14:
+                    t //= 1000
+                linhas.append([t, float(row[1]), float(row[2]), float(row[3]),
+                               float(row[4]), float(row[5])])
+            except (ValueError, IndexError):
+                continue
+        return linhas
+    return None
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument('--inicio', default='2025-01')
+    ap.add_argument('--fim', default=datetime.now(timezone.utc).strftime('%Y-%m'))
+    ap.add_argument('--intervalo', default='1h')
+    ap.add_argument('--top', type=int, default=60)
+    ap.add_argument('--ativos', default='')
+    a = ap.parse_args()
+
+    open(DIAG, "w").close()
+    os.makedirs(PASTA, exist_ok=True)
+    lista = [x.strip().upper() for x in a.ativos.split(',') if x.strip()] \
+        or candidatos(a.top + 25)
+    ms = meses(a.inicio, a.fim)
+    diag(f"{len(lista)} candidatos | {len(ms)} meses | intervalo {a.intervalo}")
+
+    resultados = []
+    for i, sim in enumerate(lista, 1):
+        todas = []
+        faltou = 0
+        for mes in ms:
+            linhas = baixar_mes(sim, a.intervalo, mes)
+            if linhas is None:
+                faltou += 1
+            else:
+                todas.extend(linhas)
+        if len(todas) < 2000:
+            diag(f"  {i:>3}. {sim:<14} descartado ({len(todas)} velas, "
+                 f"{faltou} meses sem dado)")
+            continue
+        todas.sort(key=lambda x: x[0])
+        vol_usd = sorted(c[4] * c[5] for c in todas)[len(todas) // 2]
+        resultados.append((vol_usd, sim, todas))
+        diag(f"  {i:>3}. {sim:<14} {len(todas):>6} velas  "
+             f"volume mediano {vol_usd/1e6:>8,.1f} M USD/h")
+
+    resultados.sort(reverse=True)
+    escolhidos = resultados[:a.top]
+    diag(f"\ngravando os {len(escolhidos)} de maior volume de FUTUROS")
+    for vol, sim, linhas in escolhidos:
+        caminho = f"{PASTA}/{sim}_{a.intervalo}.csv"
+        with open(caminho, 'w', newline='') as f:
+            w = csv.writer(f)
+            w.writerow(['abertura_ms', 'data', 'abertura', 'maxima', 'minima',
+                        'fechamento', 'volume'])
+            for c in linhas:
+                d = datetime.fromtimestamp(c[0] / 1000, timezone.utc)
+                w.writerow([c[0], d.strftime('%Y-%m-%d %H:%M'),
+                            c[1], c[2], c[3], c[4], c[5]])
+    diag("ordem final por volume de futuros:")
+    diag("  " + ", ".join(s for _, s, _ in escolhidos))
+
+
+if __name__ == "__main__":
+    import traceback
+    try:
+        main()
+    except Exception:
+        print("=== ERRO ===")
+        traceback.print_exc()
+        raise
