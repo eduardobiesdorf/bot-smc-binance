@@ -17,9 +17,19 @@ on:
         type: choice
         options: ['1d', '1d,4h', '4h', '1h', '30m', '15m', '1h,30m', '1h,15m', '5m', '30m,5m']
       ativos:
-        description: 'Pares separados por virgula (vazio = universo padrao de 50)'
+        description: 'Pares separados por vírgula (vazio = universo padrão)'
         required: false
         default: ''
+      mercado:
+        description: 'spot ou futuros (USDⓈ-M)'
+        required: false
+        default: 'spot'
+        type: choice
+        options: ['spot', 'futuros']
+      top:
+        description: 'Baixar os N pares de maior volume em 24h (0 = usar a lista)'
+        required: false
+        default: '0'
 
 permissions:
   contents: write
@@ -39,13 +49,15 @@ jobs:
           set -o pipefail
           ARGS="--inicio ${{ inputs.inicio }} --intervalos ${{ inputs.intervalos }}"
           [ -n "${{ inputs.ativos }}" ] && ARGS="$ARGS --ativos ${{ inputs.ativos }}"
+          ARGS="$ARGS --mercado ${{ inputs.mercado || 'spot' }}"
+          ARGS="$ARGS --top ${{ inputs.top || '0' }}"
           python -u baixar_dados.py $ARGS 2>&1 | tee download.log
 
       - name: Commitar os CSVs
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -A dados/
+          git add -A dados/ dados_fut/
           if git diff --cached --quiet; then
             echo "Nada mudou." >> $GITHUB_STEP_SUMMARY
             exit 0

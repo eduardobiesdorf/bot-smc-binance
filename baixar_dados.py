@@ -34,7 +34,13 @@ UNIVERSO = [
     'JUPUSDT', 'WIFUSDT',
 ]
 
-BASE_URL = "https://data-api.binance.vision/api/v3"
+# Spot e USD-M Futures tem universos e volumes diferentes. Quem opera
+# futuros tem de testar com dados de futuros.
+MERCADOS = {
+    'spot':    ("https://data-api.binance.vision/api/v3", "dados"),
+    'futuros': ("https://fapi.binance.com/fapi/v1", "dados_fut"),
+}
+BASE_URL = MERCADOS['spot'][0]
 PASTA = "dados"
 
 MS = {'1d': 86400000, '4h': 14400000, '1h': 3600000,
@@ -98,15 +104,54 @@ def baixar(simbolo, interval, inicio_ms, fim_ms, tentativas=3):
     return linhas
 
 
+def top_por_volume(n):
+    """Os n pares USDT de maior volume em 24h, sem stablecoin, commodity
+    nem acao tokenizada (essas seguem o pregao e ficam paradas)."""
+    fora = {'USDC', 'FDUSD', 'TUSD', 'BUSD', 'DAI', 'USDP', 'AEUR', 'EURI',
+            'EUR', 'XUSD', 'USD1', 'PYUSD', 'XAUT', 'PAXG', 'XAGT'}
+    url = f"{BASE_URL}/ticker/24hr"
+    r = requests.get(url, timeout=60)
+    r.raise_for_status()
+    cand = []
+    for d in r.json():
+        s = d.get('symbol', '')
+        if not s.endswith('USDT'):
+            continue
+        base = s[:-4]
+        if base in fora or (len(base) > 3 and base.endswith('B')
+                            and base[:-1].isalpha() and base[:-1].isupper()
+                            and len(base) <= 6):
+            continue
+        try:
+            cand.append((float(d['quoteVolume']), s))
+        except (KeyError, ValueError):
+            continue
+    cand.sort(reverse=True)
+    escolhidos = [x[1] for x in cand[:n]]
+    print("Top por volume 24h:", flush=True)
+    for v, s in cand[:n]:
+        print(f"   {s:<14} {v/1e6:>10,.0f} M USD", flush=True)
+    return escolhidos
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--inicio', default='2021-01-01')
     ap.add_argument('--fim', default=datetime.now(timezone.utc).strftime('%Y-%m-%d'))
     ap.add_argument('--intervalos', default='1d')
     ap.add_argument('--ativos', default='')
+    ap.add_argument('--mercado', default='spot', choices=list(MERCADOS))
+    ap.add_argument('--top', type=int, default=0,
+                    help='baixar os N pares de maior volume em 24h')
     a = ap.parse_args()
 
-    universo = [x.strip().upper() for x in a.ativos.split(',') if x.strip()] or UNIVERSO
+    global BASE_URL, PASTA
+    BASE_URL, PASTA = MERCADOS[a.mercado]
+
+    universo = [x.strip().upper() for x in a.ativos.split(',') if x.strip()]
+    if a.top:
+        universo = top_por_volume(a.top)
+    universo = universo or UNIVERSO
     intervalos = [x.strip() for x in a.intervalos.split(',') if x.strip()]
     for iv in intervalos:
         if iv not in MS:
