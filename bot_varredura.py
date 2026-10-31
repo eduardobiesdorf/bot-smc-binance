@@ -378,6 +378,31 @@ def main():
 
     if a.ping:
         enviar(f"✅ bot da varredura vivo — {datetime.now(BRT):%d/%m %H:%M}")
+        # manda tambem o gatilho mais recente do historico, so para voce ver
+        # o formato da mensagem e para eu confirmar que a imagem passa.
+        melhor = None
+        for sim in UNIVERSO[:a.top]:
+            try:
+                h = buscar(sim, '1h', 400)
+            except Exception:
+                continue
+            if len(h) < 150:
+                continue
+            a_ = atr(h, CFG['atr_periodo'])
+            mv = media_volume(h, CFG['vol_periodo'])
+            for imp in achar_impulsos(h, a_, mv, CFG):
+                g = seguir(h, a_, imp, CFG)
+                if g and g['fase'] == 'gatilho':
+                    if melhor is None or g['vela_ms'] > melhor[1]['vela_ms']:
+                        melhor = (sim, g, h)
+        if melhor:
+            sim, g, h = melhor
+            manda_com_grafico(sim, g, h[:g['idx'] + 1],
+                              "🧪 <i>exemplo do histórico, não é alerta de "
+                              "agora</i>\n\n" + msg_gatilho(sim, g))
+            diag(f"exemplo enviado: {sim}")
+        else:
+            diag("nenhum gatilho no histórico recente para o exemplo")
         return
 
     vistos = carregar()
