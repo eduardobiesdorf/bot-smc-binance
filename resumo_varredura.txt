@@ -1,2 +1,2 @@
-01/11 17:32 BRT
+01/11 17:41 BRT
 radar   WLFIUSDT compra — limpou o order block, esperando a reversão
