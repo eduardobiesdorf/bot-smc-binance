@@ -131,17 +131,16 @@ def baixar_mes(sim, iv, mes):
 
 
 def main():
+    global PASTA
     ap = argparse.ArgumentParser()
     ap.add_argument('--inicio', default='2025-01')
     ap.add_argument('--fim', default=datetime.now(timezone.utc).strftime('%Y-%m'))
     ap.add_argument('--intervalo', default='1h')
     ap.add_argument('--top', type=int, default=60)
     ap.add_argument('--ativos', default='')
-    ap.add_argument('--pasta', default=PASTA,
+    ap.add_argument('--pasta', default='dados_fut',
                     help='onde gravar; use outra para nao mexer no historico')
     a = ap.parse_args()
-
-    global PASTA
     PASTA = a.pasta
 
     open(DIAG, "w").close()
