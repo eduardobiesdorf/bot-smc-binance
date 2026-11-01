@@ -44,6 +44,13 @@ DIAG = "diagnostico_varredura.txt"
 RESUMO = "resumo_varredura.txt"
 MAX_CENARIOS = 4   # no maximo 4 imagens de radar por rodada
 
+# Dimensionamento. O que e fixo e a perda em dolar, nao o tamanho da
+# posicao: com stop de 0,3% e de 9% no mesmo setup, posicao fixa
+# arriscaria 30 vezes mais numa do que na outra.
+CAIXA = 60.0       # banca, em USDT
+RISCO_PCT = 2.0    # quanto da banca morre num stop
+ALAV_MAX = 8.0     # liquidacao em 8x fica em -12%; nenhum stop chega la
+
 CFG = dict(imp_min=3, imp_max=8, sigma=2.5, frac_direcao=0.7, corpo_imp=0.5,
            vol_mult=1.5, vol_periodo=20, atr_periodo=14, estrut_janela=30,
            ob_busca=6, furo_atr=0.0, furo_max=2.5, corpo_min=0.5,
@@ -390,6 +397,42 @@ def faixa(sim):
             else "⚠️ extra — fora do que foi validado")
 
 
+def mao(risco_pct):
+    """Tamanho da posicao para arriscar sempre a mesma coisa em dolar.
+
+    O stop varia de 0,3% a 9%, entao posicao fixa arrisca valores muito
+    diferentes em cada operacao. Aqui o que e fixo e a PERDA: risco em
+    dolar / stop em fracao = quanto de posicao comprar.
+
+    Dois limites batem nisso:
+      - alavancagem: posicao nunca passa de CAIXA * ALAV_MAX
+      - minimo da corretora: a Binance recusa ordem abaixo de ~5 USDT
+    """
+    perda = CAIXA * RISCO_PCT / 100
+    pos = perda / (risco_pct / 100)
+    teto = CAIXA * ALAV_MAX
+    cortou = pos > teto
+    if cortou:
+        pos = teto
+        perda = pos * risco_pct / 100
+    return dict(pos=pos, perda=perda, margem=pos / ALAV_MAX,
+                alav=pos / CAIXA, cortou=cortou, minimo=pos < 5.0)
+
+
+def msg_mao(risco_pct):
+    m = mao(risco_pct)
+    if m['minimo']:
+        return ("\n<i>⚠️ posição ficaria abaixo do mínimo de 5 USDT "
+                "da Binance — pula essa</i>")
+    t = (f"\n<b>mão</b>  posição <code>{m['pos']:.2f}</code> USDT   "
+         f"(margem <code>{m['margem']:.2f}</code> em {ALAV_MAX:.0f}x)\n"
+         f"se o stop bater, perde <b>{m['perda']:.2f}</b> USDT")
+    if m['cortou']:
+        t += (f"\n<i>⚠️ stop apertado: a mão cheia passaria de "
+              f"{ALAV_MAX:.0f}x, foi limitada. O risco caiu junto.</i>")
+    return t
+
+
 def msg_gatilho(sim, g):
     seta = "🟢" if g['lado'] == 'compra' else "🔴"
     return (
@@ -401,8 +444,9 @@ def msg_gatilho(sim, g):
         f"risco <b>{g['risco_pct']:.2f}%</b>\n"
         f"alvo     <code>{fmt(g['alvo'])}</code>   "
         f"<b>R:R 1:{g['rr']:.2f}</b>\n"
-        f"<i>liquidez a {g['liq_r']:.1f}R da entrada</i>\n\n"
-        f"<i>ordem limitada em {fmt(g['entrada'])}, válida ~4h. "
+        f"<i>liquidez a {g['liq_r']:.1f}R da entrada</i>\n"
+        + msg_mao(g['risco_pct']) +
+        f"\n\n<i>ordem limitada em {fmt(g['entrada'])}, válida ~4h. "
         f"A mercado o preço já correu e a vantagem some.</i>")
 
 
@@ -459,10 +503,19 @@ def main():
                     help='com --ping: so os pares que entraram em 01/11/2026')
     ap.add_argument('--exemplos', type=int, default=2,
                     help='quantos gatilhos do historico mandar no ping')
+    ap.add_argument('--caixa', type=float, default=CAIXA,
+                    help='banca em USDT, para calcular a mao')
+    ap.add_argument('--risco-pct', type=float, default=RISCO_PCT,
+                    help='quanto da banca morre num stop, em %%')
+    ap.add_argument('--alav', type=float, default=ALAV_MAX,
+                    help='alavancagem maxima')
     a = ap.parse_args()
     CFG['rr_min'] = a.rr_min
     CFG['vol_varr_min'] = a.vol_min
     CFG['liq_max_r'] = a.liq_max_r
+    globals()['CAIXA'] = a.caixa
+    globals()['RISCO_PCT'] = a.risco_pct
+    globals()['ALAV_MAX'] = a.alav
 
     open(DIAG, "w").close()
     diag(f"início {datetime.now(BRT):%d/%m %H:%M} BRT")
