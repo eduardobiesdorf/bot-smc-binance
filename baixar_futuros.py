@@ -43,29 +43,40 @@ def diag(linha):
 
 
 def listar_cdn():
-    """Todos os pares USDT com historico de futuros no CDN da Binance."""
+    """Todos os pares USDT com historico de futuros no CDN da Binance.
+
+    data.binance.vision serve uma pagina HTML; o XML de listagem vem do
+    bucket S3 por tras dela. Paginacao v1, por marker.
+    """
     import re
-    pares, tok = [], None
-    while True:
-        u = ("https://data.binance.vision/?delimiter=/&prefix="
-             "data/futures/um/monthly/klines/")
+    BUCKET = "https://s3-ap-northeast-1.amazonaws.com/data.binance.vision"
+    PRE = "data/futures/um/monthly/klines/"
+    pares, tok, volta = [], None, 0
+    while volta < 60:
+        volta += 1
+        u = f"{BUCKET}?delimiter=/&prefix={PRE}"
         if tok:
             u += "&marker=" + tok
         r = requests.get(u, timeout=60)
         r.raise_for_status()
-        achou = re.findall(r"<Prefix>data/futures/um/monthly/klines/([^/]+)/</Prefix>",
+        achou = re.findall(r"<Prefix>" + re.escape(PRE) + r"([^/]+)/</Prefix>",
                            r.text)
-        pares.extend(achou)
-        if "<IsTruncated>true</IsTruncated>" not in r.text or not achou:
+        if not achou:
+            diag(f"volta {volta}: nada. Inicio da resposta: {r.text[:300]}")
             break
-        tok = ("data/futures/um/monthly/klines/" + achou[-1] + "/")
+        pares.extend(achou)
+        if "<IsTruncated>true</IsTruncated>" not in r.text:
+            break
+        tok = PRE + achou[-1] + "/"
     usdt = sorted(set(x for x in pares if x.endswith('USDT')))
-    diag(f"pares no CDN de futuros: {len(pares)} no total, "
-         f"{len(usdt)} terminando em USDT")
-    diag("lista USDT:")
-    for i in range(0, len(usdt), 10):
-        diag("  " + ", ".join(usdt[i:i+10]))
-    return usdt
+    perp = [x for x in usdt if '_' not in x]
+    diag(f"pares no CDN de futuros USD-M: {len(set(pares))} no total, "
+         f"{len(usdt)} terminando em USDT, {len(perp)} perpetuos "
+         f"(sem contrato com vencimento)")
+    diag("lista USDT perpetua:")
+    for i in range(0, len(perp), 10):
+        diag("  " + ", ".join(perp[i:i+10]))
+    return perp
 
 
 def candidatos(n):
