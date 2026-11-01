@@ -42,6 +42,11 @@ on:
         description: 'Com ping: quantos gatilhos do histórico mandar'
         required: false
         default: '2'
+      novos:
+        description: 'Com ping: só os pares que entraram em 01/11'
+        required: false
+        default: false
+        type: boolean
       ping:
         description: 'Manda os últimos gatilhos do histórico, com gráfico'
         required: false
@@ -77,6 +82,7 @@ jobs:
           [ "${{ inputs.so_gatilho }}" = "true" ] && ARGS="$ARGS --so-gatilho"
           [ "${{ inputs.teste }}" = "true" ] && ARGS="$ARGS --teste"
           ARGS="$ARGS --exemplos ${{ inputs.exemplos || '2' }}"
+          [ "${{ inputs.novos }}" = "true" ] && ARGS="$ARGS --novos"
           [ "${{ inputs.ping }}" = "true" ] && ARGS="$ARGS --ping"
           python -u bot_varredura.py $ARGS 2>&1 | tee varredura.log
 

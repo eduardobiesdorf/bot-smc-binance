@@ -87,6 +87,14 @@ UNIVERSO = [
 ]
 NUCLEO = set(UNIVERSO[:20])
 
+# Os pares que o bot nao escaneava ate 01/11/2026, quando a lista passou
+# de 20 (ordem do spot) para 50 (ordem de futuros).
+ANTIGOS = {'BTCUSDT', 'ETHUSDT', 'SOLUSDT', 'XRPUSDT', 'DOGEUSDT', 'BNBUSDT',
+           'ADAUSDT', 'LINKUSDT', 'SUIUSDT', 'AVAXUSDT', 'TRXUSDT',
+           'NEARUSDT', 'LTCUSDT', 'UNIUSDT', 'DOTUSDT', 'AAVEUSDT',
+           'XLMUSDT', 'HBARUSDT', 'BCHUSDT', 'ONDOUSDT'}
+NOVOS = [s for s in UNIVERSO if s not in ANTIGOS]
+
 STABLE = {'USDC', 'FDUSD', 'TUSD', 'BUSD', 'DAI', 'USDP', 'AEUR', 'EURI',
           'EUR', 'XUSD', 'USD1', 'PYUSD'}
 COMMODITY = {'XAUT', 'PAXG', 'XAGT'}
@@ -390,6 +398,8 @@ def main():
     ap.add_argument('--so-gatilho', action='store_true')
     ap.add_argument('--teste', action='store_true')
     ap.add_argument('--ping', action='store_true')
+    ap.add_argument('--novos', action='store_true',
+                    help='com --ping: so os pares que entraram em 01/11/2026')
     ap.add_argument('--exemplos', type=int, default=2,
                     help='quantos gatilhos do historico mandar no ping')
     a = ap.parse_args()
@@ -403,7 +413,10 @@ def main():
         # manda tambem o gatilho mais recente do historico, so para voce ver
         # o formato da mensagem e para eu confirmar que a imagem passa.
         achados = []
-        for sim in UNIVERSO[:a.top]:
+        fila_ping = NOVOS if a.novos else UNIVERSO[:a.top]
+        diag(f"ping em {len(fila_ping)} pares"
+             + (" (so os que entraram agora)" if a.novos else ""))
+        for sim in fila_ping:
             try:
                 h = buscar(sim, '1h', 400)
             except Exception:
@@ -422,12 +435,14 @@ def main():
             enviar("nenhum gatilho no histórico recente dos 20 pares")
             return
         for _, sim, g, h in achados[:a.exemplos]:
+            g['nucleo'] = sim in NUCLEO
             idade = (int(time.time() * 1000) - g['vela_ms']) / 3600000
             manda_com_grafico(
                 sim, g, h[:g['idx'] + 1],
                 f"🧪 <i>gatilho do histórico, {idade:.0f}h atrás — "
                 f"não é alerta de agora</i>\n\n" + msg_gatilho(sim, g))
-            diag(f"exemplo enviado: {sim} ({idade:.0f}h)")
+            diag(f"exemplo enviado: {sim} [{'nucleo' if sim in NUCLEO else 'extra'}] "
+                 f"({idade:.0f}h)")
         return
 
     vistos = carregar()
