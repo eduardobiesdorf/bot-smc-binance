@@ -16,9 +16,9 @@ on:
   workflow_dispatch:
     inputs:
       top:
-        description: 'Quantos pares escanear (da lista fixa de 20)'
+        description: 'Quantos pares escanear (lista de 50; os 20 primeiros são o núcleo)'
         required: false
-        default: '20'
+        default: '50'
       dinamico:
         description: 'Rankear por volume de 24h em vez da lista fixa'
         required: false
@@ -71,7 +71,7 @@ jobs:
           TELEGRAM_CHAT_ID: ${{ secrets.CHAT_ID_TELEGRAM || secrets.TELEGRAM_CHAT_ID }}
         run: |
           set -o pipefail
-          ARGS="--top ${{ inputs.top || '20' }}"
+          ARGS="--top ${{ inputs.top || '50' }}"
           ARGS="$ARGS --rr-min ${{ inputs.rr_min || '1.2' }}"
           [ "${{ inputs.dinamico }}" = "true" ] && ARGS="$ARGS --dinamico"
           [ "${{ inputs.so_gatilho }}" = "true" ] && ARGS="$ARGS --so-gatilho"
