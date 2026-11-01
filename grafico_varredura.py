@@ -70,7 +70,9 @@ def desenhar(sim, h, e, caminho):
         yv = h[kv][3] if compra else h[kv][2]
         ax.plot([kv - a0], [yv], marker='v' if compra else '^', ms=13,
                 color=LARANJA, mec='white', mew=1.4, zorder=10)
-        ax.annotate("varredura", (kv - a0, yv),
+        rot_v = ("varredura" if not e.get('vol_varr')
+                 else f"varredura · {e['vol_varr']:.1f}x o volume médio")
+        ax.annotate(rot_v, (kv - a0, yv),
                     xytext=(kv - a0 - 5,
                             baixo + alt * (.03 if compra else .97)),
                     color=LARANJA, fontsize=10, fontweight='bold',
