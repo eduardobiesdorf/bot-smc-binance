@@ -17,6 +17,7 @@ import csv
 import io
 import os
 import time
+import pathlib
 import zipfile
 from datetime import datetime, timezone
 
@@ -136,12 +137,21 @@ def main():
     ap.add_argument('--intervalo', default='1h')
     ap.add_argument('--top', type=int, default=60)
     ap.add_argument('--ativos', default='')
+    ap.add_argument('--pasta', default=PASTA,
+                    help='onde gravar; use outra para nao mexer no historico')
     a = ap.parse_args()
+
+    global PASTA
+    PASTA = a.pasta
 
     open(DIAG, "w").close()
     os.makedirs(PASTA, exist_ok=True)
-    lista = [x.strip().upper() for x in a.ativos.split(',') if x.strip()] \
-        or candidatos(a.top + 25)
+    lista = [x.strip().upper() for x in a.ativos.split(',') if x.strip()]
+    if not lista:
+        # se ja existe historico baixado, usa a mesma lista: assim o recorte
+        # novo bate exatamente com o que foi medido antes
+        ja = sorted(pathlib.Path('dados_fut').glob('*_1h.csv'))
+        lista = [p.name.split('_')[0] for p in ja] or candidatos(a.top + 25)
     ms = meses(a.inicio, a.fim)
     diag(f"{len(lista)} candidatos | {len(ms)} meses | intervalo {a.intervalo}")
 
@@ -155,7 +165,7 @@ def main():
                 faltou += 1
             else:
                 todas.extend(linhas)
-        if len(todas) < 2000:
+        if len(todas) < 100:
             diag(f"  {i:>3}. {sim:<14} descartado ({len(todas)} velas, "
                  f"{faltou} meses sem dado)")
             continue
