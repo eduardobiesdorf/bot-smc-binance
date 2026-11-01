@@ -236,7 +236,7 @@ def main():
     if not lista:
         # se ja existe historico baixado, usa a mesma lista: assim o recorte
         # novo bate exatamente com o que foi medido antes
-        ja = sorted(pathlib.Path('dados_fut').glob('*_1h.csv'))
+        ja = sorted(pathlib.Path(PASTA).glob(f'*_{a.intervalo}.csv'))
         lista = [p.name.split('_')[0] for p in ja] or candidatos(a.top + 25)
     ms = meses(a.inicio, a.fim)
     diag(f"{len(lista)} candidatos | {len(ms)} meses | intervalo {a.intervalo}")
