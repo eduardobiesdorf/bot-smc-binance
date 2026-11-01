@@ -71,12 +71,57 @@ def listar_cdn():
     usdt = sorted(set(x for x in pares if x.endswith('USDT')))
     perp = [x for x in usdt if '_' not in x]
     diag(f"pares no CDN de futuros USD-M: {len(set(pares))} no total, "
-         f"{len(usdt)} terminando em USDT, {len(perp)} perpetuos "
-         f"(sem contrato com vencimento)")
-    diag("lista USDT perpetua:")
-    for i in range(0, len(perp), 10):
-        diag("  " + ", ".join(perp[i:i+10]))
-    return perp
+         f"{len(usdt)} terminando em USDT, {len(perp)} perpetuos")
+
+    # Vivo = tem arquivo diario de ontem. O CDN guarda o historico dos
+    # deslistados para sempre, entao a lista bruta nao serve de nada.
+    from concurrent.futures import ThreadPoolExecutor
+    from datetime import timedelta
+    dia = (datetime.now(timezone.utc) - timedelta(days=1)).strftime('%Y-%m-%d')
+
+    def vivo(s):
+        u = f"{CDN_DIA}/{s}/1h/{s}-1h-{dia}.zip"
+        for _ in range(2):
+            try:
+                if requests.head(u, timeout=30).ok:
+                    return s
+                return None
+            except Exception:
+                time.sleep(1)
+        return None
+
+    with ThreadPoolExecutor(max_workers=24) as ex:
+        ativos = sorted(x for x in ex.map(vivo, perp) if x)
+    diag(f"\nvivos em {dia}: {len(ativos)} de {len(perp)}")
+
+    # Separar cripto de acao tokenizada sem lista na mao: no SPOT a acao
+    # tokenizada se chama TICKER + B (AAPLB), a cripto se chama so BASE.
+    try:
+        r = requests.get(f"{SPOT}/exchangeInfo", timeout=60)
+        r.raise_for_status()
+        spot = {d['symbol'] for d in r.json().get('symbols', [])}
+    except Exception as e:
+        diag(f"nao consegui o exchangeInfo do spot: {e}")
+        return ativos
+
+    cripto, acao, orfao = [], [], []
+    for s in ativos:
+        base = s[:-4]
+        if base + 'BUSDT' in spot:
+            acao.append(s)
+        elif s in spot:
+            cripto.append(s)
+        else:
+            orfao.append(s)
+    diag(f"  cripto (existe no spot): {len(cripto)}")
+    diag(f"  acao tokenizada (existe no spot como {{T}}B): {len(acao)}")
+    diag(f"  so em futuros (nao da para classificar): {len(orfao)}")
+    for nome, lst in (("CRIPTO", cripto), ("ACAO TOKENIZADA", acao),
+                      ("SO EM FUTUROS", orfao)):
+        diag(f"\n{nome}:")
+        for i in range(0, len(lst), 10):
+            diag("  " + ", ".join(lst[i:i+10]))
+    return cripto
 
 
 def candidatos(n):
