@@ -21,9 +21,13 @@ on:
         required: false
         default: '60'
       ativos:
-        description: 'Pares separados por vírgula (vazio = ranquear sozinho)'
+        description: 'Pares separados por vírgula (vazio = os já baixados)'
         required: false
         default: ''
+      pasta:
+        description: 'Pasta de destino (outra pasta não sobrescreve o histórico)'
+        required: false
+        default: 'dados_fut'
 
 permissions:
   contents: write
@@ -45,6 +49,7 @@ jobs:
           ARGS="--inicio ${{ inputs.inicio }} --intervalo ${{ inputs.intervalo }}"
           ARGS="$ARGS --top ${{ inputs.top || '60' }}"
           [ -n "${{ inputs.ativos }}" ] && ARGS="$ARGS --ativos ${{ inputs.ativos }}"
+          ARGS="$ARGS --pasta ${{ inputs.pasta || 'dados_fut' }}"
           python -u baixar_futuros.py $ARGS 2>&1 | tee futuros.log
 
       - name: Commitar
@@ -52,7 +57,7 @@ jobs:
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -A dados_fut/ diagnostico_futuros.txt 2>/dev/null || true
+          git add -A dados_fut/ dados_out/ diagnostico_futuros.txt 2>/dev/null || true
           if git diff --cached --quiet; then
             echo "Nada mudou." >> $GITHUB_STEP_SUMMARY
             exit 0
