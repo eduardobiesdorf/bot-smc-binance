@@ -23,6 +23,7 @@ from datetime import datetime, timezone
 import requests
 
 CDN = "https://data.binance.vision/data/futures/um/monthly/klines"
+CDN_DIA = "https://data.binance.vision/data/futures/um/daily/klines"
 SPOT = "https://data-api.binance.vision/api/v3"
 PASTA = "dados_fut"
 DIAG = "diagnostico_futuros.txt"
@@ -76,6 +77,40 @@ def meses(ini, fim):
     return out
 
 
+def _ler_zip(r):
+    with zipfile.ZipFile(io.BytesIO(r.content)) as z:
+        txt = z.read(z.namelist()[0]).decode('utf-8', 'ignore')
+    linhas = []
+    for row in csv.reader(io.StringIO(txt)):
+        if not row or not row[0] or not row[0][0].isdigit():
+            continue
+        try:
+            t = int(row[0])
+            if t > 10 ** 14:
+                t //= 1000
+            linhas.append([t, float(row[1]), float(row[2]), float(row[3]),
+                           float(row[4]), float(row[5])])
+        except (ValueError, IndexError):
+            continue
+    return linhas
+
+
+def baixar_dias(sim, iv, mes):
+    """O mes corrente ainda nao tem arquivo mensal: junta os diarios."""
+    from calendar import monthrange
+    a, m = int(mes[:4]), int(mes[5:7])
+    out = []
+    for d in range(1, monthrange(a, m)[1] + 1):
+        url = f"{CDN_DIA}/{sim}/{iv}/{sim}-{iv}-{mes}-{d:02d}.zip"
+        try:
+            r = requests.get(url, timeout=60)
+        except Exception:
+            continue
+        if r.ok:
+            out.extend(_ler_zip(r))
+    return out or None
+
+
 def baixar_mes(sim, iv, mes):
     url = f"{CDN}/{sim}/{iv}/{sim}-{iv}-{mes}.zip"
     for tent in range(3):
@@ -85,27 +120,12 @@ def baixar_mes(sim, iv, mes):
             time.sleep(2 + tent * 3)
             continue
         if r.status_code == 404:
-            return None                       # mes nao existe para esse par
+            # pode ser o mes corrente, que so tem arquivo diario
+            return baixar_dias(sim, iv, mes)
         if not r.ok:
             time.sleep(2 + tent * 3)
             continue
-        with zipfile.ZipFile(io.BytesIO(r.content)) as z:
-            nome = z.namelist()[0]
-            txt = z.read(nome).decode('utf-8', 'ignore')
-        linhas = []
-        for row in csv.reader(io.StringIO(txt)):
-            if not row or not row[0] or not row[0][0].isdigit():
-                continue                      # cabecalho das versoes novas
-            try:
-                t = int(row[0])
-                # alguns arquivos vem com o tempo em microssegundos
-                if t > 10 ** 14:
-                    t //= 1000
-                linhas.append([t, float(row[1]), float(row[2]), float(row[3]),
-                               float(row[4]), float(row[5])])
-            except (ValueError, IndexError):
-                continue
-        return linhas
+        return _ler_zip(r)
     return None
 
 
