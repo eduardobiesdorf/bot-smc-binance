@@ -36,6 +36,18 @@ on:
         description: 'Distância máxima da piscina de liquidez, em R'
         required: false
         default: '1.5'
+      caixa:
+        description: 'Banca em USDT, para calcular a mão'
+        required: false
+        default: '60'
+      risco_pct:
+        description: 'Quanto da banca morre num stop (%)'
+        required: false
+        default: '2'
+      alav:
+        description: 'Alavancagem máxima'
+        required: false
+        default: '8'
       so_gatilho:
         description: 'Mandar só GATILHO (sem os avisos de radar)'
         required: false
@@ -88,6 +100,9 @@ jobs:
           ARGS="$ARGS --rr-min ${{ inputs.rr_min || '1.2' }}"
           ARGS="$ARGS --vol-min ${{ inputs.vol_min || '1.2' }}"
           ARGS="$ARGS --liq-max-r ${{ inputs.liq_max_r || '1.5' }}"
+          ARGS="$ARGS --caixa ${{ inputs.caixa || '60' }}"
+          ARGS="$ARGS --risco-pct ${{ inputs.risco_pct || '2' }}"
+          ARGS="$ARGS --alav ${{ inputs.alav || '8' }}"
           [ "${{ inputs.dinamico }}" = "true" ] && ARGS="$ARGS --dinamico"
           [ "${{ inputs.so_gatilho }}" = "true" ] && ARGS="$ARGS --so-gatilho"
           [ "${{ inputs.teste }}" = "true" ] && ARGS="$ARGS --teste"
