@@ -42,6 +42,32 @@ def diag(linha):
         pass
 
 
+def listar_cdn():
+    """Todos os pares USDT com historico de futuros no CDN da Binance."""
+    import re
+    pares, tok = [], None
+    while True:
+        u = ("https://data.binance.vision/?delimiter=/&prefix="
+             "data/futures/um/monthly/klines/")
+        if tok:
+            u += "&marker=" + tok
+        r = requests.get(u, timeout=60)
+        r.raise_for_status()
+        achou = re.findall(r"<Prefix>data/futures/um/monthly/klines/([^/]+)/</Prefix>",
+                           r.text)
+        pares.extend(achou)
+        if "<IsTruncated>true</IsTruncated>" not in r.text or not achou:
+            break
+        tok = ("data/futures/um/monthly/klines/" + achou[-1] + "/")
+    usdt = sorted(set(x for x in pares if x.endswith('USDT')))
+    diag(f"pares no CDN de futuros: {len(pares)} no total, "
+         f"{len(usdt)} terminando em USDT")
+    diag("lista USDT:")
+    for i in range(0, len(usdt), 10):
+        diag("  " + ", ".join(usdt[i:i+10]))
+    return usdt
+
+
 def candidatos(n):
     """A lista de candidatos vem do volume do SPOT, que e acessivel daqui.
     O ranking de verdade e refeito depois, com o volume dos futuros."""
@@ -138,12 +164,17 @@ def main():
     ap.add_argument('--intervalo', default='1h')
     ap.add_argument('--top', type=int, default=60)
     ap.add_argument('--ativos', default='')
+    ap.add_argument('--listar', action='store_true',
+                    help='so lista os pares USDT disponiveis e sai')
     ap.add_argument('--pasta', default='dados_fut',
                     help='onde gravar; use outra para nao mexer no historico')
     a = ap.parse_args()
     PASTA = a.pasta
 
     open(DIAG, "w").close()
+    if a.listar:
+        listar_cdn()
+        return
     os.makedirs(PASTA, exist_ok=True)
     lista = [x.strip().upper() for x in a.ativos.split(',') if x.strip()]
     if not lista:

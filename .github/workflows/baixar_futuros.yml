@@ -24,6 +24,11 @@ on:
         description: 'Pares separados por vírgula (vazio = os já baixados)'
         required: false
         default: ''
+      listar:
+        description: 'Só listar os pares USDT disponíveis, sem baixar'
+        required: false
+        default: false
+        type: boolean
       pasta:
         description: 'Pasta de destino (outra pasta não sobrescreve o histórico)'
         required: false
@@ -50,6 +55,7 @@ jobs:
           ARGS="$ARGS --top ${{ inputs.top || '60' }}"
           [ -n "${{ inputs.ativos }}" ] && ARGS="$ARGS --ativos ${{ inputs.ativos }}"
           ARGS="$ARGS --pasta ${{ inputs.pasta || 'dados_fut' }}"
+          [ "${{ inputs.listar }}" = "true" ] && ARGS="$ARGS --listar"
           python -u baixar_futuros.py $ARGS 2>&1 | tee futuros.log
 
       - name: Commitar
