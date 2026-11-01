@@ -48,7 +48,8 @@ CFG = dict(imp_min=3, imp_max=8, sigma=2.5, frac_direcao=0.7, corpo_imp=0.5,
            vol_mult=1.5, vol_periodo=20, atr_periodo=14, estrut_janela=30,
            ob_busca=6, furo_atr=0.0, furo_max=2.5, corpo_min=0.5,
            pavio_min=0.5, espera_max=60, stop_folga=0.10, rr_min=1.2,
-           risco_min_pct=0.0, max_espera_gatilho=4, vol_varr_min=1.2)
+           risco_min_pct=0.0, max_espera_gatilho=4, vol_varr_min=1.2,
+           liq_janela=100, liq_max_r=1.5)
 
 
 # ------------------------------------------------------------------ dados
@@ -216,6 +217,42 @@ def achar_impulsos(h, a, mv, cfg):
     return out
 
 
+def piscina(h, i, compra, ent, janela):
+    """Distancia ate a liquidez nao consumida mais proxima da entrada.
+
+    Numa venda e o topo fractal ainda nao superado acima do preco; numa
+    compra, o fundo ainda nao perdido abaixo. Devolve a distancia em
+    preco, ou None se nao houver nenhuma na janela.
+
+    Medido em 21 meses de futuros: quanto MAIS PERTO a piscina, melhor.
+    Ate 1,5R de distancia o setup da +0,259R/op contra +0,051 sem filtro;
+    acima de 2,5R cai para -0,369. A leitura e que uma piscina dentro do
+    nosso risco e testada sem nos tirar, e depois o preco vai embora --
+    enquanto uma piscina longe demais so e alcancada estourando o stop.
+    """
+    melhor = None
+    for k in range(max(3, i - janela), i - 3):
+        if compra:
+            ext = all(h[k][3] < h[k - m][3] for m in (1, 2, 3)) and \
+                  all(h[k][3] < h[k + m][3] for m in (1, 2, 3))
+            if not ext or h[k][3] >= ent:
+                continue
+            if any(h[j][3] <= h[k][3] for j in range(k + 4, i + 1)):
+                continue                      # ja foi consumida
+            d = ent - h[k][3]
+        else:
+            ext = all(h[k][2] > h[k - m][2] for m in (1, 2, 3)) and \
+                  all(h[k][2] > h[k + m][2] for m in (1, 2, 3))
+            if not ext or h[k][2] <= ent:
+                continue
+            if any(h[j][2] >= h[k][2] for j in range(k + 4, i + 1)):
+                continue
+            d = h[k][2] - ent
+        if melhor is None or d < melhor:
+            melhor = d
+    return melhor
+
+
 def seguir(h, a, imp, cfg, mv):
     """Espera a varredura e a reversao. Devolve gatilho, cenario ou None."""
     fim, compra = imp['fim'], imp['alta']
@@ -277,11 +314,16 @@ def seguir(h, a, imp, cfg, mv):
         # +0,138 para +0,208R, com melhora em 2025 e em 2026.
         if vol_varr < cfg['vol_varr_min']:
             return None
+        d_liq = piscina(h, k, compra, ent, cfg['liq_janela'])
+        if d_liq is None or d_liq / risco > cfg['liq_max_r']:
+            return None
+        liq_r = d_liq / risco
         return dict(fase='gatilho', lado='compra' if compra else 'venda',
                     entrada=ent, stop=stop, alvo=alvo, rr=rr, idx=k,
                     vela_ms=h[k][0], risco_pct=risco / ent * 100,
                     tipo='martelo' if martelo and not impulsao else 'impulsão',
-                    imp=imp, varredura=k_varreu, vol_varr=vol_varr)
+                    imp=imp, varredura=k_varreu, vol_varr=vol_varr,
+                    liq_r=liq_r)
 
     # chegou ao fim sem gatilho: ainda esta armado?
     if varreu:
@@ -358,7 +400,8 @@ def msg_gatilho(sim, g):
         f"stop     <code>{fmt(g['stop'])}</code>   "
         f"risco <b>{g['risco_pct']:.2f}%</b>\n"
         f"alvo     <code>{fmt(g['alvo'])}</code>   "
-        f"<b>R:R 1:{g['rr']:.2f}</b>\n\n"
+        f"<b>R:R 1:{g['rr']:.2f}</b>\n"
+        f"<i>liquidez a {g['liq_r']:.1f}R da entrada</i>\n\n"
         f"<i>ordem limitada em {fmt(g['entrada'])}, válida ~4h. "
         f"A mercado o preço já correu e a vantagem some.</i>")
 
@@ -407,6 +450,8 @@ def main():
     ap.add_argument('--rr-min', type=float, default=CFG['rr_min'])
     ap.add_argument('--vol-min', type=float, default=CFG['vol_varr_min'],
                     help='volume minimo da vela que varre, x a media de 20')
+    ap.add_argument('--liq-max-r', type=float, default=CFG['liq_max_r'],
+                    help='distancia maxima da piscina de liquidez, em R')
     ap.add_argument('--so-gatilho', action='store_true')
     ap.add_argument('--teste', action='store_true')
     ap.add_argument('--ping', action='store_true')
@@ -417,6 +462,7 @@ def main():
     a = ap.parse_args()
     CFG['rr_min'] = a.rr_min
     CFG['vol_varr_min'] = a.vol_min
+    CFG['liq_max_r'] = a.liq_max_r
 
     open(DIAG, "w").close()
     diag(f"início {datetime.now(BRT):%d/%m %H:%M} BRT")

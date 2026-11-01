@@ -32,6 +32,10 @@ on:
         description: 'Volume mínimo da vela que varre (x a média de 20)'
         required: false
         default: '1.2'
+      liq_max_r:
+        description: 'Distância máxima da piscina de liquidez, em R'
+        required: false
+        default: '1.5'
       so_gatilho:
         description: 'Mandar só GATILHO (sem os avisos de radar)'
         required: false
@@ -83,6 +87,7 @@ jobs:
           ARGS="--top ${{ inputs.top || '50' }}"
           ARGS="$ARGS --rr-min ${{ inputs.rr_min || '1.2' }}"
           ARGS="$ARGS --vol-min ${{ inputs.vol_min || '1.2' }}"
+          ARGS="$ARGS --liq-max-r ${{ inputs.liq_max_r || '1.5' }}"
           [ "${{ inputs.dinamico }}" = "true" ] && ARGS="$ARGS --dinamico"
           [ "${{ inputs.so_gatilho }}" = "true" ] && ARGS="$ARGS --so-gatilho"
           [ "${{ inputs.teste }}" = "true" ] && ARGS="$ARGS --teste"
