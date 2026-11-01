@@ -13,6 +13,8 @@ import matplotlib.pyplot as plt
 import requests
 from matplotlib.patches import Rectangle
 
+import datetime as _dt
+BRT = _dt.timezone(_dt.timedelta(hours=-3))
 VERDE, VERM, ROXO, AZUL, LARANJA = "#2e9e5b", "#d64545", "#7c3aed", "#2563eb", "#ea7317"
 
 

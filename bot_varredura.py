@@ -338,6 +338,8 @@ def enviar(texto, html=True):
 
 
 def quando(ms):
+    """Sempre horario de Brasilia. A Binance entrega em UTC, mas tudo o
+    que chega para o Eduardo tem de estar no fuso em que ele opera."""
     return f"{datetime.fromtimestamp(ms / 1000, BRT):%d/%m %H:%M}"
 
 
@@ -351,7 +353,7 @@ def msg_gatilho(sim, g):
     return (
         f"{seta} <b>{sim.replace('USDT', '/USDT')}</b> — "
         f"<b>{g['lado'].upper()}</b>   <i>{faixa(sim)}</i>\n"
-        f"vela de H1 fechada às {quando(g['vela_ms'])}\n\n"
+        f"vela de H1 fechada às {quando(g['vela_ms'])} (Brasília)\n\n"
         f"entrada  <code>{fmt(g['entrada'])}</code>\n"
         f"stop     <code>{fmt(g['stop'])}</code>   "
         f"risco <b>{g['risco_pct']:.2f}%</b>\n"
