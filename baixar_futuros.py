@@ -194,19 +194,31 @@ def baixar_dias(sim, iv, mes):
     return out or None
 
 
-def baixar_mes(sim, iv, mes):
+def recente(mes):
+    """Mes corrente ou o anterior: pode ainda nao ter arquivo mensal."""
+    ag = datetime.now(timezone.utc)
+    a, m = ag.year, ag.month
+    ant = (a - 1, 12) if m == 1 else (a, m - 1)
+    return mes in (f"{a:04d}-{m:02d}", f"{ant[0]:04d}-{ant[1]:02d}")
+
+
+def baixar_mes(sim, iv, mes, ses=None):
+    get = (ses or requests).get
     url = f"{CDN}/{sim}/{iv}/{sim}-{iv}-{mes}.zip"
     for tent in range(3):
         try:
-            r = requests.get(url, timeout=120)
-        except Exception as e:
-            time.sleep(2 + tent * 3)
+            r = get(url, timeout=120)
+        except Exception:
+            time.sleep(1 + tent * 2)
             continue
         if r.status_code == 404:
-            # pode ser o mes corrente, que so tem arquivo diario
-            return baixar_dias(sim, iv, mes)
+            # O 404 quase sempre quer dizer que o par nao existia nesse mes.
+            # So vale tentar os diarios no mes corrente/anterior, que ainda
+            # nao foram fechados num arquivo mensal. Fora disso o fallback
+            # gastava 30 requisicoes para nao achar nada.
+            return baixar_dias(sim, iv, mes) if recente(mes) else None
         if not r.ok:
-            time.sleep(2 + tent * 3)
+            time.sleep(1 + tent * 2)
             continue
         return _ler_zip(r)
     return None
@@ -241,41 +253,60 @@ def main():
     ms = meses(a.inicio, a.fim)
     diag(f"{len(lista)} candidatos | {len(ms)} meses | intervalo {a.intervalo}")
 
-    resultados = []
-    for i, sim in enumerate(lista, 1):
-        todas = []
-        faltou = 0
+    # Um par por thread. Cada um grava o proprio CSV na hora e devolve so
+    # o volume: guardar todas as velas de 150 pares na memoria estourava.
+    from concurrent.futures import ThreadPoolExecutor
+    from threading import Lock
+    trava = Lock()
+    feito = [0]
+
+    def um(sim):
+        ses = requests.Session()
+        todas, faltou = [], 0
         for mes in ms:
-            linhas = baixar_mes(sim, a.intervalo, mes)
+            linhas = baixar_mes(sim, a.intervalo, mes, ses)
             if linhas is None:
                 faltou += 1
             else:
                 todas.extend(linhas)
+        ses.close()
+        with trava:
+            feito[0] += 1
+            n = feito[0]
         if len(todas) < 100:
-            diag(f"  {i:>3}. {sim:<14} descartado ({len(todas)} velas, "
-                 f"{faltou} meses sem dado)")
-            continue
+            diag(f"  {n:>3}/{len(lista)} {sim:<14} descartado "
+                 f"({len(todas)} velas, {faltou} meses sem dado)")
+            return None
         todas.sort(key=lambda x: x[0])
         vol_usd = sorted(c[4] * c[5] for c in todas)[len(todas) // 2]
-        resultados.append((vol_usd, sim, todas))
-        diag(f"  {i:>3}. {sim:<14} {len(todas):>6} velas  "
-             f"volume mediano {vol_usd/1e6:>8,.1f} M USD/h")
-
-    resultados.sort(reverse=True)
-    escolhidos = resultados[:a.top]
-    diag(f"\ngravando os {len(escolhidos)} de maior volume de FUTUROS")
-    for vol, sim, linhas in escolhidos:
         caminho = f"{PASTA}/{sim}_{a.intervalo}.csv"
         with open(caminho, 'w', newline='') as f:
             w = csv.writer(f)
             w.writerow(['abertura_ms', 'data', 'abertura', 'maxima', 'minima',
                         'fechamento', 'volume'])
-            for c in linhas:
+            for c in todas:
                 d = datetime.fromtimestamp(c[0] / 1000, timezone.utc)
                 w.writerow([c[0], d.strftime('%Y-%m-%d %H:%M'),
                             c[1], c[2], c[3], c[4], c[5]])
+        diag(f"  {n:>3}/{len(lista)} {sim:<14} {len(todas):>6} velas  "
+             f"volume mediano {vol_usd/1e6:>8,.1f} M USD/h")
+        return (vol_usd, sim)
+
+    with ThreadPoolExecutor(max_workers=10) as ex:
+        resultados = [x for x in ex.map(um, lista) if x]
+
+    resultados.sort(reverse=True)
+    escolhidos = resultados[:a.top]
+    manter = {s for _, s in escolhidos}
+    for _, sim in resultados[a.top:]:
+        try:
+            os.remove(f"{PASTA}/{sim}_{a.intervalo}.csv")
+        except OSError:
+            pass
+    diag(f"\nficaram os {len(escolhidos)} de maior volume de FUTUROS "
+         f"({len(resultados) - len(escolhidos)} apagados)")
     diag("ordem final por volume de futuros:")
-    diag("  " + ", ".join(s for _, s, _ in escolhidos))
+    diag("  " + ", ".join(s for _, s in escolhidos))
 
 
 if __name__ == "__main__":
