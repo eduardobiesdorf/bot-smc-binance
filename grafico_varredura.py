@@ -97,7 +97,8 @@ def desenhar(sim, h, e, caminho):
                 f"{e['rr']:.1f}R", color=VERDE, fontsize=10,
                 fontweight='bold', va='center')
         titulo = (f"{sim.replace('USDT','/USDT')} — {e['lado'].upper()}  ·  "
-                  f"R:R 1:{e['rr']:.2f}  ·  risco {e['risco_pct']:.2f}%")
+                  f"R:R 1:{e['rr']:.2f}  ·  risco {e['risco_pct']:.2f}%"
+                  + ("" if e.get('nucleo', True) else "   ·  FORA DO NÚCLEO"))
         cor = VERDE if compra else VERM
         lim_dir = len(jan) + 12
     else:

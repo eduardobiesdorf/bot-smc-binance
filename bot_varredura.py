@@ -66,14 +66,26 @@ def buscar(simbolo, interval='1h', limite=400):
 # na Binance levam um B no fim do ticker (SNDKB = SanDisk, INTCB = Intel,
 # CRCLB = Circle). Elas seguem o pregao de Nova York, ficam paradas no fim
 # de semana e nao tem a liquidez que esse setup procura.
-# Os 20 pares em que a estrategia foi medida (maior volume mediano em
-# 2025-2026). O bot roda nesta lista por padrao, para que o que esta no ar
-# seja exatamente o que foi validado. Com --dinamico ele volta a rankear
-# por volume de 24h, filtrando o que nao e cripto.
-UNIVERSO = ['BTCUSDT', 'ETHUSDT', 'SOLUSDT', 'XRPUSDT', 'DOGEUSDT',
-            'BNBUSDT', 'ADAUSDT', 'LINKUSDT', 'SUIUSDT', 'AVAXUSDT',
-            'TRXUSDT', 'NEARUSDT', 'LTCUSDT', 'UNIUSDT', 'DOTUSDT',
-            'AAVEUSDT', 'XLMUSDT', 'HBARUSDT', 'BCHUSDT', 'ONDOUSDT']
+# Os 50 pares de maior volume em USD-M Futures, em ordem de volume.
+# Os 20 primeiros sao o NUCLEO, onde a estrategia foi validada:
+#   nucleo (1-20):  n=292 em 2 anos, +0,092R/op. +0,020 em 2025, +0,202 em 2026
+#   extra  (21-50): n=396,          -0,099R/op. -0,297 em 2025, +0,164 em 2026
+# O extra entra porque o Eduardo quer ver, mas vai sempre marcado no alerta.
+# Com --dinamico o bot volta a rankear por volume de 24h do spot.
+UNIVERSO = [
+    'BTCUSDT', 'ETHUSDT', 'SOLUSDT', 'XRPUSDT', 'DOGEUSDT',
+    'HYPEUSDT', 'SUIUSDT', 'BNBUSDT', 'ADAUSDT', 'ZECUSDT',
+    'ENAUSDT', 'LINKUSDT', 'AVAXUSDT', 'LTCUSDT', 'TRUMPUSDT',
+    'AAVEUSDT', 'WLDUSDT', 'TAOUSDT', 'NEARUSDT', 'BCHUSDT',
+    # ---------- daqui para baixo e a faixa EXTRA ----------
+    'FILUSDT', 'PUMPUSDT', 'UNIUSDT', 'DOTUSDT', 'ASTERUSDT',
+    'ONDOUSDT', 'PENGUUSDT', 'TRXUSDT', 'CRVUSDT', 'ARBUSDT',
+    'XLMUSDT', 'APTUSDT', 'TIAUSDT', 'HBARUSDT', 'OPUSDT',
+    'XPLUSDT', 'VIRTUALUSDT', 'FETUSDT', 'INJUSDT', 'WLFIUSDT',
+    'TONUSDT', 'SEIUSDT', 'EIGENUSDT', 'ICPUSDT', 'PENDLEUSDT',
+    'ZROUSDT', 'REUSDT', 'POLUSDT', 'DASHUSDT', 'STRKUSDT',
+]
+NUCLEO = set(UNIVERSO[:20])
 
 STABLE = {'USDC', 'FDUSD', 'TUSD', 'BUSD', 'DAI', 'USDP', 'AEUR', 'EURI',
           'EUR', 'XUSD', 'USD1', 'PYUSD'}
@@ -313,11 +325,16 @@ def quando(ms):
     return f"{datetime.fromtimestamp(ms / 1000, BRT):%d/%m %H:%M}"
 
 
+def faixa(sim):
+    return ("✅ núcleo" if sim in NUCLEO
+            else "⚠️ extra — fora do que foi validado")
+
+
 def msg_gatilho(sim, g):
     seta = "🟢" if g['lado'] == 'compra' else "🔴"
     return (
         f"{seta} <b>{sim.replace('USDT', '/USDT')}</b> — "
-        f"<b>{g['lado'].upper()}</b>\n"
+        f"<b>{g['lado'].upper()}</b>   <i>{faixa(sim)}</i>\n"
         f"vela de H1 fechada às {quando(g['vela_ms'])}\n\n"
         f"entrada  <code>{fmt(g['entrada'])}</code>\n"
         f"stop     <code>{fmt(g['stop'])}</code>   "
@@ -329,7 +346,8 @@ def msg_gatilho(sim, g):
 
 
 def msg_cenario(sim, c):
-    return (f"👀 <b>{sim.replace('USDT', '/USDT')}</b> — de olho ({c['lado']})\n"
+    return (f"👀 <b>{sim.replace('USDT', '/USDT')}</b> — de olho "
+            f"({c['lado']})   <i>{faixa(sim)}</i>\n"
             f"{c['nota']}\n\n"
             f"preço  <code>{fmt(c['preco'])}</code>\n"
             f"alvo   <code>{fmt(c['alvo'])}</code>")
@@ -365,7 +383,7 @@ def salvar(ch):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument('--top', type=int, default=20)
+    ap.add_argument('--top', type=int, default=50)
     ap.add_argument('--dinamico', action='store_true',
                     help='rankear por volume de 24h em vez da lista fixa')
     ap.add_argument('--rr-min', type=float, default=CFG['rr_min'])
@@ -447,10 +465,13 @@ def main():
             if achou['idx'] != len(h) - 1:
                 diag(f"{sim}: gatilho antigo ({len(h)-1-achou['idx']} velas atrás)")
                 continue
+            achou['nucleo'] = sim in NUCLEO
             gatilhos.append((sim, achou, h))
-            linhas.append(f"GATILHO {sim} {achou['lado']} "
+            linhas.append(f"GATILHO [{'nucleo' if sim in NUCLEO else 'extra'}] "
+                          f"{sim} {achou['lado']} "
                           f"R:R 1:{achou['rr']:.2f} risco {achou['risco_pct']:.2f}%")
         else:
+            achou['nucleo'] = sim in NUCLEO
             cenarios.append((sim, achou, h))
             linhas.append(f"radar   {sim} {achou['lado']} — {achou['nota']}")
 
