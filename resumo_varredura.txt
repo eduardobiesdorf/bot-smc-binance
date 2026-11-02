@@ -1,3 +1,2 @@
-02/11 10:27 BRT
-radar   BTCUSDT compra — chegou no order block, esperando a limpeza
-radar   TRUMPUSDT compra — chegou no order block, esperando a limpeza
+02/11 11:18 BRT
+radar   BTCUSDT compra — limpou o order block, esperando a reversão
