@@ -1,3 +1,3 @@
-02/11 14:58 BRT
+02/11 14:59 BRT
 radar   BTCUSDT compra — limpou o order block, esperando a reversão
 radar   ETHUSDT compra — chegou no order block, esperando a limpeza
