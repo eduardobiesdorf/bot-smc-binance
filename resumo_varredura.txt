@@ -1,2 +1,2 @@
-02/11 08:58 BRT
-nada
+02/11 09:06 BRT
+radar   BTCUSDT compra — chegou no order block, esperando a limpeza
