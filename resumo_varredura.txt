@@ -1,3 +1,2 @@
-02/11 18:56 BRT
-radar   ETHUSDT compra — limpou o order block, esperando a reversão
-radar   TRUMPUSDT compra — limpou o order block, esperando a reversão
+02/11 19:40 BRT
+nada
