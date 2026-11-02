@@ -1,2 +1,2 @@
-02/11 13:03 BRT
+02/11 13:15 BRT
 radar   BTCUSDT compra — limpou o order block, esperando a reversão
