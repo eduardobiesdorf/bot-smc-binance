@@ -530,8 +530,32 @@ def explicar(sim, velas=400):
         else:
             diag(f"    ✓ GATILHO {r['lado']} em {quando(r['vela_ms'])}  "
                  f"entrada {fmt(r['entrada'])}  stop {fmt(r['stop'])}  "
-                 f"R:R 1:{r['rr']:.2f}  volume {r['vol_varr']:.2f}x  "
-                 f"piscina {r['liq_r']:.1f}R\n")
+                 f"alvo {fmt(r['alvo'])}  R:R 1:{r['rr']:.2f}  "
+                 f"risco {r['risco_pct']:.2f}%  volume {r['vol_varr']:.2f}x  "
+                 f"piscina {r['liq_r']:.1f}R")
+            diag("    " + depois(h, r) + "\n")
+
+
+def depois(h, r):
+    """O que aconteceu desde o gatilho: bateu stop, alvo ou segue aberto."""
+    compra = r['lado'] == 'compra'
+    ent, stop, alvo = r['entrada'], r['stop'], r['alvo']
+    risco = abs(ent - stop)
+    pior = ent
+    for k in range(r['idx'] + 1, len(h)):
+        hi, lo = h[k][2], h[k][3]
+        pior = min(pior, lo) if compra else max(pior, hi)
+        if (lo <= stop) if compra else (hi >= stop):
+            return f"→ bateu o STOP em {quando(h[k][0])} ({k - r['idx']}h depois)"
+        if (hi >= alvo) if compra else (lo <= alvo):
+            return (f"→ bateu o ALVO em {quando(h[k][0])} "
+                    f"({k - r['idx']}h depois), +{r['rr']:.2f}R")
+    agora = h[-1][4]
+    pl = (agora - ent) / risco * (1 if compra else -1)
+    folga = (pior - stop) / risco * (1 if compra else -1)
+    return (f"→ AINDA ABERTO. Agora {fmt(agora)} = {pl:+.2f}R. "
+            f"Chegou a {fmt(pior)}, a {folga:.2f}R do stop "
+            f"({abs(pior - stop) / stop * 100:.2f}% de folga)")
 
 
 def main():
