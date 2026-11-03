@@ -36,6 +36,7 @@ from datetime import datetime, timedelta, timezone
 import requests
 
 import grafico_varredura as graf
+import acompanhamento as acomp
 
 BRT = timezone(timedelta(hours=-3))
 BASE_URL = "https://data-api.binance.vision/api/v3"
@@ -216,6 +217,7 @@ def achar_impulsos(h, a, mv, cfg):
             s = e + 1
             continue
         out.append(dict(ini=s, fim=e, alta=alta, vol_rel=vr, ob=ob,
+                        fim_ms=h[e][0],   # identidade estavel do setup
                         ob_base=h[ob][3], ob_topo=h[ob][2],
                         topo=max(x[2] for x in h[s:e + 1]) if alta
                         else min(x[3] for x in h[s:e + 1]),
@@ -641,6 +643,8 @@ def main():
     vistos = carregar()
     gatilhos, cenarios, linhas = [], [], []
     usados, descartados = [], []
+    series = {}          # o acompanhamento reusa estas velas, sem rebaixar
+    acomps = acomp.ler()
 
     fila = candidatos(a.top * 3) if a.dinamico else UNIVERSO[:a.top]
     for sim in fila:
@@ -657,6 +661,7 @@ def main():
             descartados.append(sim)
             continue
         usados.append(sim)
+        series[sim] = h
         a_ = atr(h, CFG['atr_periodo'])
         mv = media_volume(h, CFG['vol_periodo'])
         achou = None
@@ -707,20 +712,54 @@ def main():
             print(msg_gatilho(sim, g), "\n")
         for sim, c, _ in cenarios[:MAX_CENARIOS]:
             print(msg_cenario(sim, c), "\n")
+    else:
+        for sim, g, h in novos:
+            manda_com_grafico(sim, g, h, msg_gatilho(sim, g))
+
+        if not a.so_gatilho:
+            for sim, c, h in cenarios[:MAX_CENARIOS]:
+                chave = f"cen-{sim}-{c['vela_ms']}"
+                if chave in vistos:
+                    continue
+                vistos.add(chave)
+                manda_com_grafico(sim, c, h, msg_cenario(sim, c))
+    # --- desfecho dos avisos antigos ---------------------------------
+    # Os pares com aviso aberto que nao caíram na varredura desta rodada
+    # ainda precisam ser revisados, entao busca so o que faltar.
+    pendentes = {r['sim'] for r in acomps.values()
+                 if r.get('status') == 'aberto'} - set(series)
+    for sim in sorted(pendentes):
+        try:
+            series[sim] = buscar(sim, '1h', 400)
+        except Exception as e:
+            diag(f"{sim}: nao revisei o aviso aberto ({e})")
+
+    for sim, g, _ in novos:
+        acomp.registrar_gatilho(acomps, sim, g)
+    for sim, c, _ in cenarios:
+        acomp.registrar_cenario(acomps, sim, c)
+
+    desfechos = acomp.revisar(acomps, series, CFG, seguir, achar_impulsos,
+                              atr, media_volume)
+    for m in desfechos:
+        if a.teste:
+            print(m, "\n")
+        else:
+            enviar(m)
+        diag("desfecho: " + m.replace("\n", " | ")[:140])
+    if desfechos and not a.teste:
+        enviar(acomp.placar(acomps))
+    if a.teste:
+        print(acomp.placar(acomps))
         return
+    acomp.gravar(acomps)
 
-    for sim, g, h in novos:
-        manda_com_grafico(sim, g, h, msg_gatilho(sim, g))
-
-    if not a.so_gatilho:
-        for sim, c, h in cenarios[:MAX_CENARIOS]:
-            chave = f"cen-{sim}-{c['vela_ms']}"
-            if chave in vistos:
-                continue
-            vistos.add(chave)
-            manda_com_grafico(sim, c, h, msg_cenario(sim, c))
     salvar(vistos)
-    diag(f"enviados {len(novos)} gatilhos")
+    diag(f"enviados {len(novos)} gatilhos, {len(desfechos)} desfechos")
+    diag(acomp.placar(acomps).replace('<b>', '').replace('</b>', ''))
+    mot = acomp.motivos(acomps)
+    if mot:
+        diag("por que os cenários morreram:\n" + mot)
 
 
 if __name__ == "__main__":
