@@ -67,6 +67,10 @@ on:
         required: false
         default: false
         type: boolean
+      explicar:
+        description: 'Auditar um par (ex: ETHUSDT): mostra onde cada impulso foi recusado'
+        required: false
+        default: ''
       ping:
         description: 'Manda os últimos gatilhos do histórico, com gráfico'
         required: false
@@ -108,6 +112,7 @@ jobs:
           [ "${{ inputs.teste }}" = "true" ] && ARGS="$ARGS --teste"
           ARGS="$ARGS --exemplos ${{ inputs.exemplos || '2' }}"
           [ "${{ inputs.novos }}" = "true" ] && ARGS="$ARGS --novos"
+          [ -n "${{ inputs.explicar }}" ] && ARGS="$ARGS --explicar ${{ inputs.explicar }}"
           [ "${{ inputs.ping }}" = "true" ] && ARGS="$ARGS --ping"
           python -u bot_varredura.py $ARGS 2>&1 | tee varredura.log
 

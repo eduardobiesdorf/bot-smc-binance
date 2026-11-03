@@ -260,8 +260,16 @@ def piscina(h, i, compra, ent, janela):
     return melhor
 
 
-def seguir(h, a, imp, cfg, mv):
-    """Espera a varredura e a reversao. Devolve gatilho, cenario ou None."""
+def seguir(h, a, imp, cfg, mv, tr=None):
+    """Espera a varredura e a reversao. Devolve gatilho, cenario ou None.
+
+    tr: lista opcional. Se vier, recebe o motivo de cada recusa, para
+    o modo --explicar. Nao muda nenhuma decisao.
+    """
+    def no(m):
+        if tr is not None:
+            tr.append(m)
+        return None
     fim, compra = imp['fim'], imp['alta']
     base, topo = imp['ob_base'], imp['ob_topo']
     limite = base - a[fim] * cfg['furo_atr'] if compra else \
@@ -271,12 +279,12 @@ def seguir(h, a, imp, cfg, mv):
 
     for k in range(fim + 1, len(h)):
         if k - fim > cfg['espera_max']:
-            return None
+            return no(f"passou de {cfg['espera_max']} velas sem varrer o order block")
         hi, lo, o, cl = h[k][2], h[k][3], h[k][1], h[k][4]
 
         if not varreu:
             if (hi >= alvo) if compra else (lo <= alvo):
-                return None            # ja foi ao alvo, acabou
+                return no('o preço foi ao alvo antes de voltar no order block')
             if (lo <= limite) if compra else (hi >= limite):
                 vol_varr = (h[k][5] / mv[k]) if mv[k] > 0 else 0.0
                 varreu, extremo, k_varreu = True, (lo if compra else hi), k
@@ -285,12 +293,12 @@ def seguir(h, a, imp, cfg, mv):
 
         # reacao tardia nao e caca a stop: ate 4 velas depois da varredura
         if k - k_varreu > cfg['max_espera_gatilho']:
-            return None
+            return no(f"varreu mas não reverteu em {cfg['max_espera_gatilho']} velas")
         extremo = min(extremo, lo) if compra else max(extremo, hi)
         fmax = base - a[fim] * cfg['furo_max'] if compra else \
                topo + a[fim] * cfg['furo_max']
         if (extremo < fmax) if compra else (extremo > fmax):
-            return None                # foi longe demais, virou continuacao
+            return no(f"furou o order block fundo demais (> {cfg['furo_max']:.1f} ATR): virou continuação, não varredura")
 
         dentro = (cl > base) if compra else (cl < topo)
         rng = hi - lo
@@ -310,20 +318,20 @@ def seguir(h, a, imp, cfg, mv):
         risco = abs(ent - stop)
         dist = (alvo - ent) if compra else (ent - alvo)
         if risco <= 0 or dist <= 0:
-            return None
+            return no('alvo já ultrapassado ou stop inválido')
         rr = dist / risco
         if rr < cfg['rr_min'] or risco / ent * 100 < cfg['risco_min_pct']:
-            return None
+            return no(f"R:R 1:{rr:.2f} abaixo do mínimo {cfg['rr_min']:.2f}")
         # Varredura sem volume nao e varredura: e o preco escorregando no
         # livro vazio. Medido em 21 meses de futuros, os gatilhos com volume
         # abaixo de 1,2x a media deram 21,3% de acerto e -0,152R por
         # operacao; acima disso, 32,6% e +0,051R. No nucleo, o piso leva de
         # +0,138 para +0,208R, com melhora em 2025 e em 2026.
         if vol_varr < cfg['vol_varr_min']:
-            return None
+            return no(f"vela da varredura com {vol_varr:.2f}x o volume médio, mínimo {cfg['vol_varr_min']:.2f}x")
         d_liq = piscina(h, k, compra, ent, cfg['liq_janela'])
         if d_liq is None or d_liq / risco > cfg['liq_max_r']:
-            return None
+            return no('sem piscina de liquidez não consumida' if d_liq is None else f"piscina a {d_liq/risco:.1f}R da entrada, máximo {cfg['liq_max_r']:.1f}R")
         liq_r = d_liq / risco
         return dict(fase='gatilho', lado='compra' if compra else 'venda',
                     entrada=ent, stop=stop, alvo=alvo, rr=rr, idx=k,
@@ -344,7 +352,7 @@ def seguir(h, a, imp, cfg, mv):
                     imp=imp, alvo=alvo, preco=h[-1][4], vela_ms=h[-1][0],
                     varredura=None, vol_varr=0.0,
                     nota='chegou no order block, esperando a limpeza')
-    return None
+    return no('nem varreu o order block nem chegou perto dele')
 
 
 # ------------------------------------------------------------------ telegram
@@ -486,6 +494,46 @@ def salvar(ch):
         diag(f"nao salvou o estado: {e}")
 
 
+def explicar(sim, velas=400):
+    """Auditoria de um par: todo impulso achado e o destino de cada um.
+
+    Serve para responder 'por que nao veio gatilho em X'. Usa exatamente a
+    mesma funcao seguir() do bot, so que pedindo o motivo da recusa.
+    """
+    h = buscar(sim, '1h', velas)
+    if not h:
+        diag(f"{sim}: nao consegui o historico")
+        return
+    a, mv = atr(h, CFG['atr_periodo']), media_volume(h, CFG['vol_periodo'])
+    diag(f"{sim}: {len(h)} velas de H1, de {quando(h[0][0])} "
+         f"a {quando(h[-1][0])} (Brasília)")
+    diag(f"filtros: R:R>={CFG['rr_min']}  volume da varredura>="
+         f"{CFG['vol_varr_min']}x  piscina<={CFG['liq_max_r']}R  "
+         f"gatilho ate {CFG['max_espera_gatilho']} velas depois\n")
+    imps = achar_impulsos(h, a, mv, CFG)
+    diag(f"{len(imps)} impulsos encontrados\n")
+    for i, imp in enumerate(imps, 1):
+        lado = 'compra' if imp['alta'] else 'venda'
+        diag(f"{i:>2}. impulso de {'alta' if imp['alta'] else 'baixa'} "
+             f"({lado}) — velas {quando(h[imp['ini']][0])} a "
+             f"{quando(h[imp['fim']][0])}")
+        diag(f"    order block {fmt(imp['ob_base'])}–{fmt(imp['ob_topo'])}"
+             f"   alvo {fmt(imp['topo'])}")
+        tr = []
+        r = seguir(h, a, imp, CFG, mv, tr)
+        if r is None:
+            diag(f"    ✗ {tr[0] if tr else 'sem motivo registrado'}\n")
+        elif r['fase'] == 'cenario':
+            diag(f"    ⏳ radar: {r['nota']}"
+                 + (f" (varredura com {r['vol_varr']:.2f}x o volume médio)"
+                    if r['vol_varr'] else "") + "\n")
+        else:
+            diag(f"    ✓ GATILHO {r['lado']} em {quando(r['vela_ms'])}  "
+                 f"entrada {fmt(r['entrada'])}  stop {fmt(r['stop'])}  "
+                 f"R:R 1:{r['rr']:.2f}  volume {r['vol_varr']:.2f}x  "
+                 f"piscina {r['liq_r']:.1f}R\n")
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--top', type=int, default=50)
@@ -509,6 +557,11 @@ def main():
                     help='quanto da banca morre num stop, em %%')
     ap.add_argument('--alav', type=float, default=ALAV_MAX,
                     help='alavancagem maxima')
+    ap.add_argument('--explicar', default='',
+                    help='par para auditar: lista todo impulso achado e '
+                         'onde cada um foi recusado')
+    ap.add_argument('--velas', type=int, default=400,
+                    help='quantas velas de H1 puxar no --explicar')
     a = ap.parse_args()
     CFG['rr_min'] = a.rr_min
     CFG['vol_varr_min'] = a.vol_min
@@ -519,6 +572,10 @@ def main():
 
     open(DIAG, "w").close()
     diag(f"início {datetime.now(BRT):%d/%m %H:%M} BRT")
+
+    if a.explicar:
+        explicar(a.explicar.strip().upper(), a.velas)
+        return
 
     if a.ping:
         enviar(f"✅ bot da varredura vivo — {datetime.now(BRT):%d/%m %H:%M}")
