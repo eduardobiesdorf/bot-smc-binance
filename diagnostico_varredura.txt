@@ -1,6 +1,6 @@
-início 03/11 10:12 BRT
+início 03/11 10:18 BRT
 ETHUSDT: 399 velas de H1, de 17/10 19:00 a 03/11 09:00 (Brasília)
-filtros: R:R>=1.2  volume da varredura>=1.2x  piscina<=1.5R  gatilho ate 4 velas depois
+filtros: R:R>=1.2  volume da varredura>=0.0x  piscina<=1.5R  gatilho ate 4 velas depois
 
 4 impulsos encontrados
 
@@ -18,5 +18,5 @@ filtros: R:R>=1.2  volume da varredura>=1.2x  piscina<=1.5R  gatilho ate 4 velas
 
  4. impulso de alta (compra) — velas 01/11 18:00 a 02/11 00:00
     order block 2,254.65–2,264.04   alvo 2,317.84
-    ✗ vela da varredura com 1.00x o volume médio, mínimo 1.20x
+    ✓ GATILHO compra em 02/11 18:00  entrada 2,258.38  stop 2,235.6074  R:R 1:2.61  volume 1.00x  piscina 0.9R
 
