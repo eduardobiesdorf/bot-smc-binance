@@ -5,14 +5,16 @@ name: Radar da varredura (H1)
 
 on:
   schedule:
-    # Logo apos o fechamento de cada vela de 1 hora. O minuto 7 foge do
-    # topo da hora, onde a fila do Actions e mais longa.
-    # Tres horarios por hora: o Actions atrasa de 25 a 45 min na conta
-    # gratuita, e a fila de cada disparo e independente. Vale o primeiro
-    # que executar -- o estado em varredura_enviados.json evita repetir.
+    # UM disparo por hora, logo apos o fechamento da vela de H1.
+    #
+    # Eram tres (minutos 1, 11 e 21) para driblar a fila do Actions. Medido
+    # em 220 execucoes: com tres, o primeiro resultado da hora saia em 33
+    # min (mediana); com um so, sai em 43. Dez minutos a mais, e a entrada
+    # e por ordem limitada valida 4h, entao nao muda o resultado.
+    #
+    # O que muda e o custo: tres crons gastavam ~4.440 min/mes, e a conta
+    # gratuita da ~2.000. Com um cron sao ~1.540 min/mes, dentro da cota.
     - cron: '1 * * * *'
-    - cron: '11 * * * *'
-    - cron: '21 * * * *'
   workflow_dispatch:
     inputs:
       top:
@@ -92,7 +94,9 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      - run: pip install requests matplotlib
+          cache: pip
+          cache-dependency-path: requisitos.txt
+      - run: pip install -r requisitos.txt
 
       - name: Escanear
         env:
