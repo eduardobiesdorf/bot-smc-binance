@@ -392,6 +392,30 @@ def fmt(x):
            f"{x:,.4f}".rstrip('0').rstrip('.')
 
 
+def _casas(*refs):
+    """Casas decimais que o par realmente usa, olhando varios precos."""
+    n = 0
+    for r in refs:
+        t = f"{r:.10f}".rstrip('0')
+        n = max(n, len(t.split('.')[1]) if '.' in t else 0)
+    return max(2, min(n, 8))
+
+
+def como(x, *refs, baixo=None):
+    """Formata x com as casas do par.
+
+    baixo=True arredonda PARA BAIXO, baixo=False para cima. E o que
+    importa num teto de entrada: arredondar um teto de compra para cima
+    faria o numero mentir, porque naquele preco o R:R ja nao fecha.
+    """
+    import math
+    c = _casas(*refs)
+    if baixo is not None:
+        p = 10 ** c
+        x = (math.floor(x * p) if baixo else math.ceil(x * p)) / p
+    return f"{x:,.{c}f}"
+
+
 def diag(linha):
     print(linha, flush=True)
     try:
@@ -501,7 +525,8 @@ def msg_cenario(sim, c):
     # limite de entrada acima (ou abaixo) do qual o R:R nao fecha mais.
     compra = c['lado'] == 'compra'
     ok = (c['preco'] <= c['teto']) if compra else (c['preco'] >= c['teto'])
-    t += (f"\nstop ficaria em <code>{fmt(c['stop_hip'])}</code>   "
+    refs = (c['preco'], c['alvo'], c['imp']['ob_base'], c['imp']['ob_topo'])
+    t += (f"\nstop ficaria em <code>{como(c['stop_hip'], *refs)}</code>   "
           f"<i>varredura {c['vol_varr']:.1f}x o volume</i>\n")
     if ok:
         t += (f"\n✅ no preço de agora o R:R fecha. Vira gatilho se uma vela "
@@ -509,8 +534,10 @@ def msg_cenario(sim, c):
               f"em até 4 velas da varredura.")
     else:
         t += (f"\n⚠️ <b>só vira gatilho se voltar para "
-              f"{fmt(c['teto'])} ou {'abaixo' if compra else 'acima'}</b> "
-              f"(agora {fmt(c['preco'])}). No preço de agora o R:R não fecha.")
+              f"{como(c['teto'], *refs, baixo=compra)} ou "
+              f"{'abaixo' if compra else 'acima'}</b> "
+              f"(agora {como(c['preco'], *refs)}). "
+              f"No preço de agora o R:R não fecha.")
     return t
 
 
