@@ -531,7 +531,9 @@ def msg_gatilho(sim, g):
     return (
         f"{seta} <b>{sim.replace('USDT', '/USDT')}</b> — "
         f"<b>{g['lado'].upper()}</b>   <i>{faixa(sim)}</i>\n"
-        f"vela de H1 fechada às {quando(g['vela_ms'])} (Brasília)\n\n"
+        f"vela de H1 fechada às {quando(g['vela_ms'])} (Brasília)"
+        + ("  <i>⚠️ a rodada da hora anterior falhou, este gatilho chegou "
+           "atrasado</i>" if g.get('atraso') else "") + "\n\n"
         f"entrada  <code>{fmt(g['entrada'])}</code>\n"
         f"stop     <code>{fmt(g['stop'])}</code>   "
         f"risco <b>{g['risco_pct']:.2f}%</b>\n"
@@ -827,15 +829,27 @@ def main():
         if not achou:
             continue
         if achou['fase'] == 'gatilho':
-            # so vale se a vela de reversao e a ULTIMA vela fechada
-            if achou['idx'] != len(h) - 1:
-                diag(f"{sim}: gatilho antigo ({len(h)-1-achou['idx']} velas atrás)")
+            # Aceita a vela de reversao recem-fechada e a anterior. Antes era
+            # so a ultima: quando o Actions pulava uma hora agendada (3 de 23
+            # no dia 04/11), aquele gatilho sumia para sempre. O estado em
+            # varredura_enviados.json impede mandar duas vezes, e a ordem e
+            # limitada valida ~4h, entao uma hora de atraso ainda serve.
+            atraso = len(h) - 1 - achou['idx']
+            if atraso > 1:
+                diag(f"{sim}: gatilho antigo ({atraso} velas atrás)")
                 continue
             achou['nucleo'] = sim in NUCLEO
+            achou['atraso'] = atraso
             gatilhos.append((sim, achou, h))
             linhas.append(f"GATILHO [{'nucleo' if sim in NUCLEO else 'extra'}] "
                           f"{sim} {achou['lado']} "
-                          f"R:R 1:{achou['rr']:.2f} risco {achou['risco_pct']:.2f}%")
+                          f"R:R 1:{achou['rr']:.2f} risco {achou['risco_pct']:.2f}%"
+                          + ("  (vela anterior)" if atraso else ""))
+            diag(f"GATILHO {sim} {achou['lado']} "
+                 f"vela {quando(achou['vela_ms'])} "
+                 f"entrada {fmt(achou['entrada'])} "
+                 f"R:R 1:{achou['rr']:.2f}"
+                 + ("  [recuperado da vela anterior]" if atraso else ""))
         else:
             achou['nucleo'] = sim in NUCLEO
             cenarios.append((sim, achou, h))
