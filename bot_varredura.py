@@ -496,6 +496,54 @@ def salvar(ch):
         diag(f"nao salvou o estado: {e}")
 
 
+def _cru(h, a, mv, imp, r, cfg):
+    """Velas cruas do order block ate agora, para conferir no olho.
+
+    Serve para separar 'o bot leu errado' de 'o preco fez isso mesmo'.
+    """
+    compra = imp['alta']
+    base, topo = imp['ob_base'], imp['ob_topo']
+    kv = r.get('varredura')
+    ini = max(0, imp['ob'] - 2)
+    diag(f"      ATR {fmt(a[imp['fim']])}  |  furo máximo permitido "
+         f"{cfg['furo_max']:.1f} ATR = "
+         f"{fmt(base - a[imp['fim']] * cfg['furo_max']) if compra else fmt(topo + a[imp['fim']] * cfg['furo_max'])}")
+    diag(f"      {'vela':<12}{'abert':>11}{'máx':>11}{'mín':>11}"
+         f"{'fech':>11}{'vol x méd':>11}   nota")
+    for k in range(ini, len(h)):
+        c = h[k]
+        nota = []
+        if k == imp['ob']:
+            nota.append('ORDER BLOCK')
+        if imp['ini'] <= k <= imp['fim']:
+            nota.append('impulso')
+        if kv is not None and k == kv:
+            nota.append('>>> VARREDURA')
+        furou = (c[3] <= base) if compra else (c[2] >= topo)
+        if furou and k > imp['fim']:
+            nota.append('furou o OB')
+        vx = c[5] / mv[k] if mv[k] > 0 else 0
+        diag(f"      {quando(c[0]):<12}{fmt(c[1]):>11}{fmt(c[2]):>11}"
+             f"{fmt(c[3]):>11}{fmt(c[4]):>11}{vx:>10.1f}x   "
+             + ' · '.join(nota))
+    # qual seria o gatilho se a reversao viesse na vela de agora
+    if kv is None:
+        return
+    ext = min(x[3] for x in h[kv:]) if compra else max(x[2] for x in h[kv:])
+    ent = h[-1][4]
+    stop = ext - a[-1] * cfg['stop_folga'] if compra else \
+           ext + a[-1] * cfg['stop_folga']
+    risco = abs(ent - stop)
+    dist = (imp['topo'] - ent) if compra else (ent - imp['topo'])
+    diag(f"      se a reversão viesse agora: entrada {fmt(ent)}  "
+         f"stop {fmt(stop)}  alvo {fmt(imp['topo'])}")
+    if risco > 0:
+        diag(f"      → risco {risco / ent * 100:.2f}%   "
+             f"R:R 1:{dist / risco:.2f}   "
+             + ("PASSA" if dist / risco >= cfg['rr_min']
+                else f"REPROVA (mínimo 1:{cfg['rr_min']:.2f})"))
+
+
 def explicar(sim, velas=400):
     """Auditoria de um par: todo impulso achado e o destino de cada um.
 
@@ -528,7 +576,9 @@ def explicar(sim, velas=400):
         elif r['fase'] == 'cenario':
             diag(f"    ⏳ radar: {r['nota']}"
                  + (f" (varredura com {r['vol_varr']:.2f}x o volume médio)"
-                    if r['vol_varr'] else "") + "\n")
+                    if r['vol_varr'] else ""))
+            _cru(h, a, mv, imp, r, CFG)
+            diag("")
         else:
             diag(f"    ✓ GATILHO {r['lado']} em {quando(r['vela_ms'])}  "
                  f"entrada {fmt(r['entrada'])}  stop {fmt(r['stop'])}  "
