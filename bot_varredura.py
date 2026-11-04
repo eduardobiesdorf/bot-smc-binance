@@ -344,9 +344,38 @@ def seguir(h, a, imp, cfg, mv, tr=None):
 
     # chegou ao fim sem gatilho: ainda esta armado?
     if varreu:
+        # O radar so pode avisar o que AINDA pode virar gatilho. Antes ele
+        # avisava assim que o preco furava o order block, e ficava repetindo
+        # "esperando a reversao" em setups ja mortos: tres dos primeiros
+        # alertas (ETH, TRUMP e TIA) nunca poderiam virar entrada.
+        #
+        # 1) O volume da varredura e definitivo: ja aconteceu, nao melhora.
+        if vol_varr < cfg['vol_varr_min']:
+            return no(f"varredura com {vol_varr:.2f}x o volume médio, "
+                      f"mínimo {cfg['vol_varr_min']:.2f}x — não vira gatilho")
+
+        # 2) O stop ja esta definido pelo extremo da varredura, e o alvo pelo
+        #    impulso. Entao da para saber ATE QUE PRECO a entrada ainda rende
+        #    o R:R minimo:  teto = (alvo + rr*stop) / (1 + rr)
+        #    A entrada mais favoravel possivel e a propria borda do order
+        #    block, porque o gatilho exige fechar de volta dentro dele. Se
+        #    nem ela alcanca o R:R minimo, o setup acabou.
+        stop_h = extremo - a[-1] * cfg['stop_folga'] if compra else \
+                 extremo + a[-1] * cfg['stop_folga']
+        rrm = cfg['rr_min']
+        teto = (alvo + rrm * stop_h) / (1 + rrm)
+        melhor = base if compra else topo
+        if (teto < melhor) if compra else (teto > melhor):
+            rr_m = (abs(alvo - melhor) / abs(melhor - stop_h)
+                    if abs(melhor - stop_h) > 0 else 0)
+            return no(f"R:R no melhor caso seria 1:{rr_m:.2f}, abaixo de "
+                      f"1:{rrm:.2f} — o pavio da varredura jogou o stop "
+                      f"longe demais")
+
         return dict(fase='cenario', lado='compra' if compra else 'venda',
                     imp=imp, alvo=alvo, preco=h[-1][4], vela_ms=h[-1][0],
                     varredura=k_varreu, vol_varr=vol_varr,
+                    stop_hip=stop_h, teto=teto,
                     nota='limpou o order block, esperando a reversão')
     perto = abs(h[-1][4] - (base if compra else topo)) / max(a[-1], 1e-12)
     if perto <= 1.0:
@@ -461,11 +490,28 @@ def msg_gatilho(sim, g):
 
 
 def msg_cenario(sim, c):
-    return (f"👀 <b>{sim.replace('USDT', '/USDT')}</b> — de olho "
-            f"({c['lado']})   <i>{faixa(sim)}</i>\n"
-            f"{c['nota']}\n\n"
-            f"preço  <code>{fmt(c['preco'])}</code>\n"
-            f"alvo   <code>{fmt(c['alvo'])}</code>")
+    t = (f"👀 <b>{sim.replace('USDT', '/USDT')}</b> — de olho "
+         f"({c['lado']})   <i>{faixa(sim)}</i>\n"
+         f"{c['nota']}\n\n"
+         f"preço  <code>{fmt(c['preco'])}</code>\n"
+         f"alvo   <code>{fmt(c['alvo'])}</code>")
+    if c.get('teto') is None:
+        return t
+    # O stop ja esta travado no extremo da varredura. Entao existe um preco
+    # limite de entrada acima (ou abaixo) do qual o R:R nao fecha mais.
+    compra = c['lado'] == 'compra'
+    ok = (c['preco'] <= c['teto']) if compra else (c['preco'] >= c['teto'])
+    t += (f"\nstop ficaria em <code>{fmt(c['stop_hip'])}</code>   "
+          f"<i>varredura {c['vol_varr']:.1f}x o volume</i>\n")
+    if ok:
+        t += (f"\n✅ no preço de agora o R:R fecha. Vira gatilho se uma vela "
+              f"de reversão fechar {'acima' if compra else 'abaixo'} daqui, "
+              f"em até 4 velas da varredura.")
+    else:
+        t += (f"\n⚠️ <b>só vira gatilho se voltar para "
+              f"{fmt(c['teto'])} ou {'abaixo' if compra else 'acima'}</b> "
+              f"(agora {fmt(c['preco'])}). No preço de agora o R:R não fecha.")
+    return t
 
 
 def manda_com_grafico(sim, e, h, texto):
