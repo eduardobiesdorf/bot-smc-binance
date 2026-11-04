@@ -59,6 +59,8 @@ def registrar_gatilho(d, sim, g):
                  vela_ms=g['vela_ms'], entrada=g['entrada'], stop=g['stop'],
                  alvo=g['alvo'], rr=g['rr'], risco_pct=g['risco_pct'],
                  vol_varr=g.get('vol_varr', 0), liq_r=g.get('liq_r', 0),
+                 rsi_varr=g.get('rsi_varr'), rsi_gat=g.get('rsi_gat'),
+                 rsi_varr_norm=g.get('rsi_varr_norm'),
                  nucleo=bool(g.get('nucleo', True)))
 
 
@@ -164,6 +166,10 @@ def _revisar_cenario(r, h, cfg, seguir, achar_impulsos, atr, media_volume):
     return None                          # ainda armado
 
 
+def _n(x):
+    return '' if x is None else f'{x:.1f}'
+
+
 def _csv(r):
     novo = not os.path.exists(CSV_VIVO)
     try:
@@ -172,14 +178,16 @@ def _csv(r):
             if novo:
                 w.writerow(['data_brt', 'par', 'faixa', 'lado', 'entrada',
                             'stop', 'alvo', 'rr', 'risco_pct', 'vol_varr',
-                            'liq_r', 'desfecho', 'horas', 'resultado_r',
-                            'fim_brt'])
+                            'liq_r', 'rsi_varr', 'rsi_varr_norm', 'rsi_gat',
+                            'desfecho', 'horas', 'resultado_r', 'fim_brt'])
             w.writerow([_quando(r['vela_ms']), r['sim'],
                         'nucleo' if r.get('nucleo') else 'extra', r['lado'],
                         f"{r['entrada']:.8g}", f"{r['stop']:.8g}",
                         f"{r['alvo']:.8g}", f"{r['rr']:.2f}",
                         f"{r['risco_pct']:.2f}", f"{r.get('vol_varr', 0):.2f}",
-                        f"{r.get('liq_r', 0):.2f}", r['status'],
+                        f"{r.get('liq_r', 0):.2f}",
+                        _n(r.get('rsi_varr')), _n(r.get('rsi_varr_norm')),
+                        _n(r.get('rsi_gat')), r['status'],
                         r.get('horas', ''), f"{r.get('resultado_r', 0):.3f}",
                         _quando(r.get('fim_ms', r['vela_ms']))])
     except Exception as e:

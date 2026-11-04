@@ -141,6 +141,31 @@ def negocia_sempre(h, limite=0.03):
 
 
 # ------------------------------------------------------------------ calculo
+def rsi(h, p=14):
+    """RSI de Wilder. Nao filtra nada: fica gravado para teste futuro.
+
+    Medido em 22 meses, o RSI na vela da varredura separa bem (normalizado
+    pelo lado, >=40 da +0,441R contra +0,113R abaixo disso), mas nao passou
+    no teste do nulo (z=+1,35, p=0,10) e inverteu num semestre. Entao o bot
+    so ANOTA, para daqui a alguns meses a gente testar em dado novo.
+    """
+    out = [None] * len(h)
+    if len(h) < p + 1:
+        return out
+    g = l = 0.0
+    for i in range(1, p + 1):
+        d = h[i][4] - h[i - 1][4]
+        g += max(d, 0.0); l += max(-d, 0.0)
+    g /= p; l /= p
+    out[p] = 100.0 if l == 0 else 100 - 100 / (1 + g / l)
+    for i in range(p + 1, len(h)):
+        d = h[i][4] - h[i - 1][4]
+        g = (g * (p - 1) + max(d, 0.0)) / p
+        l = (l * (p - 1) + max(-d, 0.0)) / p
+        out[i] = 100.0 if l == 0 else 100 - 100 / (1 + g / l)
+    return out
+
+
 def atr(v, p=14):
     tr = [v[0][2] - v[0][3]]
     for k in range(1, len(v)):
@@ -335,7 +360,12 @@ def seguir(h, a, imp, cfg, mv, tr=None):
         if d_liq is None or d_liq / risco > cfg['liq_max_r']:
             return no('sem piscina de liquidez não consumida' if d_liq is None else f"piscina a {d_liq/risco:.1f}R da entrada, máximo {cfg['liq_max_r']:.1f}R")
         liq_r = d_liq / risco
+        _r = rsi(h, 14)
+        rsi_v, rsi_g = _r[k_varreu], _r[k]
+        # normalizado pelo lado: "a favor" vira sempre numero baixo
+        rsi_vn = rsi_v if (rsi_v is None or compra) else 100 - rsi_v
         return dict(fase='gatilho', lado='compra' if compra else 'venda',
+                    rsi_varr=rsi_v, rsi_gat=rsi_g, rsi_varr_norm=rsi_vn,
                     entrada=ent, stop=stop, alvo=alvo, rr=rr, idx=k,
                     vela_ms=h[k][0], risco_pct=risco / ent * 100,
                     tipo='martelo' if martelo and not impulsao else 'impulsão',
