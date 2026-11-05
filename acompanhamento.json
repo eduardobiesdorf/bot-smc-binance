@@ -131,12 +131,42 @@
   "tipo": "cenario",
   "sim": "STRKUSDT",
   "lado": "compra",
-  "status": "aberto",
+  "status": "virou_gatilho",
   "vela_ms": 1793894400000,
   "imp_fim_ms": 1793710800000,
   "alvo": 0.04519,
   "nota": "limpou o order block, esperando a reversão",
   "vol_varr": 9.439075385183921,
   "nucleo": false
+ },
+ "gat-STRKUSDT-1793905200000": {
+  "tipo": "gatilho",
+  "sim": "STRKUSDT",
+  "lado": "compra",
+  "status": "aberto",
+  "vela_ms": 1793905200000,
+  "entrada": 0.04052,
+  "stop": 0.03833807142857143,
+  "alvo": 0.04519,
+  "rr": 2.140308377254723,
+  "risco_pct": 5.384818784374558,
+  "vol_varr": 9.439075385183921,
+  "liq_r": 0.9532851016466425,
+  "rsi_varr": 25.99001050274839,
+  "rsi_gat": 38.16212620488012,
+  "rsi_varr_norm": 25.99001050274839,
+  "nucleo": false
+ },
+ "cen-AAVEUSDT-1793890800000": {
+  "tipo": "cenario",
+  "sim": "AAVEUSDT",
+  "lado": "venda",
+  "status": "aberto",
+  "vela_ms": 1793905200000,
+  "imp_fim_ms": 1793890800000,
+  "alvo": 122.46,
+  "nota": "chegou no order block, esperando a limpeza",
+  "vol_varr": 0.0,
+  "nucleo": true
  }
 }

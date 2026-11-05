@@ -1,16 +1,17 @@
-início 05/11 16:52 BRT
-XRPUSDT: gatilho antigo (39 velas atrás)
-SUIUSDT: gatilho antigo (169 velas atrás)
-BNBUSDT: gatilho antigo (184 velas atrás)
-ENAUSDT: gatilho antigo (188 velas atrás)
-AVAXUSDT: gatilho antigo (169 velas atrás)
-TAOUSDT: gatilho antigo (170 velas atrás)
-TRXUSDT: gatilho antigo (317 velas atrás)
-INJUSDT: gatilho antigo (172 velas atrás)
+início 05/11 17:05 BRT
+XRPUSDT: gatilho antigo (40 velas atrás)
+SUIUSDT: gatilho antigo (170 velas atrás)
+BNBUSDT: gatilho antigo (185 velas atrás)
+ENAUSDT: gatilho antigo (189 velas atrás)
+AVAXUSDT: gatilho antigo (170 velas atrás)
+TAOUSDT: gatilho antigo (171 velas atrás)
+TRXUSDT: gatilho antigo (318 velas atrás)
+INJUSDT: gatilho antigo (173 velas atrás)
+GATILHO STRKUSDT compra vela 05/11 16:00 entrada 0.04052 R:R 1:2.14
 pares (50): BTCUSDT, ETHUSDT, SOLUSDT, XRPUSDT, DOGEUSDT, HYPEUSDT, SUIUSDT, BNBUSDT, ADAUSDT, ZECUSDT, ENAUSDT, LINKUSDT, AVAXUSDT, LTCUSDT, TRUMPUSDT, AAVEUSDT, WLDUSDT, TAOUSDT, NEARUSDT, BCHUSDT, FILUSDT, PUMPUSDT, UNIUSDT, DOTUSDT, ASTERUSDT, ONDOUSDT, PENGUUSDT, TRXUSDT, CRVUSDT, ARBUSDT, XLMUSDT, APTUSDT, TIAUSDT, HBARUSDT, OPUSDT, XPLUSDT, VIRTUALUSDT, FETUSDT, INJUSDT, WLFIUSDT, TONUSDT, SEIUSDT, EIGENUSDT, ICPUSDT, PENDLEUSDT, ZROUSDT, REUSDT, POLUSDT, DASHUSDT, STRKUSDT
-gatilhos 0 | cenários 3
-enviados 0 gatilhos, 0 desfechos
-placar  0 gatilhos (0 abertos)  ·  11 cenários, 8 encerrados sem entrada
+gatilhos 1 | cenários 3
+enviados 1 gatilhos, 0 desfechos
+placar  1 gatilhos (1 abertos)  ·  12 cenários, 8 encerrados sem entrada
 por que os cenários morreram:
   7x  furou o order block fundo demais (> 2.5 ATR): virou continuação, não varredura
   1x  varredura com 0.86x o volume médio, mínimo 1.20x — não vira gatilho
