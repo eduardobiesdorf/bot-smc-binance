@@ -1,5 +1,3 @@
-05/11 17:49 BRT
-radar   ETHUSDT compra — limpou o order block, esperando a reversão
-radar   DOGEUSDT compra — limpou o order block, esperando a reversão
+05/11 18:03 BRT
 radar   AAVEUSDT venda — chegou no order block, esperando a limpeza
-GATILHO [extra] STRKUSDT compra R:R 1:2.14 risco 5.38%
+GATILHO [extra] STRKUSDT compra R:R 1:2.14 risco 5.38%  (vela anterior)

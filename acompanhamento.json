@@ -107,25 +107,27 @@
   "tipo": "cenario",
   "sim": "ETHUSDT",
   "lado": "compra",
-  "status": "aberto",
+  "status": "morreu",
   "vela_ms": 1793894400000,
   "imp_fim_ms": 1793808000000,
   "alvo": 2450.0,
   "nota": "limpou o order block, esperando a reversão",
   "vol_varr": 9.88437933296531,
-  "nucleo": true
+  "nucleo": true,
+  "motivo": "varreu mas não reverteu em 4 velas"
  },
  "cen-DOGEUSDT-1793804400000": {
   "tipo": "cenario",
   "sim": "DOGEUSDT",
   "lado": "compra",
-  "status": "aberto",
+  "status": "morreu",
   "vela_ms": 1793894400000,
   "imp_fim_ms": 1793804400000,
   "alvo": 0.07834,
   "nota": "limpou o order block, esperando a reversão",
   "vol_varr": 12.714478528780774,
-  "nucleo": true
+  "nucleo": true,
+  "motivo": "varreu mas não reverteu em 4 velas"
  },
  "cen-STRKUSDT-1793710800000": {
   "tipo": "cenario",
