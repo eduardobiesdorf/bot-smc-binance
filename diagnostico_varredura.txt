@@ -1,21 +1,16 @@
-início 05/11 19:47 BRT
-XRPUSDT: gatilho antigo (42 velas atrás)
-SUIUSDT: gatilho antigo (172 velas atrás)
-BNBUSDT: gatilho antigo (187 velas atrás)
-ENAUSDT: gatilho antigo (191 velas atrás)
-AVAXUSDT: gatilho antigo (172 velas atrás)
-TAOUSDT: gatilho antigo (173 velas atrás)
-TRXUSDT: gatilho antigo (320 velas atrás)
-INJUSDT: gatilho antigo (175 velas atrás)
-STRKUSDT: gatilho antigo (2 velas atrás)
+início 05/11 20:43 BRT
+XRPUSDT: gatilho antigo (43 velas atrás)
+SUIUSDT: gatilho antigo (173 velas atrás)
+BNBUSDT: gatilho antigo (188 velas atrás)
+ENAUSDT: gatilho antigo (192 velas atrás)
+AVAXUSDT: gatilho antigo (173 velas atrás)
+TAOUSDT: gatilho antigo (174 velas atrás)
+TRXUSDT: gatilho antigo (321 velas atrás)
+INJUSDT: gatilho antigo (176 velas atrás)
+STRKUSDT: gatilho antigo (3 velas atrás)
 pares (50): BTCUSDT, ETHUSDT, SOLUSDT, XRPUSDT, DOGEUSDT, HYPEUSDT, SUIUSDT, BNBUSDT, ADAUSDT, ZECUSDT, ENAUSDT, LINKUSDT, AVAXUSDT, LTCUSDT, TRUMPUSDT, AAVEUSDT, WLDUSDT, TAOUSDT, NEARUSDT, BCHUSDT, FILUSDT, PUMPUSDT, UNIUSDT, DOTUSDT, ASTERUSDT, ONDOUSDT, PENGUUSDT, TRXUSDT, CRVUSDT, ARBUSDT, XLMUSDT, APTUSDT, TIAUSDT, HBARUSDT, OPUSDT, XPLUSDT, VIRTUALUSDT, FETUSDT, INJUSDT, WLFIUSDT, TONUSDT, SEIUSDT, EIGENUSDT, ICPUSDT, PENDLEUSDT, ZROUSDT, REUSDT, POLUSDT, DASHUSDT, STRKUSDT
 gatilhos 0 | cenários 0
-TOKEN: ok 46 chars | CHAT_ID: ok 10 chars
-HTTP 200: {"ok":true,"result":{"message_id":172,"from":{"id":9205915638,"is_bot":true,"first_name":"SMC Trading Bot","username":"smc_crypto_alerts_bot"},"chat":{"id":[removido],"first_name":"Eduardo","last_name
-desfecho: ⚪ <b>AAVE/USDT</b> — cenário de venda encerrado <b>sem entrada</b> | <i>nem varreu o order block nem chegou perto dele</i>
-TOKEN: ok 46 chars | CHAT_ID: ok 10 chars
-HTTP 200: {"ok":true,"result":{"message_id":173,"from":{"id":9205915638,"is_bot":true,"first_name":"SMC Trading Bot","username":"smc_crypto_alerts_bot"},"chat":{"id":[removido],"first_name":"Eduardo","last_name
-enviados 0 gatilhos, 1 desfechos
+enviados 0 gatilhos, 0 desfechos
 placar  1 gatilhos (1 abertos)  ·  12 cenários, 11 encerrados sem entrada
 por que os cenários morreram:
   7x  furou o order block fundo demais (> 2.5 ATR): virou continuação, não varredura
