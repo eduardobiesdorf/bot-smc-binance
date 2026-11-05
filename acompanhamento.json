@@ -3,12 +3,13 @@
   "tipo": "cenario",
   "sim": "PENDLEUSDT",
   "lado": "compra",
-  "status": "aberto",
+  "status": "morreu",
   "vela_ms": 1793880000000,
   "imp_fim_ms": 1793808000000,
   "alvo": 1.841,
   "nota": "chegou no order block, esperando a limpeza",
   "vol_varr": 0.0,
-  "nucleo": false
+  "nucleo": false,
+  "motivo": "varredura com 0.86x o volume médio, mínimo 1.20x — não vira gatilho"
  }
 }
