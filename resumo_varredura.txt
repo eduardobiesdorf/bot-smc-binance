@@ -1,4 +1,4 @@
-05/11 14:10 BRT
+05/11 15:02 BRT
 radar   ETHUSDT compra — limpou o order block, esperando a reversão
 radar   DOGEUSDT compra — limpou o order block, esperando a reversão
 radar   STRKUSDT compra — limpou o order block, esperando a reversão
