@@ -11,5 +11,89 @@
   "vol_varr": 0.0,
   "nucleo": false,
   "motivo": "varredura com 0.86x o volume médio, mínimo 1.20x — não vira gatilho"
+ },
+ "cen-BTCUSDT-1793808000000": {
+  "tipo": "cenario",
+  "sim": "BTCUSDT",
+  "lado": "compra",
+  "status": "aberto",
+  "vela_ms": 1793887200000,
+  "imp_fim_ms": 1793808000000,
+  "alvo": 81196.01,
+  "nota": "limpou o order block, esperando a reversão",
+  "vol_varr": 2.915615995264354,
+  "nucleo": true
+ },
+ "cen-SOLUSDT-1793804400000": {
+  "tipo": "cenario",
+  "sim": "SOLUSDT",
+  "lado": "compra",
+  "status": "aberto",
+  "vela_ms": 1793887200000,
+  "imp_fim_ms": 1793804400000,
+  "alvo": 98.14,
+  "nota": "chegou no order block, esperando a limpeza",
+  "vol_varr": 0.0,
+  "nucleo": true
+ },
+ "cen-ADAUSDT-1793808000000": {
+  "tipo": "cenario",
+  "sim": "ADAUSDT",
+  "lado": "compra",
+  "status": "aberto",
+  "vela_ms": 1793887200000,
+  "imp_fim_ms": 1793808000000,
+  "alvo": 0.2015,
+  "nota": "limpou o order block, esperando a reversão",
+  "vol_varr": 3.743389049771713,
+  "nucleo": true
+ },
+ "cen-LINKUSDT-1793808000000": {
+  "tipo": "cenario",
+  "sim": "LINKUSDT",
+  "lado": "compra",
+  "status": "aberto",
+  "vela_ms": 1793887200000,
+  "imp_fim_ms": 1793808000000,
+  "alvo": 11.796,
+  "nota": "chegou no order block, esperando a limpeza",
+  "vol_varr": 0.0,
+  "nucleo": true
+ },
+ "cen-LTCUSDT-1793808000000": {
+  "tipo": "cenario",
+  "sim": "LTCUSDT",
+  "lado": "compra",
+  "status": "aberto",
+  "vela_ms": 1793887200000,
+  "imp_fim_ms": 1793808000000,
+  "alvo": 57.04,
+  "nota": "limpou o order block, esperando a reversão",
+  "vol_varr": 3.613292675635424,
+  "nucleo": true
+ },
+ "cen-XLMUSDT-1793804400000": {
+  "tipo": "cenario",
+  "sim": "XLMUSDT",
+  "lado": "compra",
+  "status": "aberto",
+  "vela_ms": 1793887200000,
+  "imp_fim_ms": 1793804400000,
+  "alvo": 0.1711,
+  "nota": "limpou o order block, esperando a reversão",
+  "vol_varr": 2.447022040783978,
+  "nucleo": false
+ },
+ "cen-HBARUSDT-1793808000000": {
+  "tipo": "cenario",
+  "sim": "HBARUSDT",
+  "lado": "compra",
+  "status": "aberto",
+  "vela_ms": 1793887200000,
+  "imp_fim_ms": 1793808000000,
+  "alvo": 0.07408,
+  "nota": "limpou o order block, esperando a reversão",
+  "vol_varr": 2.8674062966580753,
+  "nucleo": false
  }
 }
