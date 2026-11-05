@@ -1,6 +1,25 @@
-1 candidatos | 11 meses | intervalo 1d
-    1/1 ELSAUSDT          285 velas  volume mediano      1.7 M USD/h
+20 candidatos | 23 meses | intervalo 15m
+    1/20 BTCUSDT         64512 velas  volume mediano     90.7 M USD/h
+    2/20 BNBUSDT         64512 velas  volume mediano      3.2 M USD/h
+    3/20 HYPEUSDT        50166 velas  volume mediano      3.5 M USD/h
+    4/20 SUIUSDT         64512 velas  volume mediano      3.3 M USD/h
+    5/20 ADAUSDT         64512 velas  volume mediano      2.4 M USD/h
+    6/20 XRPUSDT         64512 velas  volume mediano      9.3 M USD/h
+    7/20 ETHUSDT         64512 velas  volume mediano     77.4 M USD/h
+    8/20 DOGEUSDT        64512 velas  volume mediano      6.0 M USD/h
+    9/20 ZECUSDT         64512 velas  volume mediano      2.6 M USD/h
+   10/20 SOLUSDT         64512 velas  volume mediano     20.9 M USD/h
+   11/20 ENAUSDT         64512 velas  volume mediano      1.9 M USD/h
+   12/20 LINKUSDT        64512 velas  volume mediano      1.8 M USD/h
+   13/20 WLDUSDT         64512 velas  volume mediano      1.2 M USD/h
+   14/20 AAVEUSDT        64512 velas  volume mediano      1.1 M USD/h
+   15/20 NEARUSDT        64512 velas  volume mediano      1.1 M USD/h
+   16/20 AVAXUSDT        64512 velas  volume mediano      1.6 M USD/h
+   17/20 LTCUSDT         64512 velas  volume mediano      1.1 M USD/h
+   18/20 TRUMPUSDT       62828 velas  volume mediano      1.1 M USD/h
+   19/20 BCHUSDT         64512 velas  volume mediano      0.9 M USD/h
+   20/20 TAOUSDT         64512 velas  volume mediano      1.1 M USD/h
 
-ficaram os 1 de maior volume de FUTUROS (0 apagados)
+ficaram os 20 de maior volume de FUTUROS (0 apagados)
 ordem final por volume de futuros:
-  ELSAUSDT
+  BTCUSDT, ETHUSDT, SOLUSDT, XRPUSDT, DOGEUSDT, HYPEUSDT, SUIUSDT, BNBUSDT, ZECUSDT, ADAUSDT, ENAUSDT, LINKUSDT, AVAXUSDT, WLDUSDT, LTCUSDT, AAVEUSDT, TRUMPUSDT, NEARUSDT, TAOUSDT, BCHUSDT
