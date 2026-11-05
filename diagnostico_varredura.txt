@@ -1,4 +1,4 @@
-início 05/11 18:03 BRT
+início 05/11 18:45 BRT
 XRPUSDT: gatilho antigo (41 velas atrás)
 SUIUSDT: gatilho antigo (171 velas atrás)
 BNBUSDT: gatilho antigo (186 velas atrás)
@@ -10,15 +10,7 @@ INJUSDT: gatilho antigo (174 velas atrás)
 GATILHO STRKUSDT compra vela 05/11 16:00 entrada 0.04052 R:R 1:2.14  [recuperado da vela anterior]
 pares (50): BTCUSDT, ETHUSDT, SOLUSDT, XRPUSDT, DOGEUSDT, HYPEUSDT, SUIUSDT, BNBUSDT, ADAUSDT, ZECUSDT, ENAUSDT, LINKUSDT, AVAXUSDT, LTCUSDT, TRUMPUSDT, AAVEUSDT, WLDUSDT, TAOUSDT, NEARUSDT, BCHUSDT, FILUSDT, PUMPUSDT, UNIUSDT, DOTUSDT, ASTERUSDT, ONDOUSDT, PENGUUSDT, TRXUSDT, CRVUSDT, ARBUSDT, XLMUSDT, APTUSDT, TIAUSDT, HBARUSDT, OPUSDT, XPLUSDT, VIRTUALUSDT, FETUSDT, INJUSDT, WLFIUSDT, TONUSDT, SEIUSDT, EIGENUSDT, ICPUSDT, PENDLEUSDT, ZROUSDT, REUSDT, POLUSDT, DASHUSDT, STRKUSDT
 gatilhos 1 | cenários 1
-TOKEN: ok 46 chars | CHAT_ID: ok 10 chars
-HTTP 200: {"ok":true,"result":{"message_id":169,"from":{"id":9205915638,"is_bot":true,"first_name":"SMC Trading Bot","username":"smc_crypto_alerts_bot"},"chat":{"id":[removido],"first_name":"Eduardo","last_name
-desfecho: ⚪ <b>ETH/USDT</b> — cenário de compra encerrado <b>sem entrada</b> | <i>varreu mas não reverteu em 4 velas</i>
-TOKEN: ok 46 chars | CHAT_ID: ok 10 chars
-HTTP 200: {"ok":true,"result":{"message_id":170,"from":{"id":9205915638,"is_bot":true,"first_name":"SMC Trading Bot","username":"smc_crypto_alerts_bot"},"chat":{"id":[removido],"first_name":"Eduardo","last_name
-desfecho: ⚪ <b>DOGE/USDT</b> — cenário de compra encerrado <b>sem entrada</b> | <i>varreu mas não reverteu em 4 velas</i>
-TOKEN: ok 46 chars | CHAT_ID: ok 10 chars
-HTTP 200: {"ok":true,"result":{"message_id":171,"from":{"id":9205915638,"is_bot":true,"first_name":"SMC Trading Bot","username":"smc_crypto_alerts_bot"},"chat":{"id":[removido],"first_name":"Eduardo","last_name
-enviados 0 gatilhos, 2 desfechos
+enviados 0 gatilhos, 0 desfechos
 placar  1 gatilhos (1 abertos)  ·  12 cenários, 10 encerrados sem entrada
 por que os cenários morreram:
   7x  furou o order block fundo demais (> 2.5 ATR): virou continuação, não varredura
