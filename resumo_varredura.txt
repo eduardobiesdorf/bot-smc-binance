@@ -1,8 +1,4 @@
-05/11 12:58 BRT
-radar   BTCUSDT compra — limpou o order block, esperando a reversão
-radar   SOLUSDT compra — chegou no order block, esperando a limpeza
-radar   ADAUSDT compra — limpou o order block, esperando a reversão
-radar   LINKUSDT compra — chegou no order block, esperando a limpeza
-radar   LTCUSDT compra — limpou o order block, esperando a reversão
-radar   XLMUSDT compra — limpou o order block, esperando a reversão
-radar   HBARUSDT compra — limpou o order block, esperando a reversão
+05/11 14:01 BRT
+radar   ETHUSDT compra — limpou o order block, esperando a reversão
+radar   DOGEUSDT compra — limpou o order block, esperando a reversão
+radar   STRKUSDT compra — limpou o order block, esperando a reversão
