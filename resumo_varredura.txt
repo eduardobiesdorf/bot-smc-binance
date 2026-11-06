@@ -1,4 +1,3 @@
-06/11 00:52 BRT
-GATILHO [nucleo] ZECUSDT venda R:R 1:3.10 risco 2.32%  (vela anterior)
+06/11 01:56 BRT
 radar   AAVEUSDT venda — chegou no order block, esperando a limpeza
 radar   ARBUSDT venda — limpou o order block, esperando a reversão
