@@ -171,5 +171,35 @@
   "vol_varr": 0.0,
   "nucleo": true,
   "motivo": "nem varreu o order block nem chegou perto dele"
+ },
+ "gat-ZECUSDT-1793926800000": {
+  "tipo": "gatilho",
+  "sim": "ZECUSDT",
+  "lado": "venda",
+  "status": "aberto",
+  "vela_ms": 1793926800000,
+  "entrada": 1307.04,
+  "stop": 1337.3159999999998,
+  "alvo": 1213.33,
+  "rr": 3.095190910291998,
+  "risco_pct": 2.3163789937568735,
+  "vol_varr": 1.9849488855093491,
+  "liq_r": 0.9307702470603849,
+  "rsi_varr": 61.22699883827114,
+  "rsi_gat": 55.739047230615576,
+  "rsi_varr_norm": 38.77300116172886,
+  "nucleo": true
+ },
+ "cen-ARBUSDT-1793890800000": {
+  "tipo": "cenario",
+  "sim": "ARBUSDT",
+  "lado": "venda",
+  "status": "aberto",
+  "vela_ms": 1793926800000,
+  "imp_fim_ms": 1793890800000,
+  "alvo": 0.1501,
+  "nota": "chegou no order block, esperando a limpeza",
+  "vol_varr": 0.0,
+  "nucleo": false
  }
 }
