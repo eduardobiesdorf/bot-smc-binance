@@ -1,19 +1,25 @@
-início 06/11 14:47 BRT
-XRPUSDT: gatilho antigo (61 velas atrás)
-SUIUSDT: gatilho antigo (191 velas atrás)
-BNBUSDT: gatilho antigo (206 velas atrás)
-ZECUSDT: gatilho antigo (15 velas atrás)
-ENAUSDT: gatilho antigo (210 velas atrás)
-AVAXUSDT: gatilho antigo (191 velas atrás)
-TAOUSDT: gatilho antigo (192 velas atrás)
-INJUSDT: gatilho antigo (194 velas atrás)
-STRKUSDT: gatilho antigo (21 velas atrás)
+início 06/11 15:49 BRT
+XRPUSDT: gatilho antigo (62 velas atrás)
+SUIUSDT: gatilho antigo (192 velas atrás)
+BNBUSDT: gatilho antigo (207 velas atrás)
+ZECUSDT: gatilho antigo (16 velas atrás)
+ENAUSDT: gatilho antigo (211 velas atrás)
+AVAXUSDT: gatilho antigo (192 velas atrás)
+GATILHO AAVEUSDT venda vela 06/11 14:00 entrada 131.56 R:R 1:4.13
+TAOUSDT: gatilho antigo (193 velas atrás)
+INJUSDT: gatilho antigo (195 velas atrás)
+STRKUSDT: gatilho antigo (22 velas atrás)
 pares (50): BTCUSDT, ETHUSDT, SOLUSDT, XRPUSDT, DOGEUSDT, HYPEUSDT, SUIUSDT, BNBUSDT, ADAUSDT, ZECUSDT, ENAUSDT, LINKUSDT, AVAXUSDT, LTCUSDT, TRUMPUSDT, AAVEUSDT, WLDUSDT, TAOUSDT, NEARUSDT, BCHUSDT, FILUSDT, PUMPUSDT, UNIUSDT, DOTUSDT, ASTERUSDT, ONDOUSDT, PENGUUSDT, TRXUSDT, CRVUSDT, ARBUSDT, XLMUSDT, APTUSDT, TIAUSDT, HBARUSDT, OPUSDT, XPLUSDT, VIRTUALUSDT, FETUSDT, INJUSDT, WLFIUSDT, TONUSDT, SEIUSDT, EIGENUSDT, ICPUSDT, PENDLEUSDT, ZROUSDT, REUSDT, POLUSDT, DASHUSDT, STRKUSDT
-gatilhos 0 | cenários 2
-enviados 0 gatilhos, 0 desfechos
-placar  1 fechados: 0 gain / 1 loss  (0%)  total -1.00R  ·  1 abertos  ·  12 cenários encerrados sem entrada
+gatilhos 1 | cenários 0
+TOKEN: ok 46 chars | CHAT_ID: ok 10 chars
+HTTP 200: {"ok":true,"result":{"message_id":193,"from":{"id":9205915638,"is_bot":true,"first_name":"SMC Trading Bot","username":"smc_crypto_alerts_bot"},"chat":{"id":[removido],"first_name":"Eduardo","last_name
+desfecho: ⚪ <b>DASH/USDT</b> — cenário de venda encerrado <b>sem entrada</b> | <i>nem varreu o order block nem chegou perto dele</i>
+TOKEN: ok 46 chars | CHAT_ID: ok 10 chars
+HTTP 200: {"ok":true,"result":{"message_id":194,"from":{"id":9205915638,"is_bot":true,"first_name":"SMC Trading Bot","username":"smc_crypto_alerts_bot"},"chat":{"id":[removido],"first_name":"Eduardo","last_name
+enviados 1 gatilhos, 1 desfechos
+placar  1 fechados: 0 gain / 1 loss  (0%)  total -1.00R  ·  2 abertos  ·  13 cenários encerrados sem entrada
 por que os cenários morreram:
   7x  furou o order block fundo demais (> 2.5 ATR): virou continuação, não varredura
   3x  varreu mas não reverteu em 4 velas
+  2x  nem varreu o order block nem chegou perto dele
   1x  varredura com 0.86x o volume médio, mínimo 1.20x — não vira gatilho
-  1x  nem varreu o order block nem chegou perto dele

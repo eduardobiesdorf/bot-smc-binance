@@ -1,3 +1,2 @@
-06/11 14:47 BRT
-radar   AAVEUSDT venda — limpou o order block, esperando a reversão
-radar   DASHUSDT venda — chegou no order block, esperando a limpeza
+06/11 15:50 BRT
+GATILHO [nucleo] AAVEUSDT venda R:R 1:4.13 risco 1.67%

@@ -210,12 +210,31 @@
   "tipo": "cenario",
   "sim": "DASHUSDT",
   "lado": "venda",
-  "status": "aberto",
+  "status": "morreu",
   "vela_ms": 1793980800000,
   "imp_fim_ms": 1793890800000,
   "alvo": 43.28,
   "nota": "chegou no order block, esperando a limpeza",
   "vol_varr": 0.0,
-  "nucleo": false
+  "nucleo": false,
+  "motivo": "nem varreu o order block nem chegou perto dele"
+ },
+ "gat-AAVEUSDT-1793984400000": {
+  "tipo": "gatilho",
+  "sim": "AAVEUSDT",
+  "lado": "venda",
+  "status": "aberto",
+  "vela_ms": 1793984400000,
+  "entrada": 131.56,
+  "stop": 133.76128571428572,
+  "alvo": 122.46,
+  "rr": 4.133947692906741,
+  "risco_pct": 1.6732180862615667,
+  "vol_varr": 1.9894955199503503,
+  "liq_r": 0.9903303264326061,
+  "rsi_varr": 57.292692430063596,
+  "rsi_gat": 53.58485948213453,
+  "rsi_varr_norm": 42.707307569936404,
+  "nucleo": true
  }
 }
