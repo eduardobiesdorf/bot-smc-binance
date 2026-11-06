@@ -194,12 +194,13 @@
   "tipo": "cenario",
   "sim": "ARBUSDT",
   "lado": "venda",
-  "status": "aberto",
+  "status": "morreu",
   "vela_ms": 1793926800000,
   "imp_fim_ms": 1793890800000,
   "alvo": 0.1501,
   "nota": "chegou no order block, esperando a limpeza",
   "vol_varr": 0.0,
-  "nucleo": false
+  "nucleo": false,
+  "motivo": "varreu mas não reverteu em 4 velas"
  }
 }
