@@ -176,7 +176,7 @@
   "tipo": "gatilho",
   "sim": "ZECUSDT",
   "lado": "venda",
-  "status": "aberto",
+  "status": "stop",
   "vela_ms": 1793926800000,
   "entrada": 1307.04,
   "stop": 1337.3159999999998,
@@ -188,7 +188,10 @@
   "rsi_varr": 61.22699883827114,
   "rsi_gat": 55.739047230615576,
   "rsi_varr_norm": 38.77300116172886,
-  "nucleo": true
+  "nucleo": true,
+  "fim_ms": 1793973600000,
+  "horas": 13,
+  "resultado_r": -1.0
  },
  "cen-ARBUSDT-1793890800000": {
   "tipo": "cenario",

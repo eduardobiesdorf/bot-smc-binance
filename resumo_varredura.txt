@@ -1,2 +1,2 @@
-06/11 11:15 BRT
-nada
+06/11 12:48 BRT
+radar   AAVEUSDT venda — limpou o order block, esperando a reversão

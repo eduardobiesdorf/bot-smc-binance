@@ -1,0 +1,2 @@
+data_brt,par,faixa,lado,entrada,stop,alvo,rr,risco_pct,vol_varr,liq_r,rsi_varr,rsi_varr_norm,rsi_gat,desfecho,horas,resultado_r,fim_brt
+05/11 22:00,ZECUSDT,nucleo,venda,1307.04,1337.316,1213.33,3.10,2.32,1.98,0.93,61.2,38.8,55.7,stop,13,-1.000,06/11 11:00
