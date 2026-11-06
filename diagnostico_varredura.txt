@@ -1,16 +1,15 @@
-início 06/11 02:57 BRT
-XRPUSDT: gatilho antigo (49 velas atrás)
-SUIUSDT: gatilho antigo (179 velas atrás)
-BNBUSDT: gatilho antigo (194 velas atrás)
-ZECUSDT: gatilho antigo (3 velas atrás)
-ENAUSDT: gatilho antigo (198 velas atrás)
-AVAXUSDT: gatilho antigo (179 velas atrás)
-TAOUSDT: gatilho antigo (180 velas atrás)
-TRXUSDT: gatilho antigo (327 velas atrás)
-INJUSDT: gatilho antigo (182 velas atrás)
-STRKUSDT: gatilho antigo (9 velas atrás)
+início 06/11 04:11 BRT
+XRPUSDT: gatilho antigo (51 velas atrás)
+SUIUSDT: gatilho antigo (181 velas atrás)
+BNBUSDT: gatilho antigo (196 velas atrás)
+ZECUSDT: gatilho antigo (5 velas atrás)
+ENAUSDT: gatilho antigo (200 velas atrás)
+AVAXUSDT: gatilho antigo (181 velas atrás)
+TAOUSDT: gatilho antigo (182 velas atrás)
+INJUSDT: gatilho antigo (184 velas atrás)
+STRKUSDT: gatilho antigo (11 velas atrás)
 pares (50): BTCUSDT, ETHUSDT, SOLUSDT, XRPUSDT, DOGEUSDT, HYPEUSDT, SUIUSDT, BNBUSDT, ADAUSDT, ZECUSDT, ENAUSDT, LINKUSDT, AVAXUSDT, LTCUSDT, TRUMPUSDT, AAVEUSDT, WLDUSDT, TAOUSDT, NEARUSDT, BCHUSDT, FILUSDT, PUMPUSDT, UNIUSDT, DOTUSDT, ASTERUSDT, ONDOUSDT, PENGUUSDT, TRXUSDT, CRVUSDT, ARBUSDT, XLMUSDT, APTUSDT, TIAUSDT, HBARUSDT, OPUSDT, XPLUSDT, VIRTUALUSDT, FETUSDT, INJUSDT, WLFIUSDT, TONUSDT, SEIUSDT, EIGENUSDT, ICPUSDT, PENDLEUSDT, ZROUSDT, REUSDT, POLUSDT, DASHUSDT, STRKUSDT
-gatilhos 0 | cenários 2
+gatilhos 0 | cenários 1
 enviados 0 gatilhos, 0 desfechos
 placar  2 gatilhos (2 abertos)  ·  13 cenários, 11 encerrados sem entrada
 por que os cenários morreram:

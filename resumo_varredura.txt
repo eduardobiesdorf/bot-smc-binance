@@ -1,3 +1,2 @@
-06/11 02:58 BRT
-radar   AAVEUSDT venda — chegou no order block, esperando a limpeza
+06/11 04:11 BRT
 radar   ARBUSDT venda — limpou o order block, esperando a reversão
