@@ -1,2 +1,3 @@
-06/11 13:51 BRT
+06/11 14:47 BRT
 radar   AAVEUSDT venda — limpou o order block, esperando a reversão
+radar   DASHUSDT venda — chegou no order block, esperando a limpeza

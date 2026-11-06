@@ -205,5 +205,17 @@
   "vol_varr": 0.0,
   "nucleo": false,
   "motivo": "varreu mas não reverteu em 4 velas"
+ },
+ "cen-DASHUSDT-1793890800000": {
+  "tipo": "cenario",
+  "sim": "DASHUSDT",
+  "lado": "venda",
+  "status": "aberto",
+  "vela_ms": 1793980800000,
+  "imp_fim_ms": 1793890800000,
+  "alvo": 43.28,
+  "nota": "chegou no order block, esperando a limpeza",
+  "vol_varr": 0.0,
+  "nucleo": false
  }
 }
