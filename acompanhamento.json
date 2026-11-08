@@ -145,7 +145,7 @@
   "tipo": "gatilho",
   "sim": "STRKUSDT",
   "lado": "compra",
-  "status": "aberto",
+  "status": "stop",
   "vela_ms": 1793905200000,
   "entrada": 0.04052,
   "stop": 0.03833807142857143,
@@ -157,7 +157,10 @@
   "rsi_varr": 25.99001050274839,
   "rsi_gat": 38.16212620488012,
   "rsi_varr_norm": 25.99001050274839,
-  "nucleo": false
+  "nucleo": false,
+  "fim_ms": 1794157200000,
+  "horas": 70,
+  "resultado_r": -1.0
  },
  "cen-AAVEUSDT-1793890800000": {
   "tipo": "cenario",
