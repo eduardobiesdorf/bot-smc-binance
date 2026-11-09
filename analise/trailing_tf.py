@@ -15,6 +15,7 @@ import os
 import statistics
 import sys
 
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import bot_varredura as B
 
 BRT = dt.timezone(dt.timedelta(hours=-3))
