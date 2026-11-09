@@ -58,6 +58,7 @@ def registrar_gatilho(d, sim, g):
     d[ch] = dict(tipo='gatilho', sim=sim, lado=g['lado'], status='aberto',
                  vela_ms=g['vela_ms'], entrada=g['entrada'], stop=g['stop'],
                  stop_ini=g['stop'], movs=0,
+                 degraus=[[g['vela_ms'], g['stop']]],
                  alvo=g['alvo'], rr=g['rr'], risco_pct=g['risco_pct'],
                  vol_varr=g.get('vol_varr', 0), liq_r=g.get('liq_r', 0),
                  rsi_varr=g.get('rsi_varr'), rsi_gat=g.get('rsi_gat'),
@@ -97,17 +98,29 @@ def revisar(d, series, cfg, seguir, achar_impulsos, atr, media_volume):
     return msgs
 
 
+def _vigente(r, ms):
+    """O stop que valia naquele instante. Sem isso o stop movido hoje
+    seria aplicado a velas de ontem, e a operacao 'fecharia' no passado."""
+    deg = r.get('degraus') or [[r['vela_ms'], r.get('stop_ini', r['stop'])]]
+    val = deg[0][1]
+    for q, s in deg:
+        if q <= ms:
+            val = s
+    return val
+
+
 def _revisar_gatilho(r, h):
     compra = r['lado'] == 'compra'
-    ent, stop, alvo = r['entrada'], r['stop'], r['alvo']
+    ent, alvo = r['entrada'], r['alvo']
     # 1R e sempre medido pelo stop ORIGINAL, senao o trailing distorceria
     # o resultado: stop mais perto faria qualquer perda parecer menor.
-    risco = abs(ent - r.get('stop_ini', stop))
+    risco = abs(ent - r.get('stop_ini', r['stop']))
     idx = next((i for i, c in enumerate(h) if c[0] == r['vela_ms']), None)
     if idx is None:
         return None                      # a vela ja saiu da janela baixada
     for k in range(idx + 1, len(h)):
         hi, lo = h[k][2], h[k][3]
+        stop = _vigente(r, h[k][0])
         bateu_stop = (lo <= stop) if compra else (hi >= stop)
         bateu_alvo = (hi >= alvo) if compra else (lo <= alvo)
         if bateu_stop and bateu_alvo:
@@ -207,15 +220,23 @@ def _csv(r):
 # acontece a favor da operacao, o stop sobe para o extremo de E.
 #
 # Medido em 22 meses no nucleo 20, com pivo de 1 vela (k=1) nos 15 minutos:
-#   stop fixo  R/op +0,625  rebaixamento 9,5R
-#   com stop movel  R/op +0,561  rebaixamento 6,0R
-# Custa 0,064R por operacao e corta o rebaixamento em 37%. Como o capital e
-# dimensionado pelo rebaixamento, rende 47% mais por dolar parado.
+#   stop fixo                      R/op +0,625  rebaixamento 9,5R
+#   movendo sempre                 R/op +0,561  rebaixamento 6,0R
+#   movendo so se travar >= +0,3R  R/op +0,690  rebaixamento 6,5R
+# A ultima e melhor nas duas pontas. Mover o stop enquanto ele ainda trava
+# prejuizo economiza pouco na perda e tira de muita vencedora -- foi o que
+# aconteceria no AAVE de 06/11, cortado a -0,28R antes de ir a +2,2R.
 #
 # Checar de hora em hora da exatamente o mesmo numero que checar a cada 15
 # minutos, entao nao precisa rodar mais vezes.
 K_PIVO = 1          # quantas velas de cada lado definem um pivo
 FOLGA_ATR = 0.25    # o stop fica essa distancia alem do extremo de E
+MIN_TRAVA = 0.10    # so move se o stop novo travar pelo menos isso em R
+#                   # 0,10R cobre a taxa (0,10% / stop de ~1,7% = 0,06R),
+#                   # entao a operacao nunca fecha no vermelho depois de
+#                   # movida. Medido: >=0,0R e >=0,1R dao identico (+0,610);
+#                   # >=0,3R da +0,690, mas a diferenca sao 4 operacoes em
+#                   # 83 -- ruido. Fico na regra menos ajustada.
 ESP_VARR = 20       # velas para E acontecer depois de D
 ESP_ROMPE = 12      # velas para F acontecer depois de E
 
@@ -301,6 +322,7 @@ def mover_stops(d, series15):
         if not q or len(q) < 60:
             continue
         compra = r['lado'] == 'compra'
+        risco_ini = abs(r['entrada'] - r.get('stop_ini', r['stop']))
         a = _atr(q, 14)
         ev = estruturas(q)
         # so o que fechou DEPOIS do gatilho
@@ -309,21 +331,29 @@ def mover_stops(d, series15):
             continue
         antigo = r['stop']
         melhor = antigo
-        quando_e = None
+        quando_e = quando_f = None
         for i, e in sorted(novos):
             if e['alta'] != compra or a[i] is None:
                 continue
             cand = (e['extremo'] - a[i] * FOLGA_ATR if compra
                     else e['extremo'] + a[i] * FOLGA_ATR)
-            if (cand > melhor) if compra else (cand < melhor):
-                melhor = cand
-                quando_e = q[e['E']][0]
+            if not ((cand > melhor) if compra else (cand < melhor)):
+                continue
+            emR = ((cand - r['entrada']) if compra
+                   else (r['entrada'] - cand)) / max(risco_ini, 1e-12)
+            if emR < MIN_TRAVA:
+                continue
+            melhor = cand
+            quando_e = q[e['E']][0]
+            quando_f = q[i][0] + 900000          # vale do fim da vela F
         if melhor == antigo:
             continue
         r['stop'] = melhor
+        r.setdefault('degraus', [[r['vela_ms'], r.get('stop_ini', antigo)]])
+        r['degraus'].append([quando_f, melhor])
         r['movs'] = r.get('movs', 0) + 1
-        risco = abs(r['entrada'] - r.get('stop_ini', antigo))
-        emR = ((melhor - r['entrada']) if compra else (r['entrada'] - melhor)) / risco
+        emR = ((melhor - r['entrada']) if compra
+               else (r['entrada'] - melhor)) / risco_ini
         seta = "🟢" if compra else "🔴"
         msgs.append(
             f"🔒 <b>{r['sim'].replace('USDT', '/USDT')}</b> — "
