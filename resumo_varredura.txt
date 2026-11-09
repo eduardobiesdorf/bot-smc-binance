@@ -1,2 +1,6 @@
-08/11 21:56 BRT
+08/11 22:00 BRT
 radar   NEARUSDT venda — limpou o order block, esperando a reversão
+radar   UNIUSDT venda — chegou no order block, esperando a limpeza
+radar   ARBUSDT venda — limpou o order block, esperando a reversão
+radar   HBARUSDT venda — chegou no order block, esperando a limpeza
+radar   FETUSDT venda — chegou no order block, esperando a limpeza

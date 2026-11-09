@@ -247,5 +247,65 @@
     133.7613
    ]
   ]
+ },
+ "cen-NEARUSDT-1794171600000": {
+  "tipo": "cenario",
+  "sim": "NEARUSDT",
+  "lado": "venda",
+  "status": "aberto",
+  "vela_ms": 1794178800000,
+  "imp_fim_ms": 1794171600000,
+  "alvo": 3.446,
+  "nota": "limpou o order block, esperando a reversão",
+  "vol_varr": 2.975109148718827,
+  "nucleo": true
+ },
+ "cen-UNIUSDT-1794175200000": {
+  "tipo": "cenario",
+  "sim": "UNIUSDT",
+  "lado": "venda",
+  "status": "aberto",
+  "vela_ms": 1794182400000,
+  "imp_fim_ms": 1794175200000,
+  "alvo": 6.625,
+  "nota": "chegou no order block, esperando a limpeza",
+  "vol_varr": 0.0,
+  "nucleo": false
+ },
+ "cen-ARBUSDT-1794171600000": {
+  "tipo": "cenario",
+  "sim": "ARBUSDT",
+  "lado": "venda",
+  "status": "aberto",
+  "vela_ms": 1794182400000,
+  "imp_fim_ms": 1794171600000,
+  "alvo": 0.1598,
+  "nota": "limpou o order block, esperando a reversão",
+  "vol_varr": 1.7151941573655733,
+  "nucleo": false
+ },
+ "cen-HBARUSDT-1794171600000": {
+  "tipo": "cenario",
+  "sim": "HBARUSDT",
+  "lado": "venda",
+  "status": "aberto",
+  "vela_ms": 1794182400000,
+  "imp_fim_ms": 1794171600000,
+  "alvo": 0.06421,
+  "nota": "chegou no order block, esperando a limpeza",
+  "vol_varr": 0.0,
+  "nucleo": false
+ },
+ "cen-FETUSDT-1794171600000": {
+  "tipo": "cenario",
+  "sim": "FETUSDT",
+  "lado": "venda",
+  "status": "aberto",
+  "vela_ms": 1794182400000,
+  "imp_fim_ms": 1794171600000,
+  "alvo": 0.1344,
+  "nota": "chegou no order block, esperando a limpeza",
+  "vol_varr": 0.0,
+  "nucleo": false
  }
 }
