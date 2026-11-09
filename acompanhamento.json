@@ -413,7 +413,7 @@
   "tipo": "cenario",
   "sim": "LTCUSDT",
   "lado": "venda",
-  "status": "aberto",
+  "status": "virou_gatilho",
   "vela_ms": 1794225600000,
   "imp_fim_ms": 1794171600000,
   "alvo": 49.26,
@@ -451,13 +451,14 @@
   "tipo": "cenario",
   "sim": "POLUSDT",
   "lado": "venda",
-  "status": "aberto",
+  "status": "morreu",
   "vela_ms": 1794225600000,
   "imp_fim_ms": 1794175200000,
   "alvo": 0.08593,
   "nota": "limpou o order block, esperando a reversão",
   "vol_varr": 3.739985502075626,
-  "nucleo": false
+  "nucleo": false,
+  "motivo": "varreu mas não reverteu em 4 velas"
  },
  "cen-WLDUSDT-1794171600000": {
   "tipo": "cenario",
@@ -548,5 +549,31 @@
   "rsi_gat": 56.94150420796533,
   "rsi_varr_norm": 37.1242659415024,
   "nucleo": false
+ },
+ "gat-LTCUSDT-1794243600000": {
+  "tipo": "gatilho",
+  "sim": "LTCUSDT",
+  "lado": "venda",
+  "status": "aberto",
+  "vela_ms": 1794243600000,
+  "entrada": 51.53,
+  "stop": 52.325428571428574,
+  "stop_ini": 52.325428571428574,
+  "movs": 0,
+  "degraus": [
+   [
+    1794243600000,
+    52.325428571428574
+   ]
+  ],
+  "alvo": 49.26,
+  "rr": 2.8538074712643655,
+  "risco_pct": 1.543622300462979,
+  "vol_varr": 1.2055846976132576,
+  "liq_r": 1.018318965517242,
+  "rsi_varr": 60.85726824410241,
+  "rsi_gat": 52.79906190141878,
+  "rsi_varr_norm": 39.14273175589759,
+  "nucleo": true
  }
 }
