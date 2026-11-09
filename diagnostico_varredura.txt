@@ -1,24 +1,25 @@
-início 09/11 19:43 BRT
-XRPUSDT: gatilho antigo (138 velas atrás)
-SUIUSDT: gatilho antigo (268 velas atrás)
-BNBUSDT: gatilho antigo (283 velas atrás)
-ZECUSDT: gatilho antigo (92 velas atrás)
-ENAUSDT: gatilho antigo (287 velas atrás)
-LINKUSDT: gatilho antigo (5 velas atrás)
-AVAXUSDT: gatilho antigo (268 velas atrás)
-LTCUSDT: gatilho antigo (4 velas atrás)
-AAVEUSDT: gatilho antigo (76 velas atrás)
-TAOUSDT: gatilho antigo (269 velas atrás)
-PENGUUSDT: gatilho antigo (5 velas atrás)
-HBARUSDT: gatilho antigo (17 velas atrás)
-INJUSDT: gatilho antigo (271 velas atrás)
-STRKUSDT: gatilho antigo (98 velas atrás)
+início 09/11 20:38 BRT
+XRPUSDT: gatilho antigo (139 velas atrás)
+SUIUSDT: gatilho antigo (269 velas atrás)
+BNBUSDT: gatilho antigo (284 velas atrás)
+ZECUSDT: gatilho antigo (93 velas atrás)
+ENAUSDT: gatilho antigo (288 velas atrás)
+LINKUSDT: gatilho antigo (6 velas atrás)
+AVAXUSDT: gatilho antigo (269 velas atrás)
+LTCUSDT: gatilho antigo (5 velas atrás)
+AAVEUSDT: gatilho antigo (77 velas atrás)
+TAOUSDT: gatilho antigo (270 velas atrás)
+PENGUUSDT: gatilho antigo (6 velas atrás)
+HBARUSDT: gatilho antigo (18 velas atrás)
+INJUSDT: gatilho antigo (272 velas atrás)
+STRKUSDT: gatilho antigo (99 velas atrás)
 pares (50): BTCUSDT, ETHUSDT, SOLUSDT, XRPUSDT, DOGEUSDT, HYPEUSDT, SUIUSDT, BNBUSDT, ADAUSDT, ZECUSDT, ENAUSDT, LINKUSDT, AVAXUSDT, LTCUSDT, TRUMPUSDT, AAVEUSDT, WLDUSDT, TAOUSDT, NEARUSDT, BCHUSDT, FILUSDT, PUMPUSDT, UNIUSDT, DOTUSDT, ASTERUSDT, ONDOUSDT, PENGUUSDT, TRXUSDT, CRVUSDT, ARBUSDT, XLMUSDT, APTUSDT, TIAUSDT, HBARUSDT, OPUSDT, XPLUSDT, VIRTUALUSDT, FETUSDT, INJUSDT, WLFIUSDT, TONUSDT, SEIUSDT, EIGENUSDT, ICPUSDT, PENDLEUSDT, ZROUSDT, REUSDT, POLUSDT, DASHUSDT, STRKUSDT
 gatilhos 0 | cenários 0
 stop móvel — o que o bot está vendo:
-  LINKUSDT venda: entrada 10.688  stop 10.8442  preço 10.661  (+0.17R)  | 15m até 09/11 19:15  | 0 estruturas a favor
-  LTCUSDT venda: entrada 51.53  stop 52.325429  preço 51.4  (+0.16R)  | 15m até 09/11 19:15  | 1 estruturas a favor
+  LINKUSDT venda: entrada 10.688  stop 10.8442  preço 10.657  (+0.20R)  | 15m até 09/11 20:15  | 0 estruturas a favor
+  LTCUSDT venda: entrada 51.53  stop 52.325429  preço 51.34  (+0.24R)  | 15m até 09/11 20:15  | 2 estruturas a favor
       F 09/11 18:30  stop daria 51.973523 = -0.56R  recusa (< +0.30R)
+      F 09/11 20:15  stop daria 51.687504 = -0.20R  recusa (< +0.30R)
 enviados 0 gatilhos, 0 desfechos
 placar  5 fechados: 0 gain / 5 loss  (0%)  total -5.00R  ·  2 abertos  ·  28 cenários encerrados sem entrada
 por que os cenários morreram:
