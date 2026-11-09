@@ -57,6 +57,7 @@ def registrar_gatilho(d, sim, g):
         return
     d[ch] = dict(tipo='gatilho', sim=sim, lado=g['lado'], status='aberto',
                  vela_ms=g['vela_ms'], entrada=g['entrada'], stop=g['stop'],
+                 stop_ini=g['stop'], movs=0,
                  alvo=g['alvo'], rr=g['rr'], risco_pct=g['risco_pct'],
                  vol_varr=g.get('vol_varr', 0), liq_r=g.get('liq_r', 0),
                  rsi_varr=g.get('rsi_varr'), rsi_gat=g.get('rsi_gat'),
@@ -99,7 +100,9 @@ def revisar(d, series, cfg, seguir, achar_impulsos, atr, media_volume):
 def _revisar_gatilho(r, h):
     compra = r['lado'] == 'compra'
     ent, stop, alvo = r['entrada'], r['stop'], r['alvo']
-    risco = abs(ent - stop)
+    # 1R e sempre medido pelo stop ORIGINAL, senao o trailing distorceria
+    # o resultado: stop mais perto faria qualquer perda parecer menor.
+    risco = abs(ent - r.get('stop_ini', stop))
     idx = next((i for i, c in enumerate(h) if c[0] == r['vela_ms']), None)
     if idx is None:
         return None                      # a vela ja saiu da janela baixada
@@ -113,7 +116,11 @@ def _revisar_gatilho(r, h):
             r['status'] = 'alvo' if bateu_alvo else 'stop'
             r['fim_ms'] = h[k][0]
             r['horas'] = k - idx
-            r['resultado_r'] = r['rr'] if bateu_alvo else -1.0
+            if bateu_alvo:
+                r['resultado_r'] = r['rr']
+            else:
+                saida = stop
+                r['resultado_r'] = ((saida - ent) if compra else (ent - saida)) / risco
             _csv(r)
             seta = "🎯" if bateu_alvo else "🛑"
             titulo = "ALVO" if bateu_alvo else "STOP"
@@ -192,6 +199,144 @@ def _csv(r):
                         _quando(r.get('fim_ms', r['vela_ms']))])
     except Exception as e:
         print(f"nao gravei o csv ao vivo: {e}", flush=True)
+
+
+# ------------------------------------------------- stop movel por estrutura
+# A estrutura que o Eduardo marcou: A-B-C-D formam uma perna a favor, E varre
+# o extremo de C e "falha", F rompe o extremo de D e confirma. Quando isso
+# acontece a favor da operacao, o stop sobe para o extremo de E.
+#
+# Medido em 22 meses no nucleo 20, com pivo de 1 vela (k=1) nos 15 minutos:
+#   stop fixo  R/op +0,625  rebaixamento 9,5R
+#   com stop movel  R/op +0,561  rebaixamento 6,0R
+# Custa 0,064R por operacao e corta o rebaixamento em 37%. Como o capital e
+# dimensionado pelo rebaixamento, rende 47% mais por dolar parado.
+#
+# Checar de hora em hora da exatamente o mesmo numero que checar a cada 15
+# minutos, entao nao precisa rodar mais vezes.
+K_PIVO = 1          # quantas velas de cada lado definem um pivo
+FOLGA_ATR = 0.25    # o stop fica essa distancia alem do extremo de E
+ESP_VARR = 20       # velas para E acontecer depois de D
+ESP_ROMPE = 12      # velas para F acontecer depois de E
+
+
+def _atr(h, p=14):
+    if len(h) < p + 1:
+        return [None] * len(h)
+    tr = [h[0][2] - h[0][3]]
+    for i in range(1, len(h)):
+        tr.append(max(h[i][2] - h[i][3], abs(h[i][2] - h[i-1][4]),
+                      abs(h[i][3] - h[i-1][4])))
+    out = [None] * len(h)
+    s = sum(tr[:p]) / p
+    out[p-1] = s
+    for i in range(p, len(h)):
+        s = (s * (p - 1) + tr[i]) / p
+        out[i] = s
+    return out
+
+
+def estruturas(h, k=K_PIVO, esp_varr=ESP_VARR, esp_rompe=ESP_ROMPE):
+    """{indice de F: {alta, extremo de E}}. Nunca olha para a frente."""
+    piv, pend, out = [], [], {}
+    for i in range(k, len(h)):
+        c = i - k
+        if c >= k:
+            eT = (all(h[c][2] > h[c-j][2] for j in range(1, k+1)) and
+                  all(h[c][2] >= h[c+j][2] for j in range(1, k+1)))
+            eF = (all(h[c][3] < h[c-j][3] for j in range(1, k+1)) and
+                  all(h[c][3] <= h[c+j][3] for j in range(1, k+1)))
+            for t, ok in (('T', eT), ('F', eF)):
+                if not ok:
+                    continue
+                if piv and piv[-1][1] == t:
+                    j, _ = piv[-1]
+                    if (t == 'T' and h[c][2] > h[j][2]) or \
+                       (t == 'F' and h[c][3] < h[j][3]):
+                        piv[-1] = (c, t)
+                else:
+                    piv.append((c, t))
+                if len(piv) >= 4:
+                    (a, ta), (b, tb), (cc, tc), (d, td) = piv[-4:]
+                    tip = ta + tb + tc + td
+                    if tip == 'FTFT' and h[cc][3] > h[a][3] and h[d][2] > h[b][2]:
+                        pend.append(dict(alta=True, C=cc, D=d, nasceu=i,
+                                         E=None, ext=None))
+                    elif tip == 'TFTF' and h[cc][2] < h[a][2] and h[d][3] < h[b][3]:
+                        pend.append(dict(alta=False, C=cc, D=d, nasceu=i,
+                                         E=None, ext=None))
+        vivos = []
+        for p in pend:
+            if p['E'] is None:
+                if i - p['nasceu'] > esp_varr:
+                    continue
+                if (h[i][3] < h[p['C']][3]) if p['alta'] else (h[i][2] > h[p['C']][2]):
+                    p['E'] = i
+                    p['ext'] = h[i][3] if p['alta'] else h[i][2]
+                vivos.append(p)
+                continue
+            p['ext'] = min(p['ext'], h[i][3]) if p['alta'] else max(p['ext'], h[i][2])
+            if i - p['E'] > esp_rompe:
+                continue
+            rompeu = (h[i][4] > h[p['D']][2]) if p['alta'] else (h[i][4] < h[p['D']][3])
+            if rompeu and i > p['E']:
+                out[i] = dict(alta=p['alta'], extremo=p['ext'], E=p['E'])
+                continue
+            vivos.append(p)
+        pend = vivos
+    return out
+
+
+def mover_stops(d, series15):
+    """Sobe o stop dos gatilhos abertos. Devolve as mensagens a mandar.
+
+    series15: {par: velas de 15 minutos}. O bot busca so dos pares com
+    operacao aberta, uma vez por rodada de hora em hora.
+    """
+    msgs = []
+    for ch, r in d.items():
+        if r.get('tipo') != 'gatilho' or r.get('status') != 'aberto':
+            continue
+        q = series15.get(r['sim'])
+        if not q or len(q) < 60:
+            continue
+        compra = r['lado'] == 'compra'
+        a = _atr(q, 14)
+        ev = estruturas(q)
+        # so o que fechou DEPOIS do gatilho
+        novos = [(i, e) for i, e in ev.items() if q[i][0] > r['vela_ms']]
+        if not novos:
+            continue
+        antigo = r['stop']
+        melhor = antigo
+        quando_e = None
+        for i, e in sorted(novos):
+            if e['alta'] != compra or a[i] is None:
+                continue
+            cand = (e['extremo'] - a[i] * FOLGA_ATR if compra
+                    else e['extremo'] + a[i] * FOLGA_ATR)
+            if (cand > melhor) if compra else (cand < melhor):
+                melhor = cand
+                quando_e = q[e['E']][0]
+        if melhor == antigo:
+            continue
+        r['stop'] = melhor
+        r['movs'] = r.get('movs', 0) + 1
+        risco = abs(r['entrada'] - r.get('stop_ini', antigo))
+        emR = ((melhor - r['entrada']) if compra else (r['entrada'] - melhor)) / risco
+        seta = "🟢" if compra else "🔴"
+        msgs.append(
+            f"🔒 <b>{r['sim'].replace('USDT', '/USDT')}</b> — "
+            f"stop movido   {seta} {r['lado']}\n"
+            f"gatilho de {_quando(r['vela_ms'])}\n\n"
+            f"de   <code>{antigo:.8g}</code>\n"
+            f"para <code>{melhor:.8g}</code>   "
+            f"<b>{emR:+.2f}R</b> travado\n"
+            + (f"<i>estrutura falhou em {_quando(quando_e)} e o preço "
+               f"retomou</i>\n" if quando_e else "")
+            + f"\n<i>move a ordem de stop na corretora para "
+              f"{melhor:.8g}</i>")
+    return msgs
 
 
 # ------------------------------------------------------------- placar

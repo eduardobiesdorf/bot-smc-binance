@@ -906,6 +906,28 @@ def main():
     for sim, c, _ in cenarios:
         acomp.registrar_cenario(acomps, sim, c)
 
+    # --- stop movel: 15m so dos pares com operacao aberta -------------
+    # Uma busca por par aberto, uma vez por rodada. Nao muda a cadencia do
+    # bot: medido em 22 meses, checar de hora em hora da exatamente o mesmo
+    # resultado que checar a cada 15 minutos.
+    abertos = {r['sim'] for r in acomps.values()
+               if r.get('tipo') == 'gatilho' and r.get('status') == 'aberto'}
+    s15 = {}
+    for sim in sorted(abertos):
+        try:
+            v = buscar(sim, '15m', 300)
+            if v:
+                s15[sim] = v
+        except Exception as e:
+            diag(f"{sim}: não busquei o 15m para o stop móvel ({e})")
+    if s15:
+        for m in acomp.mover_stops(acomps, s15):
+            if a.teste:
+                print(m, "\n")
+            else:
+                enviar(m)
+            diag("stop móvel: " + m.replace("\n", " | ")[:140])
+
     desfechos = acomp.revisar(acomps, series, CFG, seguir, achar_impulsos,
                               atr, media_volume)
     for m in desfechos:
