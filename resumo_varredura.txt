@@ -1,2 +1,2 @@
-09/11 16:55 BRT
-GATILHO [nucleo] LTCUSDT venda R:R 1:2.85 risco 1.54%  (vela anterior)
+09/11 17:51 BRT
+radar   VIRTUALUSDT venda — chegou no order block, esperando a limpeza

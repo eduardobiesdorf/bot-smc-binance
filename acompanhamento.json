@@ -528,7 +528,7 @@
   "tipo": "gatilho",
   "sim": "PENGUUSDT",
   "lado": "venda",
-  "status": "aberto",
+  "status": "stop",
   "vela_ms": 1794240000000,
   "entrada": 0.006362,
   "stop": 0.0064355857142857145,
@@ -548,7 +548,10 @@
   "rsi_varr": 62.8757340584976,
   "rsi_gat": 56.94150420796533,
   "rsi_varr_norm": 37.1242659415024,
-  "nucleo": false
+  "nucleo": false,
+  "fim_ms": 1794250800000,
+  "horas": 3,
+  "resultado_r": -1.0
  },
  "gat-LTCUSDT-1794243600000": {
   "tipo": "gatilho",
@@ -575,5 +578,17 @@
   "rsi_gat": 52.79906190141878,
   "rsi_varr_norm": 39.14273175589759,
   "nucleo": true
+ },
+ "cen-VIRTUALUSDT-1794171600000": {
+  "tipo": "cenario",
+  "sim": "VIRTUALUSDT",
+  "lado": "venda",
+  "status": "aberto",
+  "vela_ms": 1794250800000,
+  "imp_fim_ms": 1794171600000,
+  "alvo": 0.52,
+  "nota": "chegou no order block, esperando a limpeza",
+  "vol_varr": 0.0,
+  "nucleo": false
  }
 }
