@@ -1,4 +1,4 @@
-início 08/11 21:47 BRT
+início 08/11 21:55 BRT
 XRPUSDT: gatilho antigo (116 velas atrás)
 SUIUSDT: gatilho antigo (246 velas atrás)
 BNBUSDT: gatilho antigo (261 velas atrás)
@@ -11,3 +11,9 @@ INJUSDT: gatilho antigo (249 velas atrás)
 STRKUSDT: gatilho antigo (76 velas atrás)
 pares (50): BTCUSDT, ETHUSDT, SOLUSDT, XRPUSDT, DOGEUSDT, HYPEUSDT, SUIUSDT, BNBUSDT, ADAUSDT, ZECUSDT, ENAUSDT, LINKUSDT, AVAXUSDT, LTCUSDT, TRUMPUSDT, AAVEUSDT, WLDUSDT, TAOUSDT, NEARUSDT, BCHUSDT, FILUSDT, PUMPUSDT, UNIUSDT, DOTUSDT, ASTERUSDT, ONDOUSDT, PENGUUSDT, TRXUSDT, CRVUSDT, ARBUSDT, XLMUSDT, APTUSDT, TIAUSDT, HBARUSDT, OPUSDT, XPLUSDT, VIRTUALUSDT, FETUSDT, INJUSDT, WLFIUSDT, TONUSDT, SEIUSDT, EIGENUSDT, ICPUSDT, PENDLEUSDT, ZROUSDT, REUSDT, POLUSDT, DASHUSDT, STRKUSDT
 gatilhos 0 | cenários 1
+stop móvel — o que o bot está vendo:
+  AAVEUSDT venda: entrada 131.56  stop 133.7613  preço 127.53  (+1.83R)  | 15m até 08/11 21:30  | 4 estruturas a favor
+      F 07/11 08:00  stop daria 132.24321 = -0.31R  recusa (< +0.30R)
+      F 07/11 10:00  stop daria 132.42911 = -0.39R  recusa (< +0.30R)
+      F 07/11 13:45  stop daria 133.1306 = -0.71R  recusa (< +0.30R)
+      F 08/11 03:30  stop daria 131.2637 = +0.13R  recusa (< +0.30R)
