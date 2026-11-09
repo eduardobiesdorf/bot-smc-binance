@@ -1,27 +1,29 @@
-início 09/11 12:58 BRT
-XRPUSDT: gatilho antigo (131 velas atrás)
-SUIUSDT: gatilho antigo (261 velas atrás)
-BNBUSDT: gatilho antigo (276 velas atrás)
-ZECUSDT: gatilho antigo (85 velas atrás)
-ENAUSDT: gatilho antigo (280 velas atrás)
-AVAXUSDT: gatilho antigo (261 velas atrás)
-AAVEUSDT: gatilho antigo (69 velas atrás)
-TAOUSDT: gatilho antigo (262 velas atrás)
-HBARUSDT: gatilho antigo (10 velas atrás)
-INJUSDT: gatilho antigo (264 velas atrás)
-STRKUSDT: gatilho antigo (91 velas atrás)
+início 09/11 14:07 BRT
+XRPUSDT: gatilho antigo (133 velas atrás)
+SUIUSDT: gatilho antigo (263 velas atrás)
+BNBUSDT: gatilho antigo (278 velas atrás)
+ZECUSDT: gatilho antigo (87 velas atrás)
+ENAUSDT: gatilho antigo (282 velas atrás)
+GATILHO LINKUSDT venda vela 09/11 13:00 entrada 10.688 R:R 1:3.57
+AVAXUSDT: gatilho antigo (263 velas atrás)
+AAVEUSDT: gatilho antigo (71 velas atrás)
+TAOUSDT: gatilho antigo (264 velas atrás)
+GATILHO PENGUUSDT venda vela 09/11 13:00 entrada 0.006362 R:R 1:5.94
+HBARUSDT: gatilho antigo (12 velas atrás)
+INJUSDT: gatilho antigo (266 velas atrás)
+STRKUSDT: gatilho antigo (93 velas atrás)
 pares (50): BTCUSDT, ETHUSDT, SOLUSDT, XRPUSDT, DOGEUSDT, HYPEUSDT, SUIUSDT, BNBUSDT, ADAUSDT, ZECUSDT, ENAUSDT, LINKUSDT, AVAXUSDT, LTCUSDT, TRUMPUSDT, AAVEUSDT, WLDUSDT, TAOUSDT, NEARUSDT, BCHUSDT, FILUSDT, PUMPUSDT, UNIUSDT, DOTUSDT, ASTERUSDT, ONDOUSDT, PENGUUSDT, TRXUSDT, CRVUSDT, ARBUSDT, XLMUSDT, APTUSDT, TIAUSDT, HBARUSDT, OPUSDT, XPLUSDT, VIRTUALUSDT, FETUSDT, INJUSDT, WLFIUSDT, TONUSDT, SEIUSDT, EIGENUSDT, ICPUSDT, PENDLEUSDT, ZROUSDT, REUSDT, POLUSDT, DASHUSDT, STRKUSDT
-gatilhos 0 | cenários 7
+gatilhos 2 | cenários 3
+stop móvel — o que o bot está vendo:
+  LINKUSDT venda: entrada 10.688  stop 10.8442  preço 10.688  (+0.00R)  | 15m até 09/11 13:45  | 0 estruturas a favor
+  PENGUUSDT venda: entrada 0.006362  stop 0.0064355857  preço 0.006362  (+0.00R)  | 15m até 09/11 13:45  | 0 estruturas a favor
 TOKEN: ok 46 chars | CHAT_ID: ok 10 chars
-HTTP 200: {"ok":true,"result":{"message_id":248,"from":{"id":9205915638,"is_bot":true,"first_name":"SMC Trading Bot","username":"smc_crypto_alerts_bot"},"chat":{"id":[removido],"first_name":"Eduardo","last_name
-desfecho: ⚪ <b>ONDO/USDT</b> — cenário de venda encerrado <b>sem entrada</b> | <i>varredura com 1.02x o volume médio, mínimo 1.20x — não vira gatilho<
+HTTP 200: {"ok":true,"result":{"message_id":256,"from":{"id":9205915638,"is_bot":true,"first_name":"SMC Trading Bot","username":"smc_crypto_alerts_bot"},"chat":{"id":[removido],"first_name":"Eduardo","last_name
+desfecho: ⚪ <b>EIGEN/USDT</b> — cenário de venda encerrado <b>sem entrada</b> | <i>piscina a 1.7R da entrada, máximo 1.5R</i>
 TOKEN: ok 46 chars | CHAT_ID: ok 10 chars
-HTTP 200: {"ok":true,"result":{"message_id":249,"from":{"id":9205915638,"is_bot":true,"first_name":"SMC Trading Bot","username":"smc_crypto_alerts_bot"},"chat":{"id":[removido],"first_name":"Eduardo","last_name
-desfecho: ⚪ <b>WLD/USDT</b> — cenário de venda encerrado <b>sem entrada</b> | <i>nem varreu o order block nem chegou perto dele</i>
-TOKEN: ok 46 chars | CHAT_ID: ok 10 chars
-HTTP 200: {"ok":true,"result":{"message_id":250,"from":{"id":9205915638,"is_bot":true,"first_name":"SMC Trading Bot","username":"smc_crypto_alerts_bot"},"chat":{"id":[removido],"first_name":"Eduardo","last_name
-enviados 0 gatilhos, 2 desfechos
-placar  4 fechados: 0 gain / 4 loss  (0%)  total -4.00R  ·  0 abertos  ·  25 cenários encerrados sem entrada
+HTTP 200: {"ok":true,"result":{"message_id":257,"from":{"id":9205915638,"is_bot":true,"first_name":"SMC Trading Bot","username":"smc_crypto_alerts_bot"},"chat":{"id":[removido],"first_name":"Eduardo","last_name
+enviados 2 gatilhos, 1 desfechos
+placar  4 fechados: 0 gain / 4 loss  (0%)  total -4.00R  ·  2 abertos  ·  26 cenários encerrados sem entrada
 por que os cenários morreram:
   10x  nem varreu o order block nem chegou perto dele
   8x  furou o order block fundo demais (> 2.5 ATR): virou continuação, não varredura
@@ -29,3 +31,4 @@ por que os cenários morreram:
   1x  varredura com 0.86x o volume médio, mínimo 1.20x — não vira gatilho
   1x  varredura com 0.63x o volume médio, mínimo 1.20x — não vira gatilho
   1x  varredura com 1.02x o volume médio, mínimo 1.20x — não vira gatilho
+  1x  piscina a 1.7R da entrada, máximo 1.5R

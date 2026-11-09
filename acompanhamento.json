@@ -476,7 +476,7 @@
   "tipo": "cenario",
   "sim": "PENGUUSDT",
   "lado": "venda",
-  "status": "aberto",
+  "status": "virou_gatilho",
   "vela_ms": 1794232800000,
   "imp_fim_ms": 1794171600000,
   "alvo": 0.005925,
@@ -488,12 +488,65 @@
   "tipo": "cenario",
   "sim": "EIGENUSDT",
   "lado": "venda",
-  "status": "aberto",
+  "status": "morreu",
   "vela_ms": 1794232800000,
   "imp_fim_ms": 1794171600000,
   "alvo": 0.1523,
   "nota": "chegou no order block, esperando a limpeza",
   "vol_varr": 0.0,
+  "nucleo": false,
+  "motivo": "piscina a 1.7R da entrada, máximo 1.5R"
+ },
+ "gat-LINKUSDT-1794240000000": {
+  "tipo": "gatilho",
+  "sim": "LINKUSDT",
+  "lado": "venda",
+  "status": "aberto",
+  "vela_ms": 1794240000000,
+  "entrada": 10.688,
+  "stop": 10.8442,
+  "stop_ini": 10.8442,
+  "movs": 0,
+  "degraus": [
+   [
+    1794240000000,
+    10.8442
+   ]
+  ],
+  "alvo": 10.13,
+  "rr": 3.572343149807935,
+  "risco_pct": 1.4614520958083843,
+  "vol_varr": 1.8825862229287917,
+  "liq_r": 0.9987195902688777,
+  "rsi_varr": 58.33895937287977,
+  "rsi_gat": 54.94634546550484,
+  "rsi_varr_norm": 41.66104062712023,
+  "nucleo": true
+ },
+ "gat-PENGUUSDT-1794240000000": {
+  "tipo": "gatilho",
+  "sim": "PENGUUSDT",
+  "lado": "venda",
+  "status": "aberto",
+  "vela_ms": 1794240000000,
+  "entrada": 0.006362,
+  "stop": 0.0064355857142857145,
+  "stop_ini": 0.0064355857142857145,
+  "movs": 0,
+  "degraus": [
+   [
+    1794240000000,
+    0.0064355857142857145
+   ]
+  ],
+  "alvo": 0.005925,
+  "rr": 5.938652688798239,
+  "risco_pct": 1.156644361611363,
+  "vol_varr": 1.6680536218824376,
+  "liq_r": 1.1143467287905229,
+  "rsi_varr": 62.8757340584976,
+  "rsi_gat": 56.94150420796533,
+  "rsi_varr_norm": 37.1242659415024,
   "nucleo": false
  }
 }
