@@ -222,7 +222,7 @@ def _csv(r):
 # Medido em 22 meses no nucleo 20, com pivo de 1 vela (k=1) nos 15 minutos:
 #   stop fixo                      R/op +0,625  rebaixamento 9,5R
 #   movendo sempre                 R/op +0,561  rebaixamento 6,0R
-#   movendo so se travar >= +0,3R  R/op +0,690  rebaixamento 6,5R
+#   movendo so se travar >= +0,3R  R/op +0,690  rebaixamento 6,5R  <-- este
 # A ultima e melhor nas duas pontas. Mover o stop enquanto ele ainda trava
 # prejuizo economiza pouco na perda e tira de muita vencedora -- foi o que
 # aconteceria no AAVE de 06/11, cortado a -0,28R antes de ir a +2,2R.
@@ -231,12 +231,14 @@ def _csv(r):
 # minutos, entao nao precisa rodar mais vezes.
 K_PIVO = 1          # quantas velas de cada lado definem um pivo
 FOLGA_ATR = 0.25    # o stop fica essa distancia alem do extremo de E
-MIN_TRAVA = 0.10    # so move se o stop novo travar pelo menos isso em R
-#                   # 0,10R cobre a taxa (0,10% / stop de ~1,7% = 0,06R),
-#                   # entao a operacao nunca fecha no vermelho depois de
-#                   # movida. Medido: >=0,0R e >=0,1R dao identico (+0,610);
-#                   # >=0,3R da +0,690, mas a diferenca sao 4 operacoes em
-#                   # 83 -- ruido. Fico na regra menos ajustada.
+MIN_TRAVA = 0.30    # so move se o stop novo travar pelo menos isso em R
+#                   # Medido no nucleo 20, 22 meses, k=1 nos 15m:
+#                   #   stop fixo      R/op +0,625  rebaixamento 9,5R
+#                   #   move sempre    R/op +0,561  rebaixamento 6,0R
+#                   #   trava >=0,1R   R/op +0,610  rebaixamento 6,5R
+#                   #   trava >=0,3R   R/op +0,690  rebaixamento 6,5R
+#                   # 0,3R e o unico que ganha nas DUAS pontas. Abaixo
+#                   # disso o stop aperta cedo demais e corta vencedora.
 ESP_VARR = 20       # velas para E acontecer depois de D
 ESP_ROMPE = 12      # velas para F acontecer depois de E
 
