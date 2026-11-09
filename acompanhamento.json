@@ -583,12 +583,13 @@
   "tipo": "cenario",
   "sim": "VIRTUALUSDT",
   "lado": "venda",
-  "status": "aberto",
+  "status": "morreu",
   "vela_ms": 1794250800000,
   "imp_fim_ms": 1794171600000,
   "alvo": 0.52,
   "nota": "chegou no order block, esperando a limpeza",
   "vol_varr": 0.0,
-  "nucleo": false
+  "nucleo": false,
+  "motivo": "nem varreu o order block nem chegou perto dele"
  }
 }
