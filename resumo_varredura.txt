@@ -1,2 +1,3 @@
-09/11 05:27 BRT
-nada
+09/11 06:58 BRT
+radar   OPUSDT venda — chegou no order block, esperando a limpeza
+radar   DASHUSDT venda — chegou no order block, esperando a limpeza

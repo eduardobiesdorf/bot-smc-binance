@@ -376,5 +376,17 @@
   "rsi_gat": 51.871895444232784,
   "rsi_varr_norm": 47.557938741866664,
   "nucleo": false
+ },
+ "cen-DASHUSDT-1794171600000": {
+  "tipo": "cenario",
+  "sim": "DASHUSDT",
+  "lado": "venda",
+  "status": "aberto",
+  "vela_ms": 1794211200000,
+  "imp_fim_ms": 1794171600000,
+  "alvo": 44.33,
+  "nota": "chegou no order block, esperando a limpeza",
+  "vol_varr": 0.0,
+  "nucleo": false
  }
 }
