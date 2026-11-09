@@ -1,7 +1,8 @@
-09/11 11:53 BRT
-radar   LTCUSDT venda — chegou no order block, esperando a limpeza
-radar   WLDUSDT venda — chegou no order block, esperando a limpeza
-radar   ONDOUSDT venda — chegou no order block, esperando a limpeza
-radar   APTUSDT venda — chegou no order block, esperando a limpeza
+09/11 12:59 BRT
+radar   LINKUSDT venda — limpou o order block, esperando a reversão
+radar   LTCUSDT venda — limpou o order block, esperando a reversão
+radar   UNIUSDT venda — chegou no order block, esperando a limpeza
+radar   PENGUUSDT venda — chegou no order block, esperando a limpeza
+radar   EIGENUSDT venda — chegou no order block, esperando a limpeza
 radar   POLUSDT venda — limpou o order block, esperando a reversão
 radar   DASHUSDT venda — chegou no order block, esperando a limpeza

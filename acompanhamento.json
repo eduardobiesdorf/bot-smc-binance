@@ -438,13 +438,14 @@
   "tipo": "cenario",
   "sim": "ONDOUSDT",
   "lado": "venda",
-  "status": "aberto",
+  "status": "morreu",
   "vela_ms": 1794225600000,
   "imp_fim_ms": 1794171600000,
   "alvo": 0.3429,
   "nota": "chegou no order block, esperando a limpeza",
   "vol_varr": 0.0,
-  "nucleo": false
+  "nucleo": false,
+  "motivo": "varredura com 1.02x o volume médio, mínimo 1.20x — não vira gatilho"
  },
  "cen-POLUSDT-1794175200000": {
   "tipo": "cenario",
@@ -462,12 +463,37 @@
   "tipo": "cenario",
   "sim": "WLDUSDT",
   "lado": "venda",
-  "status": "aberto",
+  "status": "morreu",
   "vela_ms": 1794229200000,
   "imp_fim_ms": 1794171600000,
   "alvo": 0.3033,
   "nota": "chegou no order block, esperando a limpeza",
   "vol_varr": 0.0,
-  "nucleo": true
+  "nucleo": true,
+  "motivo": "nem varreu o order block nem chegou perto dele"
+ },
+ "cen-PENGUUSDT-1794171600000": {
+  "tipo": "cenario",
+  "sim": "PENGUUSDT",
+  "lado": "venda",
+  "status": "aberto",
+  "vela_ms": 1794232800000,
+  "imp_fim_ms": 1794171600000,
+  "alvo": 0.005925,
+  "nota": "chegou no order block, esperando a limpeza",
+  "vol_varr": 0.0,
+  "nucleo": false
+ },
+ "cen-EIGENUSDT-1794171600000": {
+  "tipo": "cenario",
+  "sim": "EIGENUSDT",
+  "lado": "venda",
+  "status": "aberto",
+  "vela_ms": 1794232800000,
+  "imp_fim_ms": 1794171600000,
+  "alvo": 0.1523,
+  "nota": "chegou no order block, esperando a limpeza",
+  "vol_varr": 0.0,
+  "nucleo": false
  }
 }
