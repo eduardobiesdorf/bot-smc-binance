@@ -226,7 +226,7 @@
   "tipo": "gatilho",
   "sim": "AAVEUSDT",
   "lado": "venda",
-  "status": "aberto",
+  "status": "stop",
   "vela_ms": 1793984400000,
   "entrada": 131.56,
   "stop": 133.7613,
@@ -246,7 +246,10 @@
     1793984400000,
     133.7613
    ]
-  ]
+  ],
+  "fim_ms": 1794225600000,
+  "horas": 67,
+  "resultado_r": -1.0
  },
  "cen-NEARUSDT-1794171600000": {
   "tipo": "cenario",
@@ -355,7 +358,7 @@
   "tipo": "gatilho",
   "sim": "HBARUSDT",
   "lado": "venda",
-  "status": "aberto",
+  "status": "stop",
   "vela_ms": 1794196800000,
   "entrada": 0.06679,
   "stop": 0.06728007142857143,
@@ -375,7 +378,10 @@
   "rsi_varr": 52.442061258133336,
   "rsi_gat": 51.871895444232784,
   "rsi_varr_norm": 47.557938741866664,
-  "nucleo": false
+  "nucleo": false,
+  "fim_ms": 1794222000000,
+  "horas": 7,
+  "resultado_r": -1.0
  },
  "cen-DASHUSDT-1794171600000": {
   "tipo": "cenario",
@@ -389,5 +395,65 @@
   "vol_varr": 0.0,
   "nucleo": false,
   "motivo": "nem varreu o order block nem chegou perto dele"
+ },
+ "cen-LINKUSDT-1794171600000": {
+  "tipo": "cenario",
+  "sim": "LINKUSDT",
+  "lado": "venda",
+  "status": "aberto",
+  "vela_ms": 1794225600000,
+  "imp_fim_ms": 1794171600000,
+  "alvo": 10.13,
+  "nota": "chegou no order block, esperando a limpeza",
+  "vol_varr": 0.0,
+  "nucleo": true
+ },
+ "cen-LTCUSDT-1794171600000": {
+  "tipo": "cenario",
+  "sim": "LTCUSDT",
+  "lado": "venda",
+  "status": "aberto",
+  "vela_ms": 1794225600000,
+  "imp_fim_ms": 1794171600000,
+  "alvo": 49.26,
+  "nota": "chegou no order block, esperando a limpeza",
+  "vol_varr": 0.0,
+  "nucleo": true
+ },
+ "cen-PUMPUSDT-1794175200000": {
+  "tipo": "cenario",
+  "sim": "PUMPUSDT",
+  "lado": "venda",
+  "status": "aberto",
+  "vela_ms": 1794225600000,
+  "imp_fim_ms": 1794175200000,
+  "alvo": 0.003478,
+  "nota": "chegou no order block, esperando a limpeza",
+  "vol_varr": 0.0,
+  "nucleo": false
+ },
+ "cen-ONDOUSDT-1794171600000": {
+  "tipo": "cenario",
+  "sim": "ONDOUSDT",
+  "lado": "venda",
+  "status": "aberto",
+  "vela_ms": 1794225600000,
+  "imp_fim_ms": 1794171600000,
+  "alvo": 0.3429,
+  "nota": "chegou no order block, esperando a limpeza",
+  "vol_varr": 0.0,
+  "nucleo": false
+ },
+ "cen-POLUSDT-1794175200000": {
+  "tipo": "cenario",
+  "sim": "POLUSDT",
+  "lado": "venda",
+  "status": "aberto",
+  "vela_ms": 1794225600000,
+  "imp_fim_ms": 1794175200000,
+  "alvo": 0.08593,
+  "nota": "limpou o order block, esperando a reversão",
+  "vol_varr": 3.739985502075626,
+  "nucleo": false
  }
 }

@@ -1,3 +1,5 @@
 data_brt,par,faixa,lado,entrada,stop,alvo,rr,risco_pct,vol_varr,liq_r,rsi_varr,rsi_varr_norm,rsi_gat,desfecho,horas,resultado_r,fim_brt
 05/11 22:00,ZECUSDT,nucleo,venda,1307.04,1337.316,1213.33,3.10,2.32,1.98,0.93,61.2,38.8,55.7,stop,13,-1.000,06/11 11:00
 05/11 16:00,STRKUSDT,extra,compra,0.04052,0.038338071,0.04519,2.14,5.38,9.44,0.95,26.0,26.0,38.2,stop,70,-1.000,08/11 14:00
+06/11 14:00,AAVEUSDT,nucleo,venda,131.56,133.7613,122.46,4.13,1.67,1.99,0.99,57.3,42.7,53.6,stop,67,-1.000,09/11 09:00
+09/11 01:00,HBARUSDT,extra,venda,0.06679,0.067280071,0.06421,5.26,0.73,1.40,0.88,52.4,47.6,51.9,stop,7,-1.000,09/11 08:00
