@@ -921,6 +921,9 @@ def main():
         except Exception as e:
             diag(f"{sim}: não busquei o 15m para o stop móvel ({e})")
     if s15:
+        diag("stop móvel — o que o bot está vendo:")
+        for L in acomp.diagnostico_stops(acomps, s15):
+            diag(L)
         for m in acomp.mover_stops(acomps, s15):
             if a.teste:
                 print(m, "\n")

@@ -310,6 +310,37 @@ def estruturas(h, k=K_PIVO, esp_varr=ESP_VARR, esp_rompe=ESP_ROMPE):
     return out
 
 
+def diagnostico_stops(d, series15):
+    """Por que o stop (nao) moveu. Vai para o log, nao para o Telegram."""
+    linhas = []
+    for ch, r in d.items():
+        if r.get('tipo') != 'gatilho' or r.get('status') != 'aberto':
+            continue
+        q = series15.get(r['sim'])
+        if not q:
+            linhas.append(f"  {r['sim']}: sem 15m")
+            continue
+        compra = r['lado'] == 'compra'
+        risco = abs(r['entrada'] - r.get('stop_ini', r['stop']))
+        a = _atr(q, 14)
+        ev = estruturas(q)
+        cand = [(i, e) for i, e in sorted(ev.items())
+                if q[i][0] > r['vela_ms'] and e['alta'] == compra and a[i]]
+        linhas.append(
+            f"  {r['sim']} {r['lado']}: entrada {r['entrada']:.8g}  "
+            f"stop {r['stop']:.8g}  preço {q[-1][4]:.8g}  "
+            f"({((r['entrada']-q[-1][4]) if not compra else (q[-1][4]-r['entrada']))/risco:+.2f}R)  "
+            f"| 15m até {_quando(q[-1][0])}  | {len(cand)} estruturas a favor")
+        for i, e in cand[-4:]:
+            niv = (e['extremo'] - a[i] * FOLGA_ATR if compra
+                   else e['extremo'] + a[i] * FOLGA_ATR)
+            emR = ((niv - r['entrada']) if compra else (r['entrada'] - niv)) / risco
+            linhas.append(
+                f"      F {_quando(q[i][0])}  stop daria {niv:.8g} = {emR:+.2f}R  "
+                + ("ACEITA" if emR >= MIN_TRAVA else f"recusa (< {MIN_TRAVA:+.2f}R)"))
+    return linhas
+
+
 def mover_stops(d, series15):
     """Sobe o stop dos gatilhos abertos. Devolve as mensagens a mandar.
 
