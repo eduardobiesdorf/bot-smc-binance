@@ -265,13 +265,14 @@
   "tipo": "cenario",
   "sim": "UNIUSDT",
   "lado": "venda",
-  "status": "aberto",
+  "status": "morreu",
   "vela_ms": 1794182400000,
   "imp_fim_ms": 1794175200000,
   "alvo": 6.625,
   "nota": "chegou no order block, esperando a limpeza",
   "vol_varr": 0.0,
-  "nucleo": false
+  "nucleo": false,
+  "motivo": "nem varreu o order block nem chegou perto dele"
  },
  "cen-ARBUSDT-1794171600000": {
   "tipo": "cenario",
@@ -315,13 +316,14 @@
   "tipo": "cenario",
   "sim": "FILUSDT",
   "lado": "venda",
-  "status": "aberto",
+  "status": "morreu",
   "vela_ms": 1794189600000,
   "imp_fim_ms": 1794171600000,
   "alvo": 0.7189,
   "nota": "chegou no order block, esperando a limpeza",
   "vol_varr": 0.0,
-  "nucleo": false
+  "nucleo": false,
+  "motivo": "nem varreu o order block nem chegou perto dele"
  },
  "cen-APTUSDT-1794171600000": {
   "tipo": "cenario",
@@ -340,13 +342,14 @@
   "tipo": "cenario",
   "sim": "OPUSDT",
   "lado": "venda",
-  "status": "aberto",
+  "status": "morreu",
   "vela_ms": 1794189600000,
   "imp_fim_ms": 1794171600000,
   "alvo": 0.0952,
   "nota": "chegou no order block, esperando a limpeza",
   "vol_varr": 0.0,
-  "nucleo": false
+  "nucleo": false,
+  "motivo": "nem varreu o order block nem chegou perto dele"
  },
  "gat-HBARUSDT-1794196800000": {
   "tipo": "gatilho",
