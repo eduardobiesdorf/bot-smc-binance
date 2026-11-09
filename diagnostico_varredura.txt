@@ -1,26 +1,32 @@
-início 08/11 21:59 BRT
-XRPUSDT: gatilho antigo (116 velas atrás)
-SUIUSDT: gatilho antigo (246 velas atrás)
-BNBUSDT: gatilho antigo (261 velas atrás)
-ZECUSDT: gatilho antigo (70 velas atrás)
-ENAUSDT: gatilho antigo (265 velas atrás)
-AVAXUSDT: gatilho antigo (246 velas atrás)
-AAVEUSDT: gatilho antigo (54 velas atrás)
-TAOUSDT: gatilho antigo (247 velas atrás)
-INJUSDT: gatilho antigo (250 velas atrás)
-STRKUSDT: gatilho antigo (77 velas atrás)
+início 08/11 23:10 BRT
+XRPUSDT: gatilho antigo (118 velas atrás)
+SUIUSDT: gatilho antigo (248 velas atrás)
+BNBUSDT: gatilho antigo (263 velas atrás)
+ZECUSDT: gatilho antigo (72 velas atrás)
+ENAUSDT: gatilho antigo (267 velas atrás)
+AVAXUSDT: gatilho antigo (248 velas atrás)
+AAVEUSDT: gatilho antigo (56 velas atrás)
+TAOUSDT: gatilho antigo (249 velas atrás)
+INJUSDT: gatilho antigo (251 velas atrás)
+STRKUSDT: gatilho antigo (78 velas atrás)
 pares (50): BTCUSDT, ETHUSDT, SOLUSDT, XRPUSDT, DOGEUSDT, HYPEUSDT, SUIUSDT, BNBUSDT, ADAUSDT, ZECUSDT, ENAUSDT, LINKUSDT, AVAXUSDT, LTCUSDT, TRUMPUSDT, AAVEUSDT, WLDUSDT, TAOUSDT, NEARUSDT, BCHUSDT, FILUSDT, PUMPUSDT, UNIUSDT, DOTUSDT, ASTERUSDT, ONDOUSDT, PENGUUSDT, TRXUSDT, CRVUSDT, ARBUSDT, XLMUSDT, APTUSDT, TIAUSDT, HBARUSDT, OPUSDT, XPLUSDT, VIRTUALUSDT, FETUSDT, INJUSDT, WLFIUSDT, TONUSDT, SEIUSDT, EIGENUSDT, ICPUSDT, PENDLEUSDT, ZROUSDT, REUSDT, POLUSDT, DASHUSDT, STRKUSDT
-gatilhos 0 | cenários 5
+gatilhos 0 | cenários 4
 stop móvel — o que o bot está vendo:
-  AAVEUSDT venda: entrada 131.56  stop 133.7613  preço 128.68  (+1.31R)  | 15m até 08/11 21:45  | 4 estruturas a favor
+  AAVEUSDT venda: entrada 131.56  stop 133.7613  preço 129.66  (+0.86R)  | 15m até 08/11 22:45  | 4 estruturas a favor
       F 07/11 08:00  stop daria 132.24321 = -0.31R  recusa (< +0.30R)
       F 07/11 10:00  stop daria 132.42911 = -0.39R  recusa (< +0.30R)
       F 07/11 13:45  stop daria 133.1306 = -0.71R  recusa (< +0.30R)
       F 08/11 03:30  stop daria 131.2637 = +0.13R  recusa (< +0.30R)
-enviados 0 gatilhos, 0 desfechos
-placar  2 fechados: 0 gain / 2 loss  (0%)  total -2.00R  ·  1 abertos  ·  13 cenários encerrados sem entrada
+TOKEN: ok 46 chars | CHAT_ID: ok 10 chars
+HTTP 200: {"ok":true,"result":{"message_id":205,"from":{"id":9205915638,"is_bot":true,"first_name":"SMC Trading Bot","username":"smc_crypto_alerts_bot"},"chat":{"id":[removido],"first_name":"Eduardo","last_name
+desfecho: ⚪ <b>FET/USDT</b> — cenário de venda encerrado <b>sem entrada</b> | <i>varredura com 0.63x o volume médio, mínimo 1.20x — não vira gatilho</
+TOKEN: ok 46 chars | CHAT_ID: ok 10 chars
+HTTP 200: {"ok":true,"result":{"message_id":206,"from":{"id":9205915638,"is_bot":true,"first_name":"SMC Trading Bot","username":"smc_crypto_alerts_bot"},"chat":{"id":[removido],"first_name":"Eduardo","last_name
+enviados 0 gatilhos, 1 desfechos
+placar  2 fechados: 0 gain / 2 loss  (0%)  total -2.00R  ·  1 abertos  ·  14 cenários encerrados sem entrada
 por que os cenários morreram:
   7x  furou o order block fundo demais (> 2.5 ATR): virou continuação, não varredura
   3x  varreu mas não reverteu em 4 velas
   2x  nem varreu o order block nem chegou perto dele
   1x  varredura com 0.86x o volume médio, mínimo 1.20x — não vira gatilho
+  1x  varredura com 0.63x o volume médio, mínimo 1.20x — não vira gatilho
