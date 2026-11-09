@@ -1,37 +1,30 @@
-início 09/11 10:06 BRT
-XRPUSDT: gatilho antigo (129 velas atrás)
-SUIUSDT: gatilho antigo (259 velas atrás)
-BNBUSDT: gatilho antigo (274 velas atrás)
-ZECUSDT: gatilho antigo (83 velas atrás)
-ENAUSDT: gatilho antigo (278 velas atrás)
-AVAXUSDT: gatilho antigo (259 velas atrás)
-AAVEUSDT: gatilho antigo (67 velas atrás)
-TAOUSDT: gatilho antigo (260 velas atrás)
-HBARUSDT: gatilho antigo (8 velas atrás)
-INJUSDT: gatilho antigo (262 velas atrás)
-STRKUSDT: gatilho antigo (89 velas atrás)
+início 09/11 11:53 BRT
+XRPUSDT: gatilho antigo (130 velas atrás)
+SUIUSDT: gatilho antigo (260 velas atrás)
+BNBUSDT: gatilho antigo (275 velas atrás)
+ZECUSDT: gatilho antigo (84 velas atrás)
+ENAUSDT: gatilho antigo (279 velas atrás)
+AVAXUSDT: gatilho antigo (260 velas atrás)
+AAVEUSDT: gatilho antigo (68 velas atrás)
+TAOUSDT: gatilho antigo (261 velas atrás)
+HBARUSDT: gatilho antigo (9 velas atrás)
+INJUSDT: gatilho antigo (263 velas atrás)
+STRKUSDT: gatilho antigo (90 velas atrás)
 pares (50): BTCUSDT, ETHUSDT, SOLUSDT, XRPUSDT, DOGEUSDT, HYPEUSDT, SUIUSDT, BNBUSDT, ADAUSDT, ZECUSDT, ENAUSDT, LINKUSDT, AVAXUSDT, LTCUSDT, TRUMPUSDT, AAVEUSDT, WLDUSDT, TAOUSDT, NEARUSDT, BCHUSDT, FILUSDT, PUMPUSDT, UNIUSDT, DOTUSDT, ASTERUSDT, ONDOUSDT, PENGUUSDT, TRXUSDT, CRVUSDT, ARBUSDT, XLMUSDT, APTUSDT, TIAUSDT, HBARUSDT, OPUSDT, XPLUSDT, VIRTUALUSDT, FETUSDT, INJUSDT, WLFIUSDT, TONUSDT, SEIUSDT, EIGENUSDT, ICPUSDT, PENDLEUSDT, ZROUSDT, REUSDT, POLUSDT, DASHUSDT, STRKUSDT
-gatilhos 0 | cenários 8
-stop móvel — o que o bot está vendo:
-  AAVEUSDT venda: entrada 131.56  stop 133.7613  preço 133.73  (-0.99R)  | 15m até 09/11 09:45  | 4 estruturas a favor
-      F 07/11 08:00  stop daria 132.24318 = -0.31R  recusa (< +0.30R)
-      F 07/11 10:00  stop daria 132.42909 = -0.39R  recusa (< +0.30R)
-      F 07/11 13:45  stop daria 133.13059 = -0.71R  recusa (< +0.30R)
-      F 08/11 03:30  stop daria 131.2637 = +0.13R  recusa (< +0.30R)
-  HBARUSDT venda: entrada 0.06679  stop 0.067280071  preço 0.06877  (-4.04R)  | 15m até 09/11 09:45  | 0 estruturas a favor
+gatilhos 0 | cenários 6
 TOKEN: ok 46 chars | CHAT_ID: ok 10 chars
-HTTP 200: {"ok":true,"result":{"message_id":234,"from":{"id":9205915638,"is_bot":true,"first_name":"SMC Trading Bot","username":"smc_crypto_alerts_bot"},"chat":{"id":[removido],"first_name":"Eduardo","last_name
-desfecho: 🛑 <b>AAVE/USDT</b> — STOP | gatilho de 06/11 14:00 → 09/11 09:00 (67h depois) | entrada <code>131.56</code> → <code>133.7613</code> | result
+HTTP 200: {"ok":true,"result":{"message_id":241,"from":{"id":9205915638,"is_bot":true,"first_name":"SMC Trading Bot","username":"smc_crypto_alerts_bot"},"chat":{"id":[removido],"first_name":"Eduardo","last_name
+desfecho: ⚪ <b>LINK/USDT</b> — cenário de venda encerrado <b>sem entrada</b> | <i>nem varreu o order block nem chegou perto dele</i>
 TOKEN: ok 46 chars | CHAT_ID: ok 10 chars
-HTTP 200: {"ok":true,"result":{"message_id":235,"from":{"id":9205915638,"is_bot":true,"first_name":"SMC Trading Bot","username":"smc_crypto_alerts_bot"},"chat":{"id":[removido],"first_name":"Eduardo","last_name
-desfecho: 🛑 <b>HBAR/USDT</b> — STOP | gatilho de 09/11 01:00 → 09/11 08:00 (7h depois) | entrada <code>0.06679</code> → <code>0.067280071</code> | res
+HTTP 200: {"ok":true,"result":{"message_id":242,"from":{"id":9205915638,"is_bot":true,"first_name":"SMC Trading Bot","username":"smc_crypto_alerts_bot"},"chat":{"id":[removido],"first_name":"Eduardo","last_name
+desfecho: ⚪ <b>PUMP/USDT</b> — cenário de venda encerrado <b>sem entrada</b> | <i>nem varreu o order block nem chegou perto dele</i>
 TOKEN: ok 46 chars | CHAT_ID: ok 10 chars
-HTTP 200: {"ok":true,"result":{"message_id":236,"from":{"id":9205915638,"is_bot":true,"first_name":"SMC Trading Bot","username":"smc_crypto_alerts_bot"},"chat":{"id":[removido],"first_name":"Eduardo","last_name
+HTTP 200: {"ok":true,"result":{"message_id":243,"from":{"id":9205915638,"is_bot":true,"first_name":"SMC Trading Bot","username":"smc_crypto_alerts_bot"},"chat":{"id":[removido],"first_name":"Eduardo","last_name
 enviados 0 gatilhos, 2 desfechos
-placar  4 fechados: 0 gain / 4 loss  (0%)  total -4.00R  ·  0 abertos  ·  21 cenários encerrados sem entrada
+placar  4 fechados: 0 gain / 4 loss  (0%)  total -4.00R  ·  0 abertos  ·  23 cenários encerrados sem entrada
 por que os cenários morreram:
+  9x  nem varreu o order block nem chegou perto dele
   8x  furou o order block fundo demais (> 2.5 ATR): virou continuação, não varredura
-  7x  nem varreu o order block nem chegou perto dele
   4x  varreu mas não reverteu em 4 velas
   1x  varredura com 0.86x o volume médio, mínimo 1.20x — não vira gatilho
   1x  varredura com 0.63x o volume médio, mínimo 1.20x — não vira gatilho
