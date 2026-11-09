@@ -1,5 +1,2 @@
-09/11 15:53 BRT
-GATILHO [nucleo] LINKUSDT venda R:R 1:3.57 risco 1.46%  (vela anterior)
-GATILHO [nucleo] LTCUSDT venda R:R 1:2.85 risco 1.54%
-radar   UNIUSDT venda — chegou no order block, esperando a limpeza
-GATILHO [extra] PENGUUSDT venda R:R 1:5.94 risco 1.16%  (vela anterior)
+09/11 16:55 BRT
+GATILHO [nucleo] LTCUSDT venda R:R 1:2.85 risco 1.54%  (vela anterior)

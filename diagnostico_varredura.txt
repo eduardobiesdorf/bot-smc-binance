@@ -1,30 +1,25 @@
-início 09/11 15:53 BRT
-XRPUSDT: gatilho antigo (134 velas atrás)
-SUIUSDT: gatilho antigo (264 velas atrás)
-BNBUSDT: gatilho antigo (279 velas atrás)
-ZECUSDT: gatilho antigo (88 velas atrás)
-ENAUSDT: gatilho antigo (283 velas atrás)
-GATILHO LINKUSDT venda vela 09/11 13:00 entrada 10.688 R:R 1:3.57  [recuperado da vela anterior]
-AVAXUSDT: gatilho antigo (264 velas atrás)
-GATILHO LTCUSDT venda vela 09/11 14:00 entrada 51.53 R:R 1:2.85
-AAVEUSDT: gatilho antigo (72 velas atrás)
-TAOUSDT: gatilho antigo (265 velas atrás)
-GATILHO PENGUUSDT venda vela 09/11 13:00 entrada 0.006362 R:R 1:5.94  [recuperado da vela anterior]
-HBARUSDT: gatilho antigo (13 velas atrás)
-INJUSDT: gatilho antigo (267 velas atrás)
-STRKUSDT: gatilho antigo (94 velas atrás)
+início 09/11 16:54 BRT
+XRPUSDT: gatilho antigo (135 velas atrás)
+SUIUSDT: gatilho antigo (265 velas atrás)
+BNBUSDT: gatilho antigo (280 velas atrás)
+ZECUSDT: gatilho antigo (89 velas atrás)
+ENAUSDT: gatilho antigo (284 velas atrás)
+LINKUSDT: gatilho antigo (2 velas atrás)
+AVAXUSDT: gatilho antigo (265 velas atrás)
+GATILHO LTCUSDT venda vela 09/11 14:00 entrada 51.53 R:R 1:2.85  [recuperado da vela anterior]
+AAVEUSDT: gatilho antigo (73 velas atrás)
+TAOUSDT: gatilho antigo (266 velas atrás)
+PENGUUSDT: gatilho antigo (2 velas atrás)
+HBARUSDT: gatilho antigo (14 velas atrás)
+INJUSDT: gatilho antigo (268 velas atrás)
+STRKUSDT: gatilho antigo (95 velas atrás)
 pares (50): BTCUSDT, ETHUSDT, SOLUSDT, XRPUSDT, DOGEUSDT, HYPEUSDT, SUIUSDT, BNBUSDT, ADAUSDT, ZECUSDT, ENAUSDT, LINKUSDT, AVAXUSDT, LTCUSDT, TRUMPUSDT, AAVEUSDT, WLDUSDT, TAOUSDT, NEARUSDT, BCHUSDT, FILUSDT, PUMPUSDT, UNIUSDT, DOTUSDT, ASTERUSDT, ONDOUSDT, PENGUUSDT, TRXUSDT, CRVUSDT, ARBUSDT, XLMUSDT, APTUSDT, TIAUSDT, HBARUSDT, OPUSDT, XPLUSDT, VIRTUALUSDT, FETUSDT, INJUSDT, WLFIUSDT, TONUSDT, SEIUSDT, EIGENUSDT, ICPUSDT, PENDLEUSDT, ZROUSDT, REUSDT, POLUSDT, DASHUSDT, STRKUSDT
-gatilhos 3 | cenários 1
+gatilhos 1 | cenários 0
 stop móvel — o que o bot está vendo:
-  LINKUSDT venda: entrada 10.688  stop 10.8442  preço 10.649  (+0.25R)  | 15m até 09/11 15:30  | 0 estruturas a favor
-  PENGUUSDT venda: entrada 0.006362  stop 0.0064355857  preço 0.006357  (+0.07R)  | 15m até 09/11 15:30  | 0 estruturas a favor
-  LTCUSDT venda: entrada 51.53  stop 52.325429  preço 51.63  (-0.13R)  | 15m até 09/11 15:30  | 0 estruturas a favor
-TOKEN: ok 46 chars | CHAT_ID: ok 10 chars
-HTTP 200: {"ok":true,"result":{"message_id":260,"from":{"id":9205915638,"is_bot":true,"first_name":"SMC Trading Bot","username":"smc_crypto_alerts_bot"},"chat":{"id":[removido],"first_name":"Eduardo","last_name
-desfecho: ⚪ <b>POL/USDT</b> — cenário de venda encerrado <b>sem entrada</b> | <i>varreu mas não reverteu em 4 velas</i>
-TOKEN: ok 46 chars | CHAT_ID: ok 10 chars
-HTTP 200: {"ok":true,"result":{"message_id":261,"from":{"id":9205915638,"is_bot":true,"first_name":"SMC Trading Bot","username":"smc_crypto_alerts_bot"},"chat":{"id":[removido],"first_name":"Eduardo","last_name
-enviados 1 gatilhos, 1 desfechos
+  LINKUSDT venda: entrada 10.688  stop 10.8442  preço 10.711  (-0.15R)  | 15m até 09/11 16:30  | 0 estruturas a favor
+  PENGUUSDT venda: entrada 0.006362  stop 0.0064355857  preço 0.006434  (-0.98R)  | 15m até 09/11 16:30  | 0 estruturas a favor
+  LTCUSDT venda: entrada 51.53  stop 52.325429  preço 51.76  (-0.29R)  | 15m até 09/11 16:30  | 0 estruturas a favor
+enviados 0 gatilhos, 0 desfechos
 placar  4 fechados: 0 gain / 4 loss  (0%)  total -4.00R  ·  3 abertos  ·  27 cenários encerrados sem entrada
 por que os cenários morreram:
   10x  nem varreu o order block nem chegou perto dele
