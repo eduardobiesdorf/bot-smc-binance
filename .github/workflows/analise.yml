@@ -1,0 +1,61 @@
+name: Analise (dado grande, sem commitar)
+
+# Baixa o intervalo pedido para uma pasta temporaria, roda a analise
+# ali dentro e joga o resultado no log. O dado nao entra no repositorio:
+# 3 minutos de 20 pares em 22 meses sao ~500 MB.
+
+on:
+  workflow_dispatch:
+    inputs:
+      intervalos:
+        description: 'Intervalos extras a baixar, separados por vírgula'
+        required: false
+        default: '3m'
+      inicio:
+        description: 'Mês inicial (YYYY-MM)'
+        required: false
+        default: '2025-01'
+
+permissions:
+  contents: read
+
+jobs:
+  analisar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install requests
+
+      - name: Baixar os intervalos extras
+        run: |
+          set -o pipefail
+          ATIVOS=$(python - <<'PY'
+          t=open('bot_varredura.py').read(); ns={}
+          exec(t[t.index('UNIVERSO = ['):t.index('NUCLEO = set(UNIVERSO[:20])')+27], ns)
+          print(','.join(ns['UNIVERSO'][:20]))
+          PY
+          )
+          for IV in $(echo "${{ inputs.intervalos }}" | tr ',' ' '); do
+            python -u baixar_futuros.py --inicio ${{ inputs.inicio }} \
+              --intervalo "$IV" --top 20 --pasta "dados_$IV" --ativos "$ATIVOS"
+            du -sh "dados_$IV"
+          done
+
+      - name: Rodar a análise
+        run: |
+          set -o pipefail
+          PASTAS=""
+          for IV in $(echo "${{ inputs.intervalos }}" | tr ',' ' '); do
+            PASTAS="$PASTAS dados_$IV"
+          done
+          python -u analise/trailing_tf.py dados_amp dados_15m $PASTAS \
+            2>&1 | tee analise.log
+
+      - name: Resumo
+        if: always()
+        run: |
+          { echo '```'; tail -40 analise.log; echo '```'; } >> $GITHUB_STEP_SUMMARY
