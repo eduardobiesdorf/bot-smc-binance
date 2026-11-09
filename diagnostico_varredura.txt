@@ -1,29 +1,34 @@
-início 09/11 07:57 BRT
-XRPUSDT: gatilho antigo (126 velas atrás)
-SUIUSDT: gatilho antigo (256 velas atrás)
-BNBUSDT: gatilho antigo (271 velas atrás)
-ZECUSDT: gatilho antigo (80 velas atrás)
-ENAUSDT: gatilho antigo (275 velas atrás)
-AVAXUSDT: gatilho antigo (256 velas atrás)
-AAVEUSDT: gatilho antigo (64 velas atrás)
-TAOUSDT: gatilho antigo (257 velas atrás)
-HBARUSDT: gatilho antigo (5 velas atrás)
-INJUSDT: gatilho antigo (259 velas atrás)
-STRKUSDT: gatilho antigo (86 velas atrás)
+início 09/11 08:54 BRT
+XRPUSDT: gatilho antigo (127 velas atrás)
+SUIUSDT: gatilho antigo (257 velas atrás)
+BNBUSDT: gatilho antigo (272 velas atrás)
+ZECUSDT: gatilho antigo (81 velas atrás)
+ENAUSDT: gatilho antigo (276 velas atrás)
+AVAXUSDT: gatilho antigo (257 velas atrás)
+AAVEUSDT: gatilho antigo (65 velas atrás)
+TAOUSDT: gatilho antigo (258 velas atrás)
+HBARUSDT: gatilho antigo (6 velas atrás)
+INJUSDT: gatilho antigo (260 velas atrás)
+STRKUSDT: gatilho antigo (87 velas atrás)
 pares (50): BTCUSDT, ETHUSDT, SOLUSDT, XRPUSDT, DOGEUSDT, HYPEUSDT, SUIUSDT, BNBUSDT, ADAUSDT, ZECUSDT, ENAUSDT, LINKUSDT, AVAXUSDT, LTCUSDT, TRUMPUSDT, AAVEUSDT, WLDUSDT, TAOUSDT, NEARUSDT, BCHUSDT, FILUSDT, PUMPUSDT, UNIUSDT, DOTUSDT, ASTERUSDT, ONDOUSDT, PENGUUSDT, TRXUSDT, CRVUSDT, ARBUSDT, XLMUSDT, APTUSDT, TIAUSDT, HBARUSDT, OPUSDT, XPLUSDT, VIRTUALUSDT, FETUSDT, INJUSDT, WLFIUSDT, TONUSDT, SEIUSDT, EIGENUSDT, ICPUSDT, PENDLEUSDT, ZROUSDT, REUSDT, POLUSDT, DASHUSDT, STRKUSDT
-gatilhos 0 | cenários 2
+gatilhos 0 | cenários 1
 stop móvel — o que o bot está vendo:
-  AAVEUSDT venda: entrada 131.56  stop 133.7613  preço 131.08  (+0.22R)  | 15m até 09/11 07:30  | 4 estruturas a favor
+  AAVEUSDT venda: entrada 131.56  stop 133.7613  preço 131.53  (+0.01R)  | 15m até 09/11 08:30  | 4 estruturas a favor
       F 07/11 08:00  stop daria 132.24321 = -0.31R  recusa (< +0.30R)
       F 07/11 10:00  stop daria 132.4291 = -0.39R  recusa (< +0.30R)
       F 07/11 13:45  stop daria 133.1306 = -0.71R  recusa (< +0.30R)
       F 08/11 03:30  stop daria 131.2637 = +0.13R  recusa (< +0.30R)
-  HBARUSDT venda: entrada 0.06679  stop 0.067280071  preço 0.06702  (-0.47R)  | 15m até 09/11 07:30  | 0 estruturas a favor
-enviados 0 gatilhos, 0 desfechos
-placar  2 fechados: 0 gain / 2 loss  (0%)  total -2.00R  ·  2 abertos  ·  20 cenários encerrados sem entrada
+  HBARUSDT venda: entrada 0.06679  stop 0.067280071  preço 0.06724  (-0.92R)  | 15m até 09/11 08:30  | 0 estruturas a favor
+TOKEN: ok 46 chars | CHAT_ID: ok 10 chars
+HTTP 200: {"ok":true,"result":{"message_id":228,"from":{"id":9205915638,"is_bot":true,"first_name":"SMC Trading Bot","username":"smc_crypto_alerts_bot"},"chat":{"id":[removido],"first_name":"Eduardo","last_name
+desfecho: ⚪ <b>DASH/USDT</b> — cenário de venda encerrado <b>sem entrada</b> | <i>nem varreu o order block nem chegou perto dele</i>
+TOKEN: ok 46 chars | CHAT_ID: ok 10 chars
+HTTP 200: {"ok":true,"result":{"message_id":229,"from":{"id":9205915638,"is_bot":true,"first_name":"SMC Trading Bot","username":"smc_crypto_alerts_bot"},"chat":{"id":[removido],"first_name":"Eduardo","last_name
+enviados 0 gatilhos, 1 desfechos
+placar  2 fechados: 0 gain / 2 loss  (0%)  total -2.00R  ·  2 abertos  ·  21 cenários encerrados sem entrada
 por que os cenários morreram:
   8x  furou o order block fundo demais (> 2.5 ATR): virou continuação, não varredura
-  6x  nem varreu o order block nem chegou perto dele
+  7x  nem varreu o order block nem chegou perto dele
   4x  varreu mas não reverteu em 4 velas
   1x  varredura com 0.86x o volume médio, mínimo 1.20x — não vira gatilho
   1x  varredura com 0.63x o volume médio, mínimo 1.20x — não vira gatilho
