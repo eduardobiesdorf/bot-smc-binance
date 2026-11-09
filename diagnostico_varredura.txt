@@ -1,24 +1,24 @@
-início 09/11 06:57 BRT
-XRPUSDT: gatilho antigo (125 velas atrás)
-SUIUSDT: gatilho antigo (255 velas atrás)
-BNBUSDT: gatilho antigo (270 velas atrás)
-ZECUSDT: gatilho antigo (79 velas atrás)
-ENAUSDT: gatilho antigo (274 velas atrás)
-AVAXUSDT: gatilho antigo (255 velas atrás)
-AAVEUSDT: gatilho antigo (63 velas atrás)
-TAOUSDT: gatilho antigo (256 velas atrás)
-HBARUSDT: gatilho antigo (4 velas atrás)
-INJUSDT: gatilho antigo (258 velas atrás)
-STRKUSDT: gatilho antigo (85 velas atrás)
+início 09/11 07:57 BRT
+XRPUSDT: gatilho antigo (126 velas atrás)
+SUIUSDT: gatilho antigo (256 velas atrás)
+BNBUSDT: gatilho antigo (271 velas atrás)
+ZECUSDT: gatilho antigo (80 velas atrás)
+ENAUSDT: gatilho antigo (275 velas atrás)
+AVAXUSDT: gatilho antigo (256 velas atrás)
+AAVEUSDT: gatilho antigo (64 velas atrás)
+TAOUSDT: gatilho antigo (257 velas atrás)
+HBARUSDT: gatilho antigo (5 velas atrás)
+INJUSDT: gatilho antigo (259 velas atrás)
+STRKUSDT: gatilho antigo (86 velas atrás)
 pares (50): BTCUSDT, ETHUSDT, SOLUSDT, XRPUSDT, DOGEUSDT, HYPEUSDT, SUIUSDT, BNBUSDT, ADAUSDT, ZECUSDT, ENAUSDT, LINKUSDT, AVAXUSDT, LTCUSDT, TRUMPUSDT, AAVEUSDT, WLDUSDT, TAOUSDT, NEARUSDT, BCHUSDT, FILUSDT, PUMPUSDT, UNIUSDT, DOTUSDT, ASTERUSDT, ONDOUSDT, PENGUUSDT, TRXUSDT, CRVUSDT, ARBUSDT, XLMUSDT, APTUSDT, TIAUSDT, HBARUSDT, OPUSDT, XPLUSDT, VIRTUALUSDT, FETUSDT, INJUSDT, WLFIUSDT, TONUSDT, SEIUSDT, EIGENUSDT, ICPUSDT, PENDLEUSDT, ZROUSDT, REUSDT, POLUSDT, DASHUSDT, STRKUSDT
 gatilhos 0 | cenários 2
 stop móvel — o que o bot está vendo:
-  AAVEUSDT venda: entrada 131.56  stop 133.7613  preço 131.23  (+0.15R)  | 15m até 09/11 06:30  | 4 estruturas a favor
+  AAVEUSDT venda: entrada 131.56  stop 133.7613  preço 131.08  (+0.22R)  | 15m até 09/11 07:30  | 4 estruturas a favor
       F 07/11 08:00  stop daria 132.24321 = -0.31R  recusa (< +0.30R)
       F 07/11 10:00  stop daria 132.4291 = -0.39R  recusa (< +0.30R)
       F 07/11 13:45  stop daria 133.1306 = -0.71R  recusa (< +0.30R)
       F 08/11 03:30  stop daria 131.2637 = +0.13R  recusa (< +0.30R)
-  HBARUSDT venda: entrada 0.06679  stop 0.067280071  preço 0.06692  (-0.27R)  | 15m até 09/11 06:30  | 0 estruturas a favor
+  HBARUSDT venda: entrada 0.06679  stop 0.067280071  preço 0.06702  (-0.47R)  | 15m até 09/11 07:30  | 0 estruturas a favor
 enviados 0 gatilhos, 0 desfechos
 placar  2 fechados: 0 gain / 2 loss  (0%)  total -2.00R  ·  2 abertos  ·  20 cenários encerrados sem entrada
 por que os cenários morreram:
