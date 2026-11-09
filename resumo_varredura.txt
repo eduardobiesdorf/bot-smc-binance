@@ -1,8 +1,5 @@
-09/11 00:55 BRT
-radar   NEARUSDT venda — limpou o order block, esperando a reversão
+09/11 02:01 BRT
 radar   FILUSDT venda — chegou no order block, esperando a limpeza
 radar   UNIUSDT venda — chegou no order block, esperando a limpeza
-radar   ARBUSDT venda — limpou o order block, esperando a reversão
-radar   APTUSDT venda — chegou no order block, esperando a limpeza
-radar   HBARUSDT venda — limpou o order block, esperando a reversão
+GATILHO [extra] HBARUSDT venda R:R 1:5.26 risco 0.73%
 radar   OPUSDT venda — chegou no order block, esperando a limpeza

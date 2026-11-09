@@ -252,13 +252,14 @@
   "tipo": "cenario",
   "sim": "NEARUSDT",
   "lado": "venda",
-  "status": "aberto",
+  "status": "morreu",
   "vela_ms": 1794178800000,
   "imp_fim_ms": 1794171600000,
   "alvo": 3.446,
   "nota": "limpou o order block, esperando a reversão",
   "vol_varr": 2.975109148718827,
-  "nucleo": true
+  "nucleo": true,
+  "motivo": "varreu mas não reverteu em 4 velas"
  },
  "cen-UNIUSDT-1794175200000": {
   "tipo": "cenario",
@@ -276,19 +277,20 @@
   "tipo": "cenario",
   "sim": "ARBUSDT",
   "lado": "venda",
-  "status": "aberto",
+  "status": "morreu",
   "vela_ms": 1794182400000,
   "imp_fim_ms": 1794171600000,
   "alvo": 0.1598,
   "nota": "limpou o order block, esperando a reversão",
   "vol_varr": 1.7151941573655733,
-  "nucleo": false
+  "nucleo": false,
+  "motivo": "furou o order block fundo demais (> 2.5 ATR): virou continuação, não varredura"
  },
  "cen-HBARUSDT-1794171600000": {
   "tipo": "cenario",
   "sim": "HBARUSDT",
   "lado": "venda",
-  "status": "aberto",
+  "status": "virou_gatilho",
   "vela_ms": 1794182400000,
   "imp_fim_ms": 1794171600000,
   "alvo": 0.06421,
@@ -325,13 +327,14 @@
   "tipo": "cenario",
   "sim": "APTUSDT",
   "lado": "venda",
-  "status": "aberto",
+  "status": "morreu",
   "vela_ms": 1794189600000,
   "imp_fim_ms": 1794171600000,
   "alvo": 0.5535,
   "nota": "chegou no order block, esperando a limpeza",
   "vol_varr": 0.0,
-  "nucleo": false
+  "nucleo": false,
+  "motivo": "nem varreu o order block nem chegou perto dele"
  },
  "cen-OPUSDT-1794171600000": {
   "tipo": "cenario",
@@ -343,6 +346,32 @@
   "alvo": 0.0952,
   "nota": "chegou no order block, esperando a limpeza",
   "vol_varr": 0.0,
+  "nucleo": false
+ },
+ "gat-HBARUSDT-1794196800000": {
+  "tipo": "gatilho",
+  "sim": "HBARUSDT",
+  "lado": "venda",
+  "status": "aberto",
+  "vela_ms": 1794196800000,
+  "entrada": 0.06679,
+  "stop": 0.06728007142857143,
+  "stop_ini": 0.06728007142857143,
+  "movs": 0,
+  "degraus": [
+   [
+    1794196800000,
+    0.06728007142857143
+   ]
+  ],
+  "alvo": 0.06421,
+  "rr": 5.264538696983005,
+  "risco_pct": 0.7337497059012172,
+  "vol_varr": 1.3981652613484785,
+  "liq_r": 0.8774231161638341,
+  "rsi_varr": 52.442061258133336,
+  "rsi_gat": 51.871895444232784,
+  "rsi_varr_norm": 47.557938741866664,
   "nucleo": false
  }
 }
