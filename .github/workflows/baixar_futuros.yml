@@ -15,7 +15,7 @@ on:
         required: true
         default: '1h'
         type: choice
-        options: ['1h', '4h', '15m', '30m', '2h', '1d']
+        options: ['1h', '4h', '15m', '30m', '2h', '1d', '5m', '3m', '1m']
       top:
         description: 'Quantos pares gravar (os de maior volume em futuros)'
         required: false
@@ -33,6 +33,11 @@ on:
         description: 'Pasta de destino (outra pasta não sobrescreve o histórico)'
         required: false
         default: 'dados_fut'
+      artefato:
+        description: 'Mandar como artefato em vez de commitar (para dado grande)'
+        required: false
+        default: false
+        type: boolean
 
 permissions:
   contents: write
@@ -58,8 +63,17 @@ jobs:
           [ "${{ inputs.listar }}" = "true" ] && ARGS="$ARGS --listar"
           python -u baixar_futuros.py $ARGS 2>&1 | tee futuros.log
 
+      - name: Subir como artefato
+        if: inputs.artefato
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ inputs.pasta }}
+          path: ${{ inputs.pasta }}/
+          retention-days: 3
+          compression-level: 9
+
       - name: Commitar
-        if: always()
+        if: always() && !inputs.artefato
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
