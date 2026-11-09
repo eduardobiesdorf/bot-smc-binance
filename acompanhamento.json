@@ -308,5 +308,41 @@
   "vol_varr": 0.0,
   "nucleo": false,
   "motivo": "varredura com 0.63x o volume médio, mínimo 1.20x — não vira gatilho"
+ },
+ "cen-FILUSDT-1794171600000": {
+  "tipo": "cenario",
+  "sim": "FILUSDT",
+  "lado": "venda",
+  "status": "aberto",
+  "vela_ms": 1794189600000,
+  "imp_fim_ms": 1794171600000,
+  "alvo": 0.7189,
+  "nota": "chegou no order block, esperando a limpeza",
+  "vol_varr": 0.0,
+  "nucleo": false
+ },
+ "cen-APTUSDT-1794171600000": {
+  "tipo": "cenario",
+  "sim": "APTUSDT",
+  "lado": "venda",
+  "status": "aberto",
+  "vela_ms": 1794189600000,
+  "imp_fim_ms": 1794171600000,
+  "alvo": 0.5535,
+  "nota": "chegou no order block, esperando a limpeza",
+  "vol_varr": 0.0,
+  "nucleo": false
+ },
+ "cen-OPUSDT-1794171600000": {
+  "tipo": "cenario",
+  "sim": "OPUSDT",
+  "lado": "venda",
+  "status": "aberto",
+  "vela_ms": 1794189600000,
+  "imp_fim_ms": 1794171600000,
+  "alvo": 0.0952,
+  "nota": "chegou no order block, esperando a limpeza",
+  "vol_varr": 0.0,
+  "nucleo": false
  }
 }
