@@ -1,7 +1,6 @@
-2 candidatos | 1 meses | intervalo 15m
-    1/2 AAVEUSDT          672 velas  volume mediano      0.8 M USD/h
-    2/2 STRKUSDT          672 velas  volume mediano      0.2 M USD/h
+1 candidatos | 1 meses | intervalo 15m
+    1/1 AAVEUSDT          672 velas  volume mediano      0.8 M USD/h
 
-ficaram os 2 de maior volume de FUTUROS (0 apagados)
+ficaram os 1 de maior volume de FUTUROS (0 apagados)
 ordem final por volume de futuros:
-  AAVEUSDT, STRKUSDT
+  AAVEUSDT
