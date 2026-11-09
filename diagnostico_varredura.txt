@@ -1,20 +1,15 @@
-início 08/11 20:35 BRT
-XRPUSDT: gatilho antigo (115 velas atrás)
-SUIUSDT: gatilho antigo (245 velas atrás)
-BNBUSDT: gatilho antigo (260 velas atrás)
-ZECUSDT: gatilho antigo (69 velas atrás)
-ENAUSDT: gatilho antigo (264 velas atrás)
-AVAXUSDT: gatilho antigo (245 velas atrás)
-AAVEUSDT: gatilho antigo (53 velas atrás)
-TAOUSDT: gatilho antigo (246 velas atrás)
-INJUSDT: gatilho antigo (248 velas atrás)
-STRKUSDT: gatilho antigo (75 velas atrás)
+início 08/11 21:39 BRT
+XRPUSDT: gatilho antigo (116 velas atrás)
+SUIUSDT: gatilho antigo (246 velas atrás)
+BNBUSDT: gatilho antigo (261 velas atrás)
+ZECUSDT: gatilho antigo (70 velas atrás)
+ENAUSDT: gatilho antigo (265 velas atrás)
+AVAXUSDT: gatilho antigo (246 velas atrás)
+AAVEUSDT: gatilho antigo (54 velas atrás)
+TAOUSDT: gatilho antigo (247 velas atrás)
+INJUSDT: gatilho antigo (249 velas atrás)
+STRKUSDT: gatilho antigo (76 velas atrás)
 pares (50): BTCUSDT, ETHUSDT, SOLUSDT, XRPUSDT, DOGEUSDT, HYPEUSDT, SUIUSDT, BNBUSDT, ADAUSDT, ZECUSDT, ENAUSDT, LINKUSDT, AVAXUSDT, LTCUSDT, TRUMPUSDT, AAVEUSDT, WLDUSDT, TAOUSDT, NEARUSDT, BCHUSDT, FILUSDT, PUMPUSDT, UNIUSDT, DOTUSDT, ASTERUSDT, ONDOUSDT, PENGUUSDT, TRXUSDT, CRVUSDT, ARBUSDT, XLMUSDT, APTUSDT, TIAUSDT, HBARUSDT, OPUSDT, XPLUSDT, VIRTUALUSDT, FETUSDT, INJUSDT, WLFIUSDT, TONUSDT, SEIUSDT, EIGENUSDT, ICPUSDT, PENDLEUSDT, ZROUSDT, REUSDT, POLUSDT, DASHUSDT, STRKUSDT
-gatilhos 0 | cenários 0
-enviados 0 gatilhos, 0 desfechos
-placar  2 fechados: 0 gain / 2 loss  (0%)  total -2.00R  ·  1 abertos  ·  13 cenários encerrados sem entrada
-por que os cenários morreram:
-  7x  furou o order block fundo demais (> 2.5 ATR): virou continuação, não varredura
-  3x  varreu mas não reverteu em 4 velas
-  2x  nem varreu o order block nem chegou perto dele
-  1x  varredura com 0.86x o volume médio, mínimo 1.20x — não vira gatilho
+gatilhos 0 | cenários 1
+stop móvel: 🔒 <b>AAVE/USDT</b> — stop movido   🔴 venda | gatilho de 06/11 14:00 |  | de   <code>133.76129</code> | para <code>131.2637</code>   <b>+0.13
+desfecho: 🛑 <b>AAVE/USDT</b> — STOP | gatilho de 06/11 14:00 → 06/11 15:00 (1h depois) | entrada <code>131.56</code> → <code>131.2637</code> | resulta
