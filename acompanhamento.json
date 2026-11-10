@@ -502,7 +502,7 @@
   "tipo": "gatilho",
   "sim": "LINKUSDT",
   "lado": "venda",
-  "status": "aberto",
+  "status": "alvo",
   "vela_ms": 1794240000000,
   "entrada": 10.688,
   "stop": 10.614297405725333,
@@ -526,7 +526,10 @@
   "rsi_varr": 58.33895937287977,
   "rsi_gat": 54.94634546550484,
   "rsi_varr_norm": 41.66104062712023,
-  "nucleo": true
+  "nucleo": true,
+  "fim_ms": 1794322800000,
+  "horas": 23,
+  "resultado_r": 3.572343149807935
  },
  "gat-PENGUUSDT-1794240000000": {
   "tipo": "gatilho",
