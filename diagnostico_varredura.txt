@@ -1,22 +1,22 @@
-início 11/11 10:02 BRT
-XRPUSDT: gatilho antigo (177 velas atrás)
-SUIUSDT: gatilho antigo (307 velas atrás)
-BNBUSDT: gatilho antigo (322 velas atrás)
-ZECUSDT: gatilho antigo (131 velas atrás)
-ENAUSDT: gatilho antigo (326 velas atrás)
-LINKUSDT: gatilho antigo (44 velas atrás)
-AVAXUSDT: gatilho antigo (307 velas atrás)
-LTCUSDT: gatilho antigo (43 velas atrás)
-AAVEUSDT: gatilho antigo (115 velas atrás)
-TAOUSDT: gatilho antigo (308 velas atrás)
-PENGUUSDT: gatilho antigo (44 velas atrás)
-HBARUSDT: gatilho antigo (56 velas atrás)
-INJUSDT: gatilho antigo (310 velas atrás)
-STRKUSDT: gatilho antigo (137 velas atrás)
+início 11/11 11:52 BRT
+XRPUSDT: gatilho antigo (178 velas atrás)
+SUIUSDT: gatilho antigo (308 velas atrás)
+BNBUSDT: gatilho antigo (323 velas atrás)
+ZECUSDT: gatilho antigo (132 velas atrás)
+ENAUSDT: gatilho antigo (327 velas atrás)
+LINKUSDT: gatilho antigo (45 velas atrás)
+AVAXUSDT: gatilho antigo (308 velas atrás)
+LTCUSDT: gatilho antigo (44 velas atrás)
+AAVEUSDT: gatilho antigo (116 velas atrás)
+TAOUSDT: gatilho antigo (309 velas atrás)
+PENGUUSDT: gatilho antigo (45 velas atrás)
+HBARUSDT: gatilho antigo (57 velas atrás)
+INJUSDT: gatilho antigo (311 velas atrás)
+STRKUSDT: gatilho antigo (138 velas atrás)
 pares (50): BTCUSDT, ETHUSDT, SOLUSDT, XRPUSDT, DOGEUSDT, HYPEUSDT, SUIUSDT, BNBUSDT, ADAUSDT, ZECUSDT, ENAUSDT, LINKUSDT, AVAXUSDT, LTCUSDT, TRUMPUSDT, AAVEUSDT, WLDUSDT, TAOUSDT, NEARUSDT, BCHUSDT, FILUSDT, PUMPUSDT, UNIUSDT, DOTUSDT, ASTERUSDT, ONDOUSDT, PENGUUSDT, TRXUSDT, CRVUSDT, ARBUSDT, XLMUSDT, APTUSDT, TIAUSDT, HBARUSDT, OPUSDT, XPLUSDT, VIRTUALUSDT, FETUSDT, INJUSDT, WLFIUSDT, TONUSDT, SEIUSDT, EIGENUSDT, ICPUSDT, PENDLEUSDT, ZROUSDT, REUSDT, POLUSDT, DASHUSDT, STRKUSDT
 gatilhos 0 | cenários 1
 stop móvel — o que o bot está vendo:
-  LTCUSDT venda: entrada 51.53  stop 52.325429  preço 51.11  (+0.53R)  | 15m até 11/11 09:45  | 4 estruturas a favor
+  LTCUSDT venda: entrada 51.53  stop 52.325429  preço 51.03  (+0.63R)  | 15m até 11/11 11:30  | 4 estruturas a favor
       F 09/11 18:30  stop daria 51.973523 = -0.56R  recusa (< +0.30R)
       F 09/11 20:15  stop daria 51.687504 = -0.20R  recusa (< +0.30R)
       F 09/11 20:30  stop daria 51.686432 = -0.20R  recusa (< +0.30R)

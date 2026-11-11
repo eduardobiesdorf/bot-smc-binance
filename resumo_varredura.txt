@@ -1,2 +1,2 @@
-11/11 10:02 BRT
-radar   XLMUSDT venda — chegou no order block, esperando a limpeza
+11/11 11:52 BRT
+radar   XLMUSDT venda — limpou o order block, esperando a reversão
