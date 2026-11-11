@@ -610,5 +610,17 @@
   "nota": "chegou no order block, esperando a limpeza",
   "vol_varr": 0.0,
   "nucleo": false
+ },
+ "cen-ETHUSDT-1794326400000": {
+  "tipo": "cenario",
+  "sim": "ETHUSDT",
+  "lado": "venda",
+  "status": "aberto",
+  "vela_ms": 1794416400000,
+  "imp_fim_ms": 1794326400000,
+  "alvo": 2006.0,
+  "nota": "limpou o order block, esperando a reversão",
+  "vol_varr": 1.8230657465587676,
+  "nucleo": true
  }
 }
