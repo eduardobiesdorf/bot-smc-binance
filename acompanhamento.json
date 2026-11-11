@@ -603,24 +603,51 @@
   "tipo": "cenario",
   "sim": "XLMUSDT",
   "lado": "venda",
-  "status": "aberto",
+  "status": "morreu",
   "vela_ms": 1794398400000,
   "imp_fim_ms": 1794322800000,
   "alvo": 0.1408,
   "nota": "chegou no order block, esperando a limpeza",
   "vol_varr": 0.0,
-  "nucleo": false
+  "nucleo": false,
+  "motivo": "varreu mas não reverteu em 4 velas"
  },
  "cen-ETHUSDT-1794326400000": {
   "tipo": "cenario",
   "sim": "ETHUSDT",
   "lado": "venda",
-  "status": "aberto",
+  "status": "virou_gatilho",
   "vela_ms": 1794416400000,
   "imp_fim_ms": 1794326400000,
   "alvo": 2006.0,
   "nota": "limpou o order block, esperando a reversão",
   "vol_varr": 1.8230657465587676,
+  "nucleo": true
+ },
+ "gat-ETHUSDT-1794420000000": {
+  "tipo": "gatilho",
+  "sim": "ETHUSDT",
+  "lado": "venda",
+  "status": "aberto",
+  "vela_ms": 1794420000000,
+  "entrada": 2083.57,
+  "stop": 2105.4175714285716,
+  "stop_ini": 2105.4175714285716,
+  "movs": 0,
+  "degraus": [
+   [
+    1794420000000,
+    2105.4175714285716
+   ]
+  ],
+  "alvo": 2006.0,
+  "rr": 3.550509046445183,
+  "risco_pct": 1.0485643116656234,
+  "vol_varr": 1.8230657465587676,
+  "liq_r": 1.1680932172912313,
+  "rsi_varr": 60.634212383388174,
+  "rsi_gat": 56.44447076688267,
+  "rsi_varr_norm": 39.365787616611826,
   "nucleo": true
  }
 }

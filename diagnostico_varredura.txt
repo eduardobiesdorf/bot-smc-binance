@@ -1,32 +1,39 @@
-início 11/11 15:53 BRT
-XRPUSDT: gatilho antigo (182 velas atrás)
-SUIUSDT: gatilho antigo (312 velas atrás)
-BNBUSDT: gatilho antigo (327 velas atrás)
-ZECUSDT: gatilho antigo (136 velas atrás)
-ENAUSDT: gatilho antigo (331 velas atrás)
-LINKUSDT: gatilho antigo (49 velas atrás)
-AVAXUSDT: gatilho antigo (312 velas atrás)
-LTCUSDT: gatilho antigo (48 velas atrás)
-AAVEUSDT: gatilho antigo (120 velas atrás)
-TAOUSDT: gatilho antigo (313 velas atrás)
-PENGUUSDT: gatilho antigo (49 velas atrás)
-HBARUSDT: gatilho antigo (61 velas atrás)
-INJUSDT: gatilho antigo (315 velas atrás)
-STRKUSDT: gatilho antigo (142 velas atrás)
+início 11/11 16:56 BRT
+GATILHO ETHUSDT venda vela 11/11 15:00 entrada 2,083.57 R:R 1:3.55
+XRPUSDT: gatilho antigo (183 velas atrás)
+SUIUSDT: gatilho antigo (313 velas atrás)
+BNBUSDT: gatilho antigo (328 velas atrás)
+ZECUSDT: gatilho antigo (137 velas atrás)
+ENAUSDT: gatilho antigo (332 velas atrás)
+LINKUSDT: gatilho antigo (50 velas atrás)
+AVAXUSDT: gatilho antigo (313 velas atrás)
+LTCUSDT: gatilho antigo (49 velas atrás)
+AAVEUSDT: gatilho antigo (121 velas atrás)
+TAOUSDT: gatilho antigo (314 velas atrás)
+PENGUUSDT: gatilho antigo (50 velas atrás)
+HBARUSDT: gatilho antigo (62 velas atrás)
+INJUSDT: gatilho antigo (316 velas atrás)
+STRKUSDT: gatilho antigo (143 velas atrás)
 pares (50): BTCUSDT, ETHUSDT, SOLUSDT, XRPUSDT, DOGEUSDT, HYPEUSDT, SUIUSDT, BNBUSDT, ADAUSDT, ZECUSDT, ENAUSDT, LINKUSDT, AVAXUSDT, LTCUSDT, TRUMPUSDT, AAVEUSDT, WLDUSDT, TAOUSDT, NEARUSDT, BCHUSDT, FILUSDT, PUMPUSDT, UNIUSDT, DOTUSDT, ASTERUSDT, ONDOUSDT, PENGUUSDT, TRXUSDT, CRVUSDT, ARBUSDT, XLMUSDT, APTUSDT, TIAUSDT, HBARUSDT, OPUSDT, XPLUSDT, VIRTUALUSDT, FETUSDT, INJUSDT, WLFIUSDT, TONUSDT, SEIUSDT, EIGENUSDT, ICPUSDT, PENDLEUSDT, ZROUSDT, REUSDT, POLUSDT, DASHUSDT, STRKUSDT
-gatilhos 0 | cenários 2
+gatilhos 1 | cenários 0
 stop móvel — o que o bot está vendo:
-  LTCUSDT venda: entrada 51.53  stop 52.325429  preço 51.17  (+0.45R)  | 15m até 11/11 15:30  | 4 estruturas a favor
-      F 09/11 18:30  stop daria 51.973525 = -0.56R  recusa (< +0.30R)
-      F 09/11 20:15  stop daria 51.687505 = -0.20R  recusa (< +0.30R)
-      F 09/11 20:30  stop daria 51.686433 = -0.20R  recusa (< +0.30R)
+  LTCUSDT venda: entrada 51.53  stop 52.325429  preço 50.92  (+0.77R)  | 15m até 11/11 16:30  | 4 estruturas a favor
+      F 09/11 18:30  stop daria 51.973523 = -0.56R  recusa (< +0.30R)
+      F 09/11 20:15  stop daria 51.687503 = -0.20R  recusa (< +0.30R)
+      F 09/11 20:30  stop daria 51.686432 = -0.20R  recusa (< +0.30R)
       F 10/11 12:30  stop daria 51.894776 = -0.46R  recusa (< +0.30R)
-enviados 0 gatilhos, 0 desfechos
-placar  6 fechados: 1 gain / 5 loss  (17%)  total -1.43R  ·  1 abertos  ·  28 cenários encerrados sem entrada
+  ETHUSDT venda: entrada 2083.57  stop 2105.4176  preço 2079.69  (+0.18R)  | 15m até 11/11 16:30  | 0 estruturas a favor
+TOKEN: ok 46 chars | CHAT_ID: ok 10 chars
+HTTP 200: {"ok":true,"result":{"message_id":278,"from":{"id":9205915638,"is_bot":true,"first_name":"SMC Trading Bot","username":"smc_crypto_alerts_bot"},"chat":{"id":[removido],"first_name":"Eduardo","last_name
+desfecho: ⚪ <b>XLM/USDT</b> — cenário de venda encerrado <b>sem entrada</b> | <i>varreu mas não reverteu em 4 velas</i>
+TOKEN: ok 46 chars | CHAT_ID: ok 10 chars
+HTTP 200: {"ok":true,"result":{"message_id":279,"from":{"id":9205915638,"is_bot":true,"first_name":"SMC Trading Bot","username":"smc_crypto_alerts_bot"},"chat":{"id":[removido],"first_name":"Eduardo","last_name
+enviados 1 gatilhos, 1 desfechos
+placar  6 fechados: 1 gain / 5 loss  (17%)  total -1.43R  ·  2 abertos  ·  29 cenários encerrados sem entrada
 por que os cenários morreram:
   11x  nem varreu o order block nem chegou perto dele
   8x  furou o order block fundo demais (> 2.5 ATR): virou continuação, não varredura
-  5x  varreu mas não reverteu em 4 velas
+  6x  varreu mas não reverteu em 4 velas
   1x  varredura com 0.86x o volume médio, mínimo 1.20x — não vira gatilho
   1x  varredura com 0.63x o volume médio, mínimo 1.20x — não vira gatilho
   1x  varredura com 1.02x o volume médio, mínimo 1.20x — não vira gatilho
