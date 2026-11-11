@@ -1,23 +1,23 @@
-início 11/11 13:53 BRT
-XRPUSDT: gatilho antigo (180 velas atrás)
-SUIUSDT: gatilho antigo (310 velas atrás)
-BNBUSDT: gatilho antigo (325 velas atrás)
-ZECUSDT: gatilho antigo (134 velas atrás)
-ENAUSDT: gatilho antigo (329 velas atrás)
-LINKUSDT: gatilho antigo (47 velas atrás)
-AVAXUSDT: gatilho antigo (310 velas atrás)
-LTCUSDT: gatilho antigo (46 velas atrás)
-AAVEUSDT: gatilho antigo (118 velas atrás)
-TAOUSDT: gatilho antigo (311 velas atrás)
-PENGUUSDT: gatilho antigo (47 velas atrás)
-HBARUSDT: gatilho antigo (59 velas atrás)
-INJUSDT: gatilho antigo (313 velas atrás)
-STRKUSDT: gatilho antigo (140 velas atrás)
+início 11/11 14:54 BRT
+XRPUSDT: gatilho antigo (181 velas atrás)
+SUIUSDT: gatilho antigo (311 velas atrás)
+BNBUSDT: gatilho antigo (326 velas atrás)
+ZECUSDT: gatilho antigo (135 velas atrás)
+ENAUSDT: gatilho antigo (330 velas atrás)
+LINKUSDT: gatilho antigo (48 velas atrás)
+AVAXUSDT: gatilho antigo (311 velas atrás)
+LTCUSDT: gatilho antigo (47 velas atrás)
+AAVEUSDT: gatilho antigo (119 velas atrás)
+TAOUSDT: gatilho antigo (312 velas atrás)
+PENGUUSDT: gatilho antigo (48 velas atrás)
+HBARUSDT: gatilho antigo (60 velas atrás)
+INJUSDT: gatilho antigo (314 velas atrás)
+STRKUSDT: gatilho antigo (141 velas atrás)
 pares (50): BTCUSDT, ETHUSDT, SOLUSDT, XRPUSDT, DOGEUSDT, HYPEUSDT, SUIUSDT, BNBUSDT, ADAUSDT, ZECUSDT, ENAUSDT, LINKUSDT, AVAXUSDT, LTCUSDT, TRUMPUSDT, AAVEUSDT, WLDUSDT, TAOUSDT, NEARUSDT, BCHUSDT, FILUSDT, PUMPUSDT, UNIUSDT, DOTUSDT, ASTERUSDT, ONDOUSDT, PENGUUSDT, TRXUSDT, CRVUSDT, ARBUSDT, XLMUSDT, APTUSDT, TIAUSDT, HBARUSDT, OPUSDT, XPLUSDT, VIRTUALUSDT, FETUSDT, INJUSDT, WLFIUSDT, TONUSDT, SEIUSDT, EIGENUSDT, ICPUSDT, PENDLEUSDT, ZROUSDT, REUSDT, POLUSDT, DASHUSDT, STRKUSDT
 gatilhos 0 | cenários 1
 stop móvel — o que o bot está vendo:
-  LTCUSDT venda: entrada 51.53  stop 52.325429  preço 51.14  (+0.49R)  | 15m até 11/11 13:30  | 4 estruturas a favor
-      F 09/11 18:30  stop daria 51.973523 = -0.56R  recusa (< +0.30R)
+  LTCUSDT venda: entrada 51.53  stop 52.325429  preço 51.48  (+0.06R)  | 15m até 11/11 14:30  | 4 estruturas a favor
+      F 09/11 18:30  stop daria 51.973524 = -0.56R  recusa (< +0.30R)
       F 09/11 20:15  stop daria 51.687504 = -0.20R  recusa (< +0.30R)
       F 09/11 20:30  stop daria 51.686432 = -0.20R  recusa (< +0.30R)
       F 10/11 12:30  stop daria 51.894776 = -0.46R  recusa (< +0.30R)
