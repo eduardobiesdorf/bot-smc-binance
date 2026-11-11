@@ -1,2 +1,2 @@
-11/11 08:56 BRT
-nada
+11/11 10:02 BRT
+radar   XLMUSDT venda — chegou no order block, esperando a limpeza

@@ -598,5 +598,17 @@
   "vol_varr": 0.0,
   "nucleo": false,
   "motivo": "nem varreu o order block nem chegou perto dele"
+ },
+ "cen-XLMUSDT-1794322800000": {
+  "tipo": "cenario",
+  "sim": "XLMUSDT",
+  "lado": "venda",
+  "status": "aberto",
+  "vela_ms": 1794398400000,
+  "imp_fim_ms": 1794322800000,
+  "alvo": 0.1408,
+  "nota": "chegou no order block, esperando a limpeza",
+  "vol_varr": 0.0,
+  "nucleo": false
  }
 }
