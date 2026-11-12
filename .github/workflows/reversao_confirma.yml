@@ -19,6 +19,10 @@ on:
         description: 'Volume mediano mínimo, em M USD/h (0 = todas)'
         required: false
         default: '0'
+      entrada:
+        description: 'Tempos gráficos da entrada, em horas'
+        required: false
+        default: '4,1'
       threads:
         description: 'Downloads em paralelo'
         required: false
@@ -51,8 +55,9 @@ jobs:
           set -o pipefail
           python -u analise/reversao_confirma.py dados_universo \
             --faixas "${{ inputs.faixas || '4' }}" \
-            --corte "${{ inputs.corte || '0' }}" 2>&1 | tee conf.log
+            --corte "${{ inputs.corte || '0' }}" \
+            --entrada "${{ inputs.entrada || '4,1' }}" 2>&1 | tee conf.log
       - name: Resumo
         if: always()
         run: |
-          { echo '```'; tail -120 conf.log; echo '```'; } >> $GITHUB_STEP_SUMMARY
+          { echo '```'; tail -200 conf.log; echo '```'; } >> $GITHUB_STEP_SUMMARY

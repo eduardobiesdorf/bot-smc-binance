@@ -86,7 +86,7 @@ def explosoes(h8, cfg):
     return fora
 
 
-def entrada_h4(h4, mv4, e, cfg, pos4):
+def entrada_h4(h4, mv4, e, cfg, pos4, tfe=4):
     """Do fim da explosao ate a confirmacao, em velas de 4h."""
     alta = e['alta']
     k0 = pos4.get(e['fim_ms'])
@@ -99,7 +99,9 @@ def entrada_h4(h4, mv4, e, cfg, pos4):
     pico = e['topo']
     tocou = extremo = seguidas = None
     seguidas = 0
-    lim = min(k0 + cfg['espera']*2, len(h4))
+    # as janelas valem em HORAS, para H4 e H1 esperarem o mesmo tempo
+    lim = min(k0 + int(cfg['espera']*8/tfe), len(h4))
+    gat = max(1, int(cfg['gat_h4']*4/tfe))
     for k in range(k0, lim):
         hi, lo, o, cl = h4[k][2], h4[k][3], h4[k][1], h4[k][4]
         if tocou is None:
@@ -113,7 +115,7 @@ def entrada_h4(h4, mv4, e, cfg, pos4):
             extremo = min(extremo, lo) if alta else max(extremo, hi)
         if (extremo < morte) if alta else (extremo > morte):
             return None
-        if k - tocou > cfg['gat_h4']:
+        if k - tocou > gat:
             return None
         if (hi >= pico) if alta else (lo <= pico):
             return None
@@ -156,16 +158,16 @@ def entrada_h4(h4, mv4, e, cfg, pos4):
     return None
 
 
-def rodar(cru, cfg, faixa):
+def rodar(cru, cfg, faixa, tfe=4):
     ops = []
     for sim, h1, _ in cru:
-        h8, h4 = juntar(h1, 8), juntar(h1, 4)
+        h8, h4 = juntar(h1, 8), juntar(h1, tfe)
         if len(h8) < 80 or len(h4) < 160:
             continue
         mv4 = exp8.medvol(h4, 20)
         pos4 = {v[0]: k for k, v in enumerate(h4)}
         for e in explosoes(h8, cfg):
-            r = entrada_h4(h4, mv4, e, cfg, pos4)
+            r = entrada_h4(h4, mv4, e, cfg, pos4, tfe)
             if not r:
                 continue
             alta = e['alta']
@@ -191,7 +193,8 @@ def rodar(cru, cfg, faixa):
             if dist <= 0:
                 continue
             fim = saida = None
-            for m in range(r['idx']+1, min(r['idx']+1+240, len(h4))):
+            for m in range(r['idx']+1,
+                           min(r['idx']+1+int(960/tfe), len(h4))):
                 hi, lo = h4[m][2], h4[m][3]
                 if alta:
                     if lo <= stop: fim, saida = 'stop', stop; break
@@ -203,7 +206,7 @@ def rodar(cru, cfg, faixa):
                 continue
             pos = RISCO/(risco/ent*100/100)
             mov = (saida-ent)/ent*(1 if alta else -1)
-            horas = (m-r['idx'])*4
+            horas = (m-r['idx'])*tfe
             q = dt.datetime.fromtimestamp(h4[r['idx']][0]/1000, BRT)
             ops.append(dict(sim=sim, liq=pos*mov - pos*TAXA*2 -
                             pos*(horas/8)*FUND8, ano=q.year, q=q,
@@ -254,6 +257,8 @@ def main():
     ap.add_argument('pasta')
     ap.add_argument('--corte', type=float, default=0.0)
     ap.add_argument('--faixas', type=int, default=1)
+    ap.add_argument('--entrada', default='4',
+                    help='tempos gráficos da entrada, em horas')
     a = ap.parse_args()
     cru = []
     for p in sorted(glob.glob(os.path.join(a.pasta, '*_1h.csv'))):
@@ -271,7 +276,8 @@ def main():
         vs = [vm for k, (s, _, vm) in enumerate(cru) if faixa[s] == i_]
         rot_f.append(f"faixa {i_+1}: {len(vs)} moedas, "
                      f"{min(vs)/1e6:,.2f} a {max(vs)/1e6:,.0f} M USD/h")
-    print(f"{len(cru)} moedas · padrão em H8, entrada no H4")
+    print(f"{len(cru)} moedas · padrão em H8, entrada em "
+          f"{', '.join('H'+x for x in a.entrada.split(','))}")
     for r_ in rot_f:
         print("  " + r_)
 
@@ -286,19 +292,22 @@ def main():
         ('espera só 6 velas de 4h', dict(BASE, gat_h4=6)),
         ('espera até 24 velas de 4h', dict(BASE, gat_h4=24)),
     ]
-    guardado = {}
-    print(f"\n{'='*120}\n  TODAS AS MOEDAS\n{'='*120}")
-    cab()
-    for rot, cfg in VAR:
-        ops = rodar(cru, cfg, faixa)
-        guardado[rot] = ops
-        painel(rot, ops)
-    if a.faixas > 1:
-        for i_ in range(a.faixas):
-            print(f"\n  {rot_f[i_].upper()}")
-            cab()
-            for rot, _ in VAR:
-                painel(rot, [o for o in guardado[rot] if o['faixa'] == i_])
+    for tfe in [int(x) for x in a.entrada.split(',')]:
+        guardado = {}
+        print(f"\n{'#'*120}\n#  PADRÃO EM H8, ENTRADA EM H{tfe}\n{'#'*120}")
+        print(f"\n{'='*120}\n  TODAS AS MOEDAS\n{'='*120}")
+        cab()
+        for rot, cfg in VAR:
+            ops = rodar(cru, cfg, faixa, tfe)
+            guardado[rot] = ops
+            painel(rot, ops)
+        if a.faixas > 1:
+            for i_ in range(a.faixas):
+                print(f"\n  {rot_f[i_].upper()}")
+                cab()
+                for rot, _ in VAR:
+                    painel(rot, [o for o in guardado[rot]
+                                 if o['faixa'] == i_])
 
 
 if __name__ == '__main__':
