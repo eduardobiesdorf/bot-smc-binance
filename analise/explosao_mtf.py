@@ -204,7 +204,13 @@ def varrer(sim, h1, tf, cfg):
             alvo_r = pico
             if cfg.get('proj'):
                 tam = hg[i][2] - hg[i][3]
-                if cfg.get('proj_de') == 'topo':
+                if cfg.get('proj_de') == 'vela':
+                    # o topo da PROPRIA vela que estourou, mais uma
+                    # fracao do tamanho dela
+                    base_p = hg[i][2] if alta else hg[i][3]
+                    alvo_r = base_p + cfg['proj']*tam if alta else \
+                             base_p - cfg['proj']*tam
+                elif cfg.get('proj_de') == 'topo':
                     # segurar ALEM do topo: o topo mais um tanto do
                     # tamanho da explosao
                     alvo_r = pico + cfg['proj']*tam if alta else \
