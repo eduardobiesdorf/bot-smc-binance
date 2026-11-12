@@ -684,12 +684,13 @@
   "tipo": "cenario",
   "sim": "VIRTUALUSDT",
   "lado": "venda",
-  "status": "aberto",
+  "status": "morreu",
   "vela_ms": 1794510000000,
   "imp_fim_ms": 1794488400000,
   "alvo": 0.5034,
   "nota": "limpou o order block, esperando a reversão",
   "vol_varr": 8.56168962747569,
-  "nucleo": false
+  "nucleo": false,
+  "motivo": "piscina a 4.6R da entrada, máximo 1.5R"
  }
 }

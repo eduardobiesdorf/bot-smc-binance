@@ -1,20 +1,25 @@
-início 12/11 17:48 BRT
-ETHUSDT: gatilho antigo (25 velas atrás)
-XRPUSDT: gatilho antigo (208 velas atrás)
-SUIUSDT: gatilho antigo (74 velas atrás)
-ZECUSDT: gatilho antigo (162 velas atrás)
-LINKUSDT: gatilho antigo (75 velas atrás)
-LTCUSDT: gatilho antigo (74 velas atrás)
-AAVEUSDT: gatilho antigo (146 velas atrás)
-PENGUUSDT: gatilho antigo (75 velas atrás)
-HBARUSDT: gatilho antigo (87 velas atrás)
-STRKUSDT: gatilho antigo (168 velas atrás)
+início 12/11 18:01 BRT
+ETHUSDT: gatilho antigo (26 velas atrás)
+XRPUSDT: gatilho antigo (209 velas atrás)
+SUIUSDT: gatilho antigo (75 velas atrás)
+ZECUSDT: gatilho antigo (163 velas atrás)
+LINKUSDT: gatilho antigo (76 velas atrás)
+LTCUSDT: gatilho antigo (75 velas atrás)
+AAVEUSDT: gatilho antigo (147 velas atrás)
+PENGUUSDT: gatilho antigo (76 velas atrás)
+HBARUSDT: gatilho antigo (88 velas atrás)
+STRKUSDT: gatilho antigo (169 velas atrás)
 pares (50): BTCUSDT, ETHUSDT, SOLUSDT, XRPUSDT, DOGEUSDT, HYPEUSDT, SUIUSDT, BNBUSDT, ADAUSDT, ZECUSDT, ENAUSDT, LINKUSDT, AVAXUSDT, LTCUSDT, TRUMPUSDT, AAVEUSDT, WLDUSDT, TAOUSDT, NEARUSDT, BCHUSDT, FILUSDT, PUMPUSDT, UNIUSDT, DOTUSDT, ASTERUSDT, ONDOUSDT, PENGUUSDT, TRXUSDT, CRVUSDT, ARBUSDT, XLMUSDT, APTUSDT, TIAUSDT, HBARUSDT, OPUSDT, XPLUSDT, VIRTUALUSDT, FETUSDT, INJUSDT, WLFIUSDT, TONUSDT, SEIUSDT, EIGENUSDT, ICPUSDT, PENDLEUSDT, ZROUSDT, REUSDT, POLUSDT, DASHUSDT, STRKUSDT
-gatilhos 0 | cenários 1
+gatilhos 0 | cenários 0
 explosão 8h: 50 pares olhados, 0 gatilho(s)
 🧪 explosão de 8h em teste: 0 aberta(s), nenhuma resolvida ainda
-enviados 0 gatilhos, 0 desfechos
-placar  8 fechados: 3 gain / 5 loss  (38%)  total +4.98R  ·  0 abertos  ·  29 cenários encerrados sem entrada
+TOKEN: ok 46 chars | CHAT_ID: ok 10 chars
+HTTP 200: {"ok":true,"result":{"message_id":291,"from":{"id":9205915638,"is_bot":true,"first_name":"SMC Trading Bot","username":"smc_crypto_alerts_bot"},"chat":{"id":[removido],"first_name":"Eduardo","last_name
+desfecho: ⚪ <b>VIRTUAL/USDT</b> — cenário de venda encerrado <b>sem entrada</b> | <i>piscina a 4.6R da entrada, máximo 1.5R</i>
+TOKEN: ok 46 chars | CHAT_ID: ok 10 chars
+HTTP 200: {"ok":true,"result":{"message_id":292,"from":{"id":9205915638,"is_bot":true,"first_name":"SMC Trading Bot","username":"smc_crypto_alerts_bot"},"chat":{"id":[removido],"first_name":"Eduardo","last_name
+enviados 0 gatilhos, 1 desfechos
+placar  8 fechados: 3 gain / 5 loss  (38%)  total +4.98R  ·  0 abertos  ·  30 cenários encerrados sem entrada
 por que os cenários morreram:
   11x  nem varreu o order block nem chegou perto dele
   8x  furou o order block fundo demais (> 2.5 ATR): virou continuação, não varredura
@@ -23,3 +28,4 @@ por que os cenários morreram:
   1x  varredura com 0.63x o volume médio, mínimo 1.20x — não vira gatilho
   1x  varredura com 1.02x o volume médio, mínimo 1.20x — não vira gatilho
   1x  piscina a 1.7R da entrada, máximo 1.5R
+  1x  piscina a 4.6R da entrada, máximo 1.5R
