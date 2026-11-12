@@ -198,16 +198,40 @@ def varrer(sim, h1, tf, cfg):
                 s = (min(s, ex - ag[i]*0.10) if alta
                      else max(s, ex + ag[i]*0.10))
             risco = abs(p - s)
-            dist = (pico - p) if alta else (p - pico)
-            if risco <= 0 or dist <= 0 or dist/risco < cfg['rr_min']:
+            # alvo: por padrao o topo que a explosao deixou. Com 'proj',
+            # projeta o tamanho da explosao a partir do fundo do recuo --
+            # a medida classica, que fica ALEM daquele topo.
+            alvo_r = pico
+            if cfg.get('proj'):
+                tam = hg[i][2] - hg[i][3]
+                if cfg.get('proj_de') == 'topo':
+                    # segurar ALEM do topo: o topo mais um tanto do
+                    # tamanho da explosao
+                    alvo_r = pico + cfg['proj']*tam if alta else \
+                             pico - cfg['proj']*tam
+                else:
+                    fundo = min(h1[x][3] for x in range(k1, k+1)) if alta \
+                            else max(h1[x][2] for x in range(k1, k+1))
+                    alvo_r = fundo + cfg['proj']*tam if alta else \
+                             fundo - cfg['proj']*tam
+            dist = (alvo_r - p) if alta else (p - alvo_r)
+            # Com 'rr_no_topo', o filtro de risco/retorno usa o topo da
+            # explosao mesmo quando o alvo e projetado. Assim as variantes
+            # de alvo pegam EXATAMENTE as mesmas operacoes, e a comparacao
+            # mede so a saida, nao um conjunto diferente de trades.
+            dist_f = ((pico - p) if alta else (p - pico)) \
+                if cfg.get('rr_no_topo') else dist
+            if risco <= 0 or dist <= 0 or dist_f <= 0 \
+                    or dist_f/risco < cfg['rr_min']:
                 reg[rot] = None; continue
-            f, saida, horas = resolver1h(h1, k, p, s, pico, alta)
+            f, saida, horas = resolver1h(h1, k, p, s, alvo_r, alta)
             if f is None:
                 reg[rot] = None; continue
             liq, rp = dinheiro(p, saida, s, alta, horas)
             q = dt.datetime.fromtimestamp(h1[k][0]/1000, BRT)
             reg[rot] = dict(ent=p, stop=s, rr=dist/risco, fim=f, liq=liq,
-                            risco_pct=rp*100, q=q, ano=q.year, horas=horas)
+                            risco_pct=rp*100, q=q, ano=q.year, horas=horas,
+                            alvo=alvo_r, topo=pico)
         out.append(reg)
         i = max(i + 1, int((h1[tocou][0] - hg[0][0]) // passo) + 1) \
             if tocou else i + 1
