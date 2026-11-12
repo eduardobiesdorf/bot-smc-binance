@@ -23,6 +23,10 @@ on:
         description: 'Tempos gráficos da entrada, em horas'
         required: false
         default: '4,1'
+      blocos:
+        description: 'Cortes do ranking de volume'
+        required: false
+        default: '50,100,150,200,300'
       threads:
         description: 'Downloads em paralelo'
         required: false
@@ -56,8 +60,10 @@ jobs:
           python -u analise/reversao_confirma.py dados_universo \
             --faixas "${{ inputs.faixas || '4' }}" \
             --corte "${{ inputs.corte || '0' }}" \
-            --entrada "${{ inputs.entrada || '4,1' }}" 2>&1 | tee conf.log
+            --entrada "${{ inputs.entrada || '4,1' }}" \
+            --blocos "${{ inputs.blocos || '50,100,150,200,300' }}" \
+            2>&1 | tee conf.log
       - name: Resumo
         if: always()
         run: |
-          { echo '```'; tail -200 conf.log; echo '```'; } >> $GITHUB_STEP_SUMMARY
+          { echo '```'; tail -300 conf.log; echo '```'; } >> $GITHUB_STEP_SUMMARY

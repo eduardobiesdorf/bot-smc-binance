@@ -136,12 +136,12 @@ def entrada_h4(h4, mv4, e, cfg, pos4, tfe=4):
             continue
         if cfg['vol_min'] and mv4[k] > 0 and h4[k][5] < cfg['vol_min']*mv4[k]:
             continue
-        if cfg['modo'] == 'raso':
+        if cfg['modo'] in ('raso', 'raso_rompe'):
             # o encosto nao pode ter afundado no order block
             meio = (e['ob_base'] + e['ob_topo'])/2
             if (extremo < meio) if alta else (extremo > meio):
                 return None
-        if cfg['modo'] == 'rompe_vela':
+        if cfg['modo'] in ('rompe_vela', 'raso_rompe'):
             if (cl <= alto_toque) if alta else (cl >= baixo_toque):
                 continue
         if cfg['modo'] == 'fundo_alto':
@@ -257,6 +257,8 @@ def main():
     ap.add_argument('pasta')
     ap.add_argument('--corte', type=float, default=0.0)
     ap.add_argument('--faixas', type=int, default=1)
+    ap.add_argument('--blocos', default='',
+                    help='cortes do ranking de volume, ex 50,100,150,200')
     ap.add_argument('--entrada', default='4',
                     help='tempos gráficos da entrada, em horas')
     a = ap.parse_args()
@@ -288,6 +290,8 @@ def main():
         ('encosto raso no OB', dict(BASE, modo='raso')),
         ('duas velas seguidas', dict(BASE, modo='duas')),
         ('rompe a vela do encosto', dict(BASE, modo='rompe_vela')),
+        ('raso + volume ≥1,2x', dict(BASE, modo='raso', vol_min=1.2)),
+        ('raso + rompe a vela', dict(BASE, modo='raso_rompe')),
         ('fundo mais alto', dict(BASE, modo='fundo_alto')),
         ('espera só 6 velas de 4h', dict(BASE, gat_h4=6)),
         ('espera até 24 velas de 4h', dict(BASE, gat_h4=24)),
@@ -308,6 +312,29 @@ def main():
                 for rot, _ in VAR:
                     painel(rot, [o for o in guardado[rot]
                                  if o['faixa'] == i_])
+        if a.blocos:
+            cortes = [int(x) for x in a.blocos.split(',')]
+            print(f"\n{'~'*120}\n  POR BLOCO DO RANKING DE VOLUME "
+                  f"(exclusivos)\n{'~'*120}")
+            ant = 0
+            for c in cortes + [len(cru)]:
+                nomes = {s for s, _, _ in cru[ant:c]}
+                if nomes:
+                    print(f"\n  posições {ant+1} a {min(c, len(cru))} "
+                          f"({len(nomes)} moedas)")
+                    cab()
+                    for rot, _ in VAR:
+                        painel(rot, [o for o in guardado[rot]
+                                     if o['sim'] in nomes])
+                ant = c
+            print(f"\n{'~'*120}\n  ACUMULADO: AS N MAIORES\n{'~'*120}")
+            for c in cortes + [len(cru)]:
+                nomes = {s for s, _, _ in cru[:c]}
+                print(f"\n  as {min(c, len(cru))} maiores")
+                cab()
+                for rot, _ in VAR:
+                    painel(rot, [o for o in guardado[rot]
+                                 if o['sim'] in nomes])
 
 
 if __name__ == '__main__':
