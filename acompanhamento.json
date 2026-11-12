@@ -564,7 +564,7 @@
   "tipo": "gatilho",
   "sim": "LTCUSDT",
   "lado": "venda",
-  "status": "aberto",
+  "status": "alvo",
   "vela_ms": 1794243600000,
   "entrada": 51.53,
   "stop": 49.93472121040381,
@@ -600,7 +600,10 @@
   "rsi_varr": 60.85726824410241,
   "rsi_gat": 52.79906190141878,
   "rsi_varr_norm": 39.14273175589759,
-  "nucleo": true
+  "nucleo": true,
+  "fim_ms": 1794481200000,
+  "horas": 66,
+  "resultado_r": 2.8538074712643655
  },
  "cen-VIRTUALUSDT-1794171600000": {
   "tipo": "cenario",
@@ -647,13 +650,17 @@
   "status": "aberto",
   "vela_ms": 1794420000000,
   "entrada": 2083.57,
-  "stop": 2105.4175714285716,
+  "stop": 2054.750719345917,
   "stop_ini": 2105.4175714285716,
-  "movs": 0,
+  "movs": 1,
   "degraus": [
    [
     1794420000000,
     2105.4175714285716
+   ],
+   [
+    1794483900000,
+    2054.750719345917
    ]
   ],
   "alvo": 2006.0,
