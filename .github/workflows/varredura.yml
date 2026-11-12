@@ -69,6 +69,11 @@ on:
         required: false
         default: false
         type: boolean
+      sem_explosao8:
+        description: 'Desligar o segundo alerta (explosão de 8h, em teste)'
+        required: false
+        default: false
+        type: boolean
       explicar:
         description: 'Auditar um par (ex: ETHUSDT): mostra onde cada impulso foi recusado'
         required: false
@@ -114,6 +119,7 @@ jobs:
           [ "${{ inputs.dinamico }}" = "true" ] && ARGS="$ARGS --dinamico"
           [ "${{ inputs.so_gatilho }}" = "true" ] && ARGS="$ARGS --so-gatilho"
           [ "${{ inputs.teste }}" = "true" ] && ARGS="$ARGS --teste"
+          [ "${{ inputs.sem_explosao8 }}" = "true" ] && ARGS="$ARGS --sem-explosao8"
           ARGS="$ARGS --exemplos ${{ inputs.exemplos || '2' }}"
           [ "${{ inputs.novos }}" = "true" ] && ARGS="$ARGS --novos"
           [ -n "${{ inputs.explicar }}" ] && ARGS="$ARGS --explicar ${{ inputs.explicar }}"
@@ -130,7 +136,8 @@ jobs:
           # resolve. Resultado: nada era salvo desde 03/11. Adiciona um a um.
           for f in varredura_enviados.json acompanhamento.json \
                    historico_ao_vivo.csv diagnostico_varredura.txt \
-                   resumo_varredura.txt; do
+                   resumo_varredura.txt explosao8_estado.json \
+                   historico_explosao8.csv; do
             if [ -f "$f" ]; then git add "$f"; fi
           done
           if git diff --cached --quiet; then

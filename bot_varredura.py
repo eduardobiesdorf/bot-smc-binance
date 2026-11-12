@@ -37,6 +37,7 @@ import requests
 
 import grafico_varredura as graf
 import acompanhamento as acomp
+import explosao8 as exp8
 
 BRT = timezone(timedelta(hours=-3))
 BASE_URL = "https://data-api.binance.vision/api/v3"
@@ -741,6 +742,9 @@ def main():
     ap.add_argument('--explicar', default='',
                     help='par para auditar: lista todo impulso achado e '
                          'onde cada um foi recusado')
+    ap.add_argument('--sem-explosao8', action='store_true',
+                    help='não roda o segundo alerta (explosão de 8h, '
+                         'em teste)')
     ap.add_argument('--velas', type=int, default=400,
                     help='quantas velas de H1 puxar no --explicar')
     a = ap.parse_args()
@@ -930,6 +934,58 @@ def main():
             else:
                 enviar(m)
             diag("stop móvel: " + m.replace("\n", " | ")[:140])
+
+    # --- segundo alerta: explosao de vela unica em H8 (EM TESTE) -----
+    # Estado e historico proprios, em explosao8_estado.json e
+    # historico_explosao8.csv, para nao contaminar o placar da varredura.
+    # Busca 8h direto da Binance em vez de remontar das velas de 1h: com
+    # 400 velas de 1h sairiam so 50 de 8h, e o padrao precisa de ~70.
+    if not a.sem_explosao8:
+        try:
+            exp8_d = exp8.ler()
+            s8, achados8 = {}, []
+            alvos8 = sorted(set(usados) |
+                            {r['sim'] for r in exp8_d.values()
+                             if r.get('status') == 'aberto'})
+            for sim in alvos8:
+                try:
+                    v = buscar(sim, '8h', 200)
+                except Exception as e:
+                    diag(f"{sim}: não busquei o 8h ({e})")
+                    continue
+                if len(v) < 70:
+                    continue
+                s8[sim] = v
+                if sim not in usados:
+                    continue
+                g8 = exp8.achar(v)
+                if g8:
+                    achados8.append((sim, g8))
+                    diag(f"EXPLOSÃO 8h {sim} {g8['lado']} "
+                         f"vela {quando(g8['vela_ms'])} "
+                         f"entrada {fmt(g8['entrada'])} "
+                         f"R:R 1:{g8['rr']:.2f} RSI {g8['rsi']:.0f}")
+            diag(f"explosão 8h: {len(s8)} pares olhados, "
+                 f"{len(achados8)} gatilho(s)")
+            for sim, g8 in achados8:
+                if not exp8.registrar(exp8_d, sim, g8):
+                    continue
+                texto = exp8.msg(sim, g8, quando, fmt, msg_mao)
+                if a.teste:
+                    print(texto, "\n")
+                else:
+                    enviar(texto)
+            for m in exp8.revisar(exp8_d, s8, fmt, quando):
+                if a.teste:
+                    print(m, "\n")
+                else:
+                    enviar(m)
+                diag("explosão 8h, desfecho: " + m.replace("\n", " | ")[:140])
+            if not a.teste:
+                exp8.gravar(exp8_d)
+            diag(exp8.placar(exp8_d).replace('<b>', '').replace('</b>', ''))
+        except Exception as e:
+            diag(f"explosão 8h falhou, o resto segue: {e}")
 
     desfechos = acomp.revisar(acomps, series, CFG, seguir, achar_impulsos,
                               atr, media_volume)
