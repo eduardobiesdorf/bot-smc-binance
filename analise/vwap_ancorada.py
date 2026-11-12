@@ -43,12 +43,14 @@ def choques_vela(h, a, mv, cfg):
 
 
 def choques_perna(h, a, mv, cfg):
-    """Pernada de 3 a 8 velas, >= sigma de volatilidade, direcional."""
+    """Pernada direcional. O quao exigente e depende da configuracao:
+    comprimento, se pede volume, se pede romper o topo, e quanto do
+    movimento precisa estar a favor."""
     jan = cfg['janela']
     i = max(jan, 21) + 1
     while i < len(h) - 2:
         achou = None
-        for n in range(3, 9):
+        for n in range(cfg.get('perna_min', 3), cfg.get('perna_max', 8) + 1):
             f = i + n - 1
             if f >= len(h) - 2:
                 break
@@ -58,19 +60,21 @@ def choques_perna(h, a, mv, cfg):
             if a[i-1] <= 0 or desloc < cfg['sigma']*a[i-1]:
                 continue
             favor = sum(1 for v in tramo if (v[4] > v[1]) == alta)
-            if favor / len(tramo) < 0.7:
+            if favor / len(tramo) < cfg.get('frac_favor', 0.7):
                 continue
             corpo = sum(abs(v[4]-v[1]) for v in tramo)
             faixa = sum(v[2]-v[3] for v in tramo)
-            if faixa <= 0 or corpo/faixa < 0.5:
+            if faixa <= 0 or corpo/faixa < cfg.get('corpo_min', 0.5):
                 continue
-            vm = statistics.mean(v[5] for v in tramo)
-            if mv[i-1] <= 0 or vm < cfg['vol']*mv[i-1]:
-                continue
-            if alta and h[f][4] <= max(x[2] for x in h[i-jan:i]):
-                continue
-            if not alta and h[f][4] >= min(x[3] for x in h[i-jan:i]):
-                continue
+            if cfg.get('pede_volume', True):
+                vm = statistics.mean(v[5] for v in tramo)
+                if mv[i-1] <= 0 or vm < cfg['vol']*mv[i-1]:
+                    continue
+            if cfg.get('pede_rompimento', True):
+                if alta and h[f][4] <= max(x[2] for x in h[i-jan:i]):
+                    continue
+                if not alta and h[f][4] >= min(x[3] for x in h[i-jan:i]):
+                    continue
             achou = (i, f, alta)
             break
         if achou:
@@ -196,23 +200,41 @@ def main():
     print(f"{len(cru)} moedas com volume mediano ≥ {a.corte:.2f} M USD/h")
     print(f"ponto de empate com stop de 1%: ~55% de acerto no alvo 1:1\n")
 
-    variantes = [
-        ('vela única · 1:1 · stop 1% · 24h', dict(BASE)),
-        ('vela única · 1:1 · stop 1% · 12h', dict(BASE, validade=12)),
-        ('vela única · 1:1 · stop 1% · 48h', dict(BASE, validade=48)),
-        ('vela única · 1:1 · stop 0,5 vol', dict(BASE, stop='atr')),
-        ('vela única · 1:1 · stop na origem', dict(BASE, stop='origem')),
-        ('vela única · 1:1,5 · stop 1%', dict(BASE, alvo=1.5)),
-        ('vela única · 1:2 · stop 1%', dict(BASE, alvo=2.0)),
-        ('vela única · âncora no extremo', dict(BASE, ancora='extremo')),
-        ('vela única · stop 2%', dict(BASE, stop_pct=2.0)),
+    solto = dict(BASE, pede_volume=False, pede_rompimento=False,
+                 frac_favor=0.6, corpo_min=0.4, sigma=1.5)
+    grupos = [
+        ('PERNADA LARGA (3 a 20 velas, sem exigir volume nem rompimento)',
+         choques_perna, dict(solto, perna_min=3, perna_max=20), [
+             ('1:1 · stop 1%', {}),
+             ('1:2 · stop 1%', dict(alvo=2.0)),
+             ('1:3 · stop 1%', dict(alvo=3.0)),
+             ('1:1 · stop 2%', dict(stop_pct=2.0)),
+             ('1:1 · stop na origem', dict(stop='origem')),
+             ('1:2 · stop na origem', dict(stop='origem', alvo=2.0)),
+             ('1:3 · stop na origem', dict(stop='origem', alvo=3.0)),
+             ('1:1 · validade 72h', dict(validade=72)),
+         ]),
+        ('PERNADA LONGA (5 a 30 velas, movimento de 2,5 volatilidades)',
+         choques_perna, dict(solto, perna_min=5, perna_max=30, sigma=2.5), [
+             ('1:1 · stop 1%', {}),
+             ('1:2 · stop 1%', dict(alvo=2.0)),
+             ('1:3 · stop 1%', dict(alvo=3.0)),
+             ('1:2 · stop na origem', dict(stop='origem', alvo=2.0)),
+             ('1:3 · stop na origem', dict(stop='origem', alvo=3.0)),
+         ]),
+        ('PERNADA EXIGENTE (3 a 8 velas, com volume e rompimento)',
+         choques_perna, dict(BASE), [
+             ('1:1 · stop 1%', {}),
+             ('1:2 · stop 1%', dict(alvo=2.0)),
+             ('1:3 · stop na origem', dict(stop='origem', alvo=3.0)),
+         ]),
     ]
     for tf in [int(x) for x in a.tf.split(',')]:
-        for nome, ger in (('CHOQUE DE VELA ÚNICA', choques_vela),
-                          ('CHOQUE DE PERNADA (3 a 8 velas)', choques_perna)):
+        for nome, ger, base, variantes in grupos:
             print(f"\n{'='*130}\n  H{tf} — {nome}\n{'='*130}")
             cab()
-            for rot, cfg in variantes:
+            for rot, extra in variantes:
+                cfg = dict(base, **extra)
                 ops = []
                 for sim, h1 in cru:
                     hg = juntar(h1, tf)
@@ -224,7 +246,7 @@ def main():
                         if g:
                             ops.append(dict(g, sim=sim))
                 ops.sort(key=lambda o: o['q'])
-                painel(rot.replace('vela única · ', ''), ops)
+                painel(rot, ops)
 
 
 if __name__ == '__main__':
