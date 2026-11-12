@@ -53,6 +53,12 @@ BASE = dict(sigma=2.5, vol=1.5, ob_busca=6,
             # em qualquer tempo grafico -- e o mesmo evento, pego antes,
             # em vez de um evento tres vezes menor.
             sigma_abs=False,
+            # A queda de 160h e a MESMA queda de preco em qualquer tempo
+            # grafico. Medi-la em volatilidades da propria vela torna a
+            # exigencia 3x menor no H1 -- era isso que fazia o H1
+            # disparar 794 vezes em coisa que nao era tendencia.
+            # Com tend_abs, a queda exigida e a mesma em preco.
+            tend_abs=False,
             gat_h4=12,        # velas de 4h para a confirmacao aparecer
             furo_max=1.0, rr_min=1.2, stop_folga=0.10, est_min=0.5,
             alvo_proj=0.9, modo='direta', vol_min=0.0, tfp=8)
@@ -64,6 +70,7 @@ def explosoes(h8, cfg):
     tfp = cfg['tfp']
     esc = {8: 1.0, 4: 1.46, 2: 2.10, 1: 3.05}.get(tfp, (8/tfp)**0.5)
     sig = cfg['sigma'] * (esc if cfg.get('sigma_abs') else 1.0)
+    tnd = cfg['tend_atr'] * (esc if cfg.get('tend_abs') else 1.0)
     # as janelas, convertidas de horas para velas deste tempo grafico
     pv = max(1, round(cfg['pivo_h']/tfp))
     bt = max(5, round(cfg['topo_h']/tfp))
@@ -81,7 +88,7 @@ def explosoes(h8, cfg):
         jan = h8[i-tj:i]
         queda = (h8[i-tj][4] - h8[i-1][4]) / a[i-1] if alta \
             else (h8[i-1][4] - h8[i-tj][4]) / a[i-1]
-        if queda < cfg['tend_atr']:
+        if queda < tnd:
             continue
         tmax = max(x[2] for x in jan); tmin = min(x[3] for x in jan)
         if tmax > tmin and cfg['perto_do_fundo']:
@@ -318,10 +325,12 @@ def main():
         ('rompe a vela do encosto', dict(BASE, modo='rompe_vela')),
         ('raso + volume ≥1,2x', dict(BASE, modo='raso', vol_min=1.2)),
         ('raso + rompe a vela', dict(BASE, modo='raso_rompe')),
-        ('TAMANHO REAL: direta', dict(BASE, sigma_abs=True)),
-        ('TAMANHO REAL: raso', dict(BASE, sigma_abs=True, modo='raso')),
-        ('TAMANHO REAL: raso+volume', dict(BASE, sigma_abs=True,
-                                           modo='raso', vol_min=1.2)),
+        ('QUEDA REAL: direta', dict(BASE, tend_abs=True)),
+        ('QUEDA REAL: raso', dict(BASE, tend_abs=True, modo='raso')),
+        ('QUEDA REAL: raso+volume', dict(BASE, tend_abs=True, modo='raso',
+                                         vol_min=1.2)),
+        ('QUEDA REAL: raso+duas velas', dict(BASE, tend_abs=True,
+                                             modo='raso', vol_min=0.0)),
         ('fundo mais alto', dict(BASE, modo='fundo_alto')),
         ('espera só 6 velas de 4h', dict(BASE, gat_h4=6)),
         ('espera até 24 velas de 4h', dict(BASE, gat_h4=24)),
