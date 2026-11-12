@@ -41,7 +41,7 @@ BASE = dict(sigma=2.5, vol=1.5, ob_busca=6, pivo=2, busca_topo=30,
             espera=30,        # velas de 8h esperando o encosto
             gat_h4=12,        # velas de 4h para a confirmacao aparecer
             furo_max=1.0, rr_min=1.2, stop_folga=0.10, est_min=0.5,
-            alvo_proj=0.9, modo='direta', vol_min=0.0)
+            alvo_proj=0.9, modo='direta', vol_min=0.0, tfp=8)
 
 
 def explosoes(h8, cfg):
@@ -81,12 +81,12 @@ def explosoes(h8, cfg):
             continue
         fora.append(dict(i=i, alta=alta, ob_base=ob_base, ob_topo=ob_topo,
                          atr=a[i], topo=hi if alta else lo,
-                         tam=hi-lo, fim_ms=h8[i][0] + 8*3600_000,
+                         tam=hi-lo, fim_ms=h8[i][0] + cfg['tfp']*3600_000,
                          queda=queda))
     return fora
 
 
-def entrada_h4(h4, mv4, e, cfg, pos4, tfe=4):
+def entrada_h4(h4, mv4, e, cfg, pos4, tfe=4, tfp=8):
     """Do fim da explosao ate a confirmacao, em velas de 4h."""
     alta = e['alta']
     k0 = pos4.get(e['fim_ms'])
@@ -100,7 +100,7 @@ def entrada_h4(h4, mv4, e, cfg, pos4, tfe=4):
     tocou = extremo = seguidas = None
     seguidas = 0
     # as janelas valem em HORAS, para H4 e H1 esperarem o mesmo tempo
-    lim = min(k0 + int(cfg['espera']*8/tfe), len(h4))
+    lim = min(k0 + int(cfg['espera']*tfp/tfe), len(h4))
     gat = max(1, int(cfg['gat_h4']*4/tfe))
     for k in range(k0, lim):
         hi, lo, o, cl = h4[k][2], h4[k][3], h4[k][1], h4[k][4]
@@ -158,16 +158,16 @@ def entrada_h4(h4, mv4, e, cfg, pos4, tfe=4):
     return None
 
 
-def rodar(cru, cfg, faixa, tfe=4):
+def rodar(cru, cfg, faixa, tfe=4, tfp=8):
     ops = []
     for sim, h1, _ in cru:
-        h8, h4 = juntar(h1, 8), juntar(h1, tfe)
+        h8, h4 = juntar(h1, tfp), juntar(h1, tfe)
         if len(h8) < 80 or len(h4) < 160:
             continue
         mv4 = exp8.medvol(h4, 20)
         pos4 = {v[0]: k for k, v in enumerate(h4)}
         for e in explosoes(h8, cfg):
-            r = entrada_h4(h4, mv4, e, cfg, pos4, tfe)
+            r = entrada_h4(h4, mv4, e, cfg, pos4, tfe, tfp)
             if not r:
                 continue
             alta = e['alta']
@@ -262,6 +262,8 @@ def main():
     ap.add_argument('--faixas', type=int, default=1)
     ap.add_argument('--blocos', default='',
                     help='cortes do ranking de volume, ex 50,100,150,200')
+    ap.add_argument('--padrao', default='8',
+                    help='tempos gráficos do padrão, em horas')
     ap.add_argument('--entrada', default='4',
                     help='tempos gráficos da entrada, em horas')
     a = ap.parse_args()
@@ -299,13 +301,16 @@ def main():
         ('espera só 6 velas de 4h', dict(BASE, gat_h4=6)),
         ('espera até 24 velas de 4h', dict(BASE, gat_h4=24)),
     ]
-    for tfe in [int(x) for x in a.entrada.split(',')]:
+    pares_tf = [(p_, e_) for p_ in [int(x) for x in a.padrao.split(',')]
+                for e_ in [int(x) for x in a.entrada.split(',')] if e_ < p_]
+    for tfp, tfe in pares_tf:
         guardado = {}
-        print(f"\n{'#'*120}\n#  PADRÃO EM H8, ENTRADA EM H{tfe}\n{'#'*120}")
+        print(f"\n{'#'*120}\n#  PADRÃO EM H{tfp}, ENTRADA EM H{tfe}\n"
+              f"{'#'*120}")
         print(f"\n{'='*120}\n  TODAS AS MOEDAS\n{'='*120}")
         cab()
         for rot, cfg in VAR:
-            ops = rodar(cru, cfg, faixa, tfe)
+            ops = rodar(cru, dict(cfg, tfp=tfp), faixa, tfe, tfp)
             guardado[rot] = ops
             painel(rot, ops)
         if a.faixas > 1:

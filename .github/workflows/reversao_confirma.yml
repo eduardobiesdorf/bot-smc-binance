@@ -19,10 +19,14 @@ on:
         description: 'Volume mediano mínimo, em M USD/h (0 = todas)'
         required: false
         default: '0'
+      padrao:
+        description: 'Tempos gráficos do PADRÃO, em horas (manda na frequência)'
+        required: false
+        default: '8,4,2'
       entrada:
         description: 'Tempos gráficos da entrada, em horas'
         required: false
-        default: '4,1'
+        default: '1'
       blocos:
         description: 'Cortes do ranking de volume'
         required: false
@@ -60,7 +64,8 @@ jobs:
           python -u analise/reversao_confirma.py dados_universo \
             --faixas "${{ inputs.faixas || '4' }}" \
             --corte "${{ inputs.corte || '0' }}" \
-            --entrada "${{ inputs.entrada || '4,1' }}" \
+            --padrao "${{ inputs.padrao || '8,4,2' }}" \
+            --entrada "${{ inputs.entrada || '1' }}" \
             --blocos "${{ inputs.blocos || '50,100,150,200,300' }}" \
             2>&1 | tee conf.log
       - name: Resumo
