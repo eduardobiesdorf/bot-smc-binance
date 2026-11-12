@@ -47,6 +47,12 @@ BASE = dict(sigma=2.5, vol=1.5, ob_busca=6,
             tend_h=160,       # 20 velas de 8h medindo a queda
             espera_h=240,     # 30 velas de 8h esperando o encosto
             tend_atr=2.0, perto_do_fundo=0.35,
+            # a volatilidade de uma vela de 8h vale 1,46x a de H4, 2,10x
+            # a de H2 e 3,05x a de H1 (medido em 142 moedas). Com
+            # sigma_abs, a explosao precisa ter o MESMO tamanho absoluto
+            # em qualquer tempo grafico -- e o mesmo evento, pego antes,
+            # em vez de um evento tres vezes menor.
+            sigma_abs=False,
             gat_h4=12,        # velas de 4h para a confirmacao aparecer
             furo_max=1.0, rr_min=1.2, stop_folga=0.10, est_min=0.5,
             alvo_proj=0.9, modo='direta', vol_min=0.0, tfp=8)
@@ -56,6 +62,8 @@ def explosoes(h8, cfg):
     """As velas de explosao de reversao, com o order block e o alvo."""
     a, mv = exp8.atr(h8, 14), exp8.medvol(h8, 20)
     tfp = cfg['tfp']
+    esc = {8: 1.0, 4: 1.46, 2: 2.10, 1: 3.05}.get(tfp, (8/tfp)**0.5)
+    sig = cfg['sigma'] * (esc if cfg.get('sigma_abs') else 1.0)
     # as janelas, convertidas de horas para velas deste tempo grafico
     pv = max(1, round(cfg['pivo_h']/tfp))
     bt = max(5, round(cfg['topo_h']/tfp))
@@ -66,7 +74,7 @@ def explosoes(h8, cfg):
         o, hi, lo, cl, vol = h8[i][1], h8[i][2], h8[i][3], h8[i][4], h8[i][5]
         rng = hi - lo
         if rng <= 0 or a[i-1] <= 0 or mv[i-1] <= 0 \
-                or rng < cfg['sigma']*a[i-1] or abs(cl-o)/rng < 0.5 \
+                or rng < sig*a[i-1] or abs(cl-o)/rng < 0.5 \
                 or vol < cfg['vol']*mv[i-1]:
             continue
         alta = cl > o
@@ -310,6 +318,10 @@ def main():
         ('rompe a vela do encosto', dict(BASE, modo='rompe_vela')),
         ('raso + volume ≥1,2x', dict(BASE, modo='raso', vol_min=1.2)),
         ('raso + rompe a vela', dict(BASE, modo='raso_rompe')),
+        ('TAMANHO REAL: direta', dict(BASE, sigma_abs=True)),
+        ('TAMANHO REAL: raso', dict(BASE, sigma_abs=True, modo='raso')),
+        ('TAMANHO REAL: raso+volume', dict(BASE, sigma_abs=True,
+                                           modo='raso', vol_min=1.2)),
         ('fundo mais alto', dict(BASE, modo='fundo_alto')),
         ('espera só 6 velas de 4h', dict(BASE, gat_h4=6)),
         ('espera até 24 velas de 4h', dict(BASE, gat_h4=24)),
