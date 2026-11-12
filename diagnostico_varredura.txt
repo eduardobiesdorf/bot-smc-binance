@@ -1,4 +1,4 @@
-início 12/11 15:45 BRT
+início 12/11 15:52 BRT
 ETHUSDT: gatilho antigo (23 velas atrás)
 XRPUSDT: gatilho antigo (206 velas atrás)
 SUIUSDT: gatilho antigo (72 velas atrás)
@@ -13,3 +13,13 @@ pares (50): BTCUSDT, ETHUSDT, SOLUSDT, XRPUSDT, DOGEUSDT, HYPEUSDT, SUIUSDT, BNB
 gatilhos 0 | cenários 0
 explosão 8h: 50 pares olhados, 0 gatilho(s)
 🧪 explosão de 8h em teste: 0 aberta(s), nenhuma resolvida ainda
+enviados 0 gatilhos, 0 desfechos
+placar  8 fechados: 3 gain / 5 loss  (38%)  total +4.98R  ·  0 abertos  ·  29 cenários encerrados sem entrada
+por que os cenários morreram:
+  11x  nem varreu o order block nem chegou perto dele
+  8x  furou o order block fundo demais (> 2.5 ATR): virou continuação, não varredura
+  6x  varreu mas não reverteu em 4 velas
+  1x  varredura com 0.86x o volume médio, mínimo 1.20x — não vira gatilho
+  1x  varredura com 0.63x o volume médio, mínimo 1.20x — não vira gatilho
+  1x  varredura com 1.02x o volume médio, mínimo 1.20x — não vira gatilho
+  1x  piscina a 1.7R da entrada, máximo 1.5R
