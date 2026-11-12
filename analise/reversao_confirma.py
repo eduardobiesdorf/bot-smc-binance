@@ -301,8 +301,10 @@ def main():
         ('espera só 6 velas de 4h', dict(BASE, gat_h4=6)),
         ('espera até 24 velas de 4h', dict(BASE, gat_h4=24)),
     ]
+    # entrada igual ao padrao e valido: o encosto e o gatilho sao lidos
+    # na propria vela do padrao, como no setup que ja roda no bot
     pares_tf = [(p_, e_) for p_ in [int(x) for x in a.padrao.split(',')]
-                for e_ in [int(x) for x in a.entrada.split(',')] if e_ < p_]
+                for e_ in [int(x) for x in a.entrada.split(',')] if e_ <= p_]
     for tfp, tfe in pares_tf:
         guardado = {}
         print(f"\n{'#'*120}\n#  PADRÃO EM H{tfp}, ENTRADA EM H{tfe}\n"

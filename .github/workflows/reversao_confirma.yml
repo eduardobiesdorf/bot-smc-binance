@@ -22,7 +22,7 @@ on:
       padrao:
         description: 'Tempos gráficos do PADRÃO, em horas (manda na frequência)'
         required: false
-        default: '8,4,2'
+        default: '8,4,2,1'
       entrada:
         description: 'Tempos gráficos da entrada, em horas'
         required: false
@@ -64,7 +64,7 @@ jobs:
           python -u analise/reversao_confirma.py dados_universo \
             --faixas "${{ inputs.faixas || '4' }}" \
             --corte "${{ inputs.corte || '0' }}" \
-            --padrao "${{ inputs.padrao || '8,4,2' }}" \
+            --padrao "${{ inputs.padrao || '8,4,2,1' }}" \
             --entrada "${{ inputs.entrada || '1' }}" \
             --blocos "${{ inputs.blocos || '50,100,150,200,300' }}" \
             2>&1 | tee conf.log
