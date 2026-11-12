@@ -59,6 +59,10 @@ BASE = dict(sigma=2.5, vol=1.5, ob_busca=6,
             # disparar 794 vezes em coisa que nao era tendencia.
             # Com tend_abs, a queda exigida e a mesma em preco.
             tend_abs=False,
+            # fractal: as janelas valem em VELAS, nao em horas. O padrao
+            # no H1 vira uma miniatura exata do H8. E a leitura de que
+            # "tudo que acontece em tempo menor acontece em tempo maior".
+            fractal=False,
             gat_h4=12,        # velas de 4h para a confirmacao aparecer
             furo_max=1.0, rr_min=1.2, stop_folga=0.10, est_min=0.5,
             alvo_proj=0.9, modo='direta', vol_min=0.0, tfp=8)
@@ -72,9 +76,12 @@ def explosoes(h8, cfg):
     sig = cfg['sigma'] * (esc if cfg.get('sigma_abs') else 1.0)
     tnd = cfg['tend_atr'] * (esc if cfg.get('tend_abs') else 1.0)
     # as janelas, convertidas de horas para velas deste tempo grafico
-    pv = max(1, round(cfg['pivo_h']/tfp))
-    bt = max(5, round(cfg['topo_h']/tfp))
-    tj = max(5, round(cfg['tend_h']/tfp))
+    if cfg.get('fractal'):
+        pv, bt, tj = 2, 30, 20          # as mesmas velas do H8
+    else:
+        pv = max(1, round(cfg['pivo_h']/tfp))
+        bt = max(5, round(cfg['topo_h']/tfp))
+        tj = max(5, round(cfg['tend_h']/tfp))
     cfg = dict(cfg, pivo=pv, busca_topo=bt)
     fora = []
     for i in range(max(tj, bt, 21) + 1, len(h8) - 2):
@@ -128,7 +135,8 @@ def entrada_h4(h4, mv4, e, cfg, pos4, tfe=4, tfp=8):
     tocou = extremo = seguidas = None
     seguidas = 0
     # as janelas valem em HORAS, para H4 e H1 esperarem o mesmo tempo
-    lim = min(k0 + int(cfg['espera_h']/tfe), len(h4))
+    lim = min(k0 + int((30*tfp if cfg.get('fractal')
+                        else cfg['espera_h'])/tfe), len(h4))
     gat = max(1, int(cfg['gat_h4']*4/tfe))
     for k in range(k0, lim):
         hi, lo, o, cl = h4[k][2], h4[k][3], h4[k][1], h4[k][4]
@@ -236,8 +244,9 @@ def rodar(cru, cfg, faixa, tfe=4, tfp=8):
             mov = (saida-ent)/ent*(1 if alta else -1)
             horas = (m-r['idx'])*tfe
             q = dt.datetime.fromtimestamp(h4[r['idx']][0]/1000, BRT)
-            ops.append(dict(sim=sim, liq=pos*mov - pos*TAXA*2 -
-                            pos*(horas/8)*FUND8, ano=q.year, q=q,
+            custo = pos*TAXA*2 + pos*(horas/8)*FUND8
+            ops.append(dict(sim=sim, bruto=pos*mov, custo=custo,
+                            liq=pos*mov - custo, ano=q.year, q=q,
                             faixa=faixa[sim], rr=dist/risco,
                             risco_pct=risco/ent*100,
                             mes=q.strftime('%Y-%m')))
@@ -273,12 +282,16 @@ def painel(rot, sel, larg=26):
         z = f"{(statistics.mean(v)-statistics.mean(nu))/(statistics.pstdev(nu) or 1e-9):+.2f}"
     print(f"{rot:<{larg}}{len(v):>5}{len(g)/len(v)*100:>8.1f}%"
           f"{statistics.mean(o['rr'] for o in sel):>7.2f}"
-          f"{statistics.mean(v):>+10.1f}{tot:>+9.0f}{dd:>8.0f}{ps(v):>5}"
+          f"{statistics.mean(o['risco_pct'] for o in sel):>7.1f}%"
+          f"{statistics.mean(o['bruto'] for o in sel):>+9.1f}"
+          f"{-statistics.mean(o['custo'] for o in sel):>7.1f}"
+          f"{statistics.mean(v):>+9.1f}{tot:>+9.0f}{dd:>8.0f}{ps(v):>5}"
           f"{z:>8}{ok:>6}  {' '.join(porano)}")
 
 
 def cab(larg=26):
-    print(f"{'':<{larg}}{'n':>5}{'acerto':>9}{'R:R':>7}{'méd/op':>10}"
+    print(f"{'':<{larg}}{'n':>5}{'acerto':>9}{'R:R':>7}{'stop':>7}"
+          f"{'bruto':>9}{'taxa':>7}{'líq/op':>9}"
           f"{'total':>9}{'rb':>8}{'seq':>5}{'z':>8}{'anos+':>6}"
           f"  por ano: méd/op (n)")
 
@@ -325,12 +338,10 @@ def main():
         ('rompe a vela do encosto', dict(BASE, modo='rompe_vela')),
         ('raso + volume ≥1,2x', dict(BASE, modo='raso', vol_min=1.2)),
         ('raso + rompe a vela', dict(BASE, modo='raso_rompe')),
-        ('QUEDA REAL: direta', dict(BASE, tend_abs=True)),
-        ('QUEDA REAL: raso', dict(BASE, tend_abs=True, modo='raso')),
-        ('QUEDA REAL: raso+volume', dict(BASE, tend_abs=True, modo='raso',
-                                         vol_min=1.2)),
-        ('QUEDA REAL: raso+duas velas', dict(BASE, tend_abs=True,
-                                             modo='raso', vol_min=0.0)),
+        ('FRACTAL: direta', dict(BASE, fractal=True)),
+        ('FRACTAL: raso', dict(BASE, fractal=True, modo='raso')),
+        ('FRACTAL: raso+volume', dict(BASE, fractal=True, modo='raso',
+                                      vol_min=1.2)),
         ('fundo mais alto', dict(BASE, modo='fundo_alto')),
         ('espera só 6 velas de 4h', dict(BASE, gat_h4=6)),
         ('espera até 24 velas de 4h', dict(BASE, gat_h4=24)),
