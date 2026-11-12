@@ -10,7 +10,7 @@ on:
       inicio:
         description: 'Mês inicial (YYYY-MM)'
         required: false
-        default: '2025-01'
+        default: '2023-01'
       faixas:
         description: 'Em quantas faixas de volume dividir'
         required: false
@@ -51,7 +51,7 @@ jobs:
         run: |
           set -o pipefail
           python -u baixar_futuros.py \
-            --inicio ${{ inputs.inicio || '2025-01' }} \
+            --inicio ${{ inputs.inicio || '2023-01' }} \
             --intervalo 1h --top 9999 --pasta dados_universo 2>&1 | tail -4
           echo "pares baixados: $(ls dados_universo | wc -l)"
       - name: Rodar

@@ -228,10 +228,15 @@ def painel(rot, sel, larg=26):
     v = [o['liq'] for o in sel]
     g = [x for x in v if x > 0]
     tot, dd = curva(v)
-    p25 = [o['liq'] for o in sel if o['ano'] == 2025]
-    p26 = [o['liq'] for o in sel if o['ano'] == 2026]
-    ok = '✓' if (p25 and p26 and statistics.mean(p25) > 0
-                 and statistics.mean(p26) > 0) else ' '
+    anos = sorted({o['ano'] for o in sel})
+    porano, bons = [], 0
+    for y in anos:
+        vy = [o['liq'] for o in sel if o['ano'] == y]
+        m = statistics.mean(vy)
+        if m > 0:
+            bons += 1
+        porano.append(f"{str(y)[2:]}:{m:+.0f}({len(vy)})")
+    ok = '✓' if bons == len(anos) and len(anos) >= 2 else f'{bons}/{len(anos)}'
     z = ''
     if len(v) >= 25:
         random.seed(3)
@@ -241,15 +246,13 @@ def painel(rot, sel, larg=26):
     print(f"{rot:<{larg}}{len(v):>5}{len(g)/len(v)*100:>8.1f}%"
           f"{statistics.mean(o['rr'] for o in sel):>7.2f}"
           f"{statistics.mean(v):>+10.1f}{tot:>+9.0f}{dd:>8.0f}{ps(v):>5}"
-          f"{(statistics.mean(p25) if p25 else 0):>+9.1f}{len(p25):>4}"
-          f"{(statistics.mean(p26) if p26 else 0):>+9.1f}{len(p26):>4}"
-          f"{z:>8}{ok:>3}")
+          f"{z:>8}{ok:>6}  {' '.join(porano)}")
 
 
 def cab(larg=26):
     print(f"{'':<{larg}}{'n':>5}{'acerto':>9}{'R:R':>7}{'méd/op':>10}"
-          f"{'total':>9}{'rb':>8}{'seq':>5}{'2025':>9}{'n25':>4}"
-          f"{'2026':>9}{'n26':>4}{'z':>8}{'ok':>3}")
+          f"{'total':>9}{'rb':>8}{'seq':>5}{'z':>8}{'anos+':>6}"
+          f"  por ano: méd/op (n)")
 
 
 def main():
