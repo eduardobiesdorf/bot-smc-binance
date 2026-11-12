@@ -141,8 +141,12 @@ def seguir(h, a, ini, fim, alta, cfg):
         if cfg['pede_contra'] and not contra:
             continue
         ent = cl
-        s = pico2 + a[k]*cfg['folga'] if alta else pico2 - a[k]*cfg['folga']
+        base_s = H if cfg.get('stop_no_H') else pico2
+        s = base_s + a[k]*cfg['folga'] if alta else base_s - a[k]*cfg['folga']
         alv = L
+        if cfg.get('alvo_r'):
+            r0 = abs(ent - s)
+            alv = ent - cfg['alvo_r']*r0 if alta else ent + cfg['alvo_r']*r0
         risco = abs(ent - s)
         dist = abs(ent - alv)
         if risco <= 0 or dist <= 0 or dist/risco < cfg['rr_min']:
@@ -159,7 +163,7 @@ def seguir(h, a, ini, fim, alta, cfg):
     return None
 
 
-BASE = dict(sigma=2.5, vol=1.5, janela=20, perna_max=8, espera=30,
+BASE = dict(sigma=2.5, vol=1.5, janela=20, perna_max=1, espera=30,
             espera2=30, espera_recusa=6, recuo_min=0.35, recuo_velas=3,
             pivo=2, folga=0.10, rr_min=2.0, stop_min_pct=0.8,
             abaixo_do_H=True, pede_contra=True)
@@ -224,6 +228,92 @@ def desenhar(h, g, sim, tf, caminho):
     plt.close(fig)
 
 
+def resolver(h, g, maxbar=120):
+    venda = g['alta']
+    for m in range(g['k']+1, min(g['k']+1+maxbar, len(h))):
+        hi, lo = h[m][2], h[m][3]
+        if venda:
+            if hi >= g['stop']: return 'stop', g['stop'], m-g['k']
+            if lo <= g['alvo']: return 'alvo', g['alvo'], m-g['k']
+        else:
+            if lo <= g['stop']: return 'stop', g['stop'], m-g['k']
+            if hi >= g['alvo']: return 'alvo', g['alvo'], m-g['k']
+    return None, None, None
+
+
+def dinheiro(g, saida, velas, tf):
+    from explosao import RISCO, TAXA, FUND8
+    pos = RISCO / (g['risco_pct']/100)
+    mov = (saida - g['ent'])/g['ent'] * (-1 if g['alta'] else 1)
+    horas = velas * tf
+    custo = pos*TAXA*2 + pos*(horas/8)*FUND8
+    return pos*mov - custo, pos*mov, custo
+
+
+def ps(v):
+    import itertools
+    return max((len(list(gg)) for k, gg in
+                itertools.groupby(v, key=lambda x: x <= 0) if k), default=0)
+
+
+def painel(rot, sel, larg=34):
+    import random
+    from explosao import curva
+    if not sel:
+        print(f"{rot:<{larg}}{'—':>6}"); return
+    v = [o['liq'] for o in sel]
+    g = [x for x in v if x > 0]
+    tot, dd = curva(v)
+    p25 = [o['liq'] for o in sel if o['ano'] == 2025]
+    p26 = [o['liq'] for o in sel if o['ano'] == 2026]
+    z = ''
+    if len(v) >= 25:
+        random.seed(3)
+        nu = [statistics.mean([x if random.random() < .5 else -x for x in v])
+              for _ in range(300)]
+        dp = statistics.pstdev(nu) or 1e-9
+        z = f"{(statistics.mean(v)-statistics.mean(nu))/dp:>+7.2f}"
+    print(f"{rot:<{larg}}{len(v):>5}{len(g)/len(v)*100:>8.1f}%"
+          f"{statistics.mean(o['bruto'] for o in sel):>+9.1f}"
+          f"{-statistics.mean(o['custo'] for o in sel):>7.1f}"
+          f"{statistics.mean(v):>+9.1f}{tot:>+9.0f}{dd:>7.0f}{ps(v):>5}"
+          f"{(statistics.mean(p25) if p25 else 0):>+9.1f}{len(p25):>4}"
+          f"{(statistics.mean(p26) if p26 else 0):>+9.1f}{len(p26):>4}{z:>7}")
+
+
+def cab(larg=34):
+    print(f"{'':<{larg}}{'n':>5}{'acerto':>9}{'bruto':>9}{'taxa':>7}"
+          f"{'líq/op':>9}{'total':>9}{'rb':>7}{'seq':>5}"
+          f"{'2025':>9}{'n25':>4}{'2026':>9}{'n26':>4}{'z':>7}")
+
+
+def backtest(cru, tf, variantes):
+    print(f"\n{'='*132}\n  H{tf} — recusa no rompimento do mini pivô\n{'='*132}")
+    cab()
+    for rot, extra in variantes:
+        cfg = dict(BASE, **extra)
+        ops = []
+        for sim, h1 in cru:
+            hg = juntar(h1, tf)
+            if len(hg) < 120:
+                continue
+            ag, mvg = atr(hg, 14), medvol(hg, 20)
+            for ini, fim, alta in explosoes(hg, ag, mvg, cfg):
+                g = seguir(hg, ag, ini, fim, alta, cfg)
+                if not g:
+                    continue
+                f, saida, velas = resolver(hg, g)
+                if f is None:
+                    continue
+                liq, bruto, custo = dinheiro(g, saida, velas, tf)
+                ops.append(dict(g, sim=sim, fim=f, liq=liq, bruto=bruto,
+                                custo=custo, ano=g['q'].year,
+                                mes=g['q'].strftime('%Y-%m')))
+        ops.sort(key=lambda o: o['q'])
+        painel(rot, ops)
+    return ops
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('pasta')
@@ -231,6 +321,7 @@ def main():
     ap.add_argument('--corte', type=float, default=0.32)
     ap.add_argument('--desenhar', default='')
     ap.add_argument('--quantos', type=int, default=4)
+    ap.add_argument('--backtest', action='store_true')
     a = ap.parse_args()
 
     cru = []
@@ -260,6 +351,22 @@ def main():
     print(f"stop: mediana {statistics.median(sp):.1f}%")
     print(f"vendas {sum(1 for _,_,g in achados if g['alta'])} · "
           f"compras {sum(1 for _,_,g in achados if not g['alta'])}")
+
+    if a.backtest:
+        variantes = [
+            ('padrão (stop na 2ª alta, alvo no L)', {}),
+            ('stop acima do H', dict(stop_no_H=True)),
+            ('alvo 2x o risco', dict(alvo_r=2.0)),
+            ('alvo 3x o risco', dict(alvo_r=3.0)),
+            ('pode passar do H', dict(abaixo_do_H=False)),
+            ('recusa sem exigir vela contra', dict(pede_contra=False)),
+            ('R:R mínimo 1:3', dict(rr_min=3.0)),
+            ('recuo mínimo de 50%', dict(recuo_min=0.5)),
+            ('pivô de 3 velas', dict(pivo=3)),
+        ]
+        for tf in (1, 4, 8):
+            backtest(cru, tf, variantes)
+        return
 
     if a.desenhar:
         os.makedirs(a.desenhar, exist_ok=True)
