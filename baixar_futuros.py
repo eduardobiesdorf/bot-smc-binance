@@ -292,7 +292,8 @@ def main():
              f"volume mediano {vol_usd/1e6:>8,.1f} M USD/h")
         return (vol_usd, sim)
 
-    with ThreadPoolExecutor(max_workers=10) as ex:
+    nthr = int(os.environ.get('BAIXAR_THREADS', '10'))
+    with ThreadPoolExecutor(max_workers=nthr) as ex:
         resultados = [x for x in ex.map(um, lista) if x]
 
     resultados.sort(reverse=True)

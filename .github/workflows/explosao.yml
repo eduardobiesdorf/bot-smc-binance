@@ -1,0 +1,65 @@
+name: Explosão de vela única (universo inteiro)
+
+# Baixa TODOS os pares USDT de futuros para uma pasta temporaria, roda o
+# teste da explosao de vela unica em H1/H4/H8/H12/diario e joga as tabelas
+# no log. O dado nao entra no repositorio: sao centenas de MB, e commitar
+# isso deixaria o clone de toda rodada horaria do radar mais lento.
+
+on:
+  workflow_dispatch:
+    inputs:
+      inicio:
+        description: 'Mês inicial (YYYY-MM)'
+        required: false
+        default: '2025-01'
+      top:
+        description: 'Quantos pares (9999 = todos os cripto do CDN)'
+        required: false
+        default: '9999'
+      tf:
+        description: 'Tempos gráficos, em horas'
+        required: false
+        default: '1,4,8,12,24'
+      threads:
+        description: 'Downloads em paralelo'
+        required: false
+        default: '16'
+
+permissions:
+  contents: read
+
+jobs:
+  explodir:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install requests
+
+      - name: Baixar o universo inteiro em 1h
+        env:
+          BAIXAR_THREADS: ${{ inputs.threads || '16' }}
+        run: |
+          set -o pipefail
+          python -u baixar_futuros.py \
+            --inicio ${{ inputs.inicio || '2025-01' }} \
+            --intervalo 1h \
+            --top ${{ inputs.top || '9999' }} \
+            --pasta dados_universo 2>&1 | tail -40
+          echo "pares baixados: $(ls dados_universo | wc -l)"
+          du -sh dados_universo
+
+      - name: Rodar o teste
+        run: |
+          set -o pipefail
+          python -u analise/explosao.py dados_universo \
+            --tf "${{ inputs.tf || '1,4,8,12,24' }}" \
+            --rot "(universo inteiro)" 2>&1 | tee explosao.log
+
+      - name: Resumo
+        if: always()
+        run: |
+          { echo '```'; cat explosao.log; echo '```'; } >> $GITHUB_STEP_SUMMARY
