@@ -1,2 +1,2 @@
-12/11 16:53 BRT
-nada
+12/11 17:49 BRT
+radar   VIRTUALUSDT venda — limpou o order block, esperando a reversão

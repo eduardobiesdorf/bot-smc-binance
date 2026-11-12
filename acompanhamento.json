@@ -679,5 +679,17 @@
   "fim_ms": 1794488400000,
   "horas": 19,
   "resultado_r": 3.550509046445183
+ },
+ "cen-VIRTUALUSDT-1794488400000": {
+  "tipo": "cenario",
+  "sim": "VIRTUALUSDT",
+  "lado": "venda",
+  "status": "aberto",
+  "vela_ms": 1794510000000,
+  "imp_fim_ms": 1794488400000,
+  "alvo": 0.5034,
+  "nota": "limpou o order block, esperando a reversão",
+  "vol_varr": 8.56168962747569,
+  "nucleo": false
  }
 }

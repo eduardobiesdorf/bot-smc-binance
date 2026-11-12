@@ -1,16 +1,16 @@
-início 12/11 16:53 BRT
-ETHUSDT: gatilho antigo (24 velas atrás)
-XRPUSDT: gatilho antigo (207 velas atrás)
-SUIUSDT: gatilho antigo (73 velas atrás)
-ZECUSDT: gatilho antigo (161 velas atrás)
-LINKUSDT: gatilho antigo (74 velas atrás)
-LTCUSDT: gatilho antigo (73 velas atrás)
-AAVEUSDT: gatilho antigo (145 velas atrás)
-PENGUUSDT: gatilho antigo (74 velas atrás)
-HBARUSDT: gatilho antigo (86 velas atrás)
-STRKUSDT: gatilho antigo (167 velas atrás)
+início 12/11 17:48 BRT
+ETHUSDT: gatilho antigo (25 velas atrás)
+XRPUSDT: gatilho antigo (208 velas atrás)
+SUIUSDT: gatilho antigo (74 velas atrás)
+ZECUSDT: gatilho antigo (162 velas atrás)
+LINKUSDT: gatilho antigo (75 velas atrás)
+LTCUSDT: gatilho antigo (74 velas atrás)
+AAVEUSDT: gatilho antigo (146 velas atrás)
+PENGUUSDT: gatilho antigo (75 velas atrás)
+HBARUSDT: gatilho antigo (87 velas atrás)
+STRKUSDT: gatilho antigo (168 velas atrás)
 pares (50): BTCUSDT, ETHUSDT, SOLUSDT, XRPUSDT, DOGEUSDT, HYPEUSDT, SUIUSDT, BNBUSDT, ADAUSDT, ZECUSDT, ENAUSDT, LINKUSDT, AVAXUSDT, LTCUSDT, TRUMPUSDT, AAVEUSDT, WLDUSDT, TAOUSDT, NEARUSDT, BCHUSDT, FILUSDT, PUMPUSDT, UNIUSDT, DOTUSDT, ASTERUSDT, ONDOUSDT, PENGUUSDT, TRXUSDT, CRVUSDT, ARBUSDT, XLMUSDT, APTUSDT, TIAUSDT, HBARUSDT, OPUSDT, XPLUSDT, VIRTUALUSDT, FETUSDT, INJUSDT, WLFIUSDT, TONUSDT, SEIUSDT, EIGENUSDT, ICPUSDT, PENDLEUSDT, ZROUSDT, REUSDT, POLUSDT, DASHUSDT, STRKUSDT
-gatilhos 0 | cenários 0
+gatilhos 0 | cenários 1
 explosão 8h: 50 pares olhados, 0 gatilho(s)
 🧪 explosão de 8h em teste: 0 aberta(s), nenhuma resolvida ainda
 enviados 0 gatilhos, 0 desfechos
