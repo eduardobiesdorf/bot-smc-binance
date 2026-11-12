@@ -1,0 +1,67 @@
+name: Explosão com filtro (universo inteiro)
+
+# Mesma baixa do teste anterior, mas rodando a versao com os filtros
+# que apareceram no H8: RSI depois da explosao >= 70 e extensao >= 0.5
+# volatilidade. Roda em varios tempos graficos e em varios cortes de
+# volume, para ver se um universo maior da mais oportunidade.
+
+on:
+  workflow_dispatch:
+    inputs:
+      inicio:
+        description: 'Mês inicial (YYYY-MM)'
+        required: false
+        default: '2025-01'
+      tf:
+        description: 'Tempos gráficos, em horas'
+        required: false
+        default: '1,4,8'
+      cortes:
+        description: 'Cortes de volume (M USD/h), separados por vírgula'
+        required: false
+        default: '0.32,0.14,0.00'
+      threads:
+        description: 'Downloads em paralelo'
+        required: false
+        default: '16'
+
+permissions:
+  contents: read
+
+jobs:
+  filtrar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install requests
+
+      - name: Baixar o universo inteiro em 1h
+        env:
+          BAIXAR_THREADS: ${{ inputs.threads || '16' }}
+        run: |
+          set -o pipefail
+          python -u baixar_futuros.py \
+            --inicio ${{ inputs.inicio || '2025-01' }} \
+            --intervalo 1h --top 9999 --pasta dados_universo 2>&1 | tail -5
+          echo "pares baixados: $(ls dados_universo | wc -l)"
+
+      - name: Rodar com filtro, em cada corte de volume
+        run: |
+          set -o pipefail
+          for C in $(echo "${{ inputs.cortes || '0.32,0.14,0.00' }}" | tr ',' ' '); do
+            echo ""
+            echo "##################################################"
+            echo "#  CORTE DE VOLUME: $C M USD/h"
+            echo "##################################################"
+            python -u analise/explosao_filtro.py dados_universo \
+              --tf "${{ inputs.tf || '1,4,8' }}" --corte "$C"
+          done 2>&1 | tee filtro.log
+
+      - name: Resumo
+        if: always()
+        run: |
+          { echo '```'; tail -120 filtro.log; echo '```'; } >> $GITHUB_STEP_SUMMARY
