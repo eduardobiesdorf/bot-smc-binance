@@ -243,6 +243,10 @@ def main():
     ap.add_argument('--corte', type=float, default=0.32)
     ap.add_argument('--desenhar', default='')
     ap.add_argument('--quantos', type=int, default=3)
+    ap.add_argument('--tf', default='8')
+    ap.add_argument('--faixas', type=int, default=1)
+    ap.add_argument('--mes', action='store_true',
+                    help='abre mês a mês a variante padrão')
     a = ap.parse_args()
     cru = []
     for p in sorted(glob.glob(os.path.join(a.pasta, '*_1h.csv'))):
@@ -253,15 +257,23 @@ def main():
         if vm >= a.corte*1e6:
             cru.append((os.path.basename(p).replace('_1h.csv', ''), h, vm))
     cru.sort(key=lambda x: -x[2])
-    n3 = max(1, len(cru)//3)
-    grandes = {s for k, (s, _, _) in enumerate(cru) if k < n3}
-    h8 = {s: juntar(h, 8) for s, h, _ in cru}
+    nf = max(1, len(cru)//a.faixas)
+    faixa, rot_f = {}, []
+    for k, (s, _, _) in enumerate(cru):
+        faixa[s] = min(k // nf, a.faixas - 1)
+    for i_ in range(a.faixas):
+        vs = [vm for k, (s, _, vm) in enumerate(cru) if faixa[s] == i_]
+        rot_f.append(f"faixa {i_+1}: {len(vs)} moedas, "
+                     f"{min(vs)/1e6:,.2f} a {max(vs)/1e6:,.0f} M USD/h")
+    grandes = {s for s in faixa if faixa[s] == 0}
     print(f"{len(cru)} moedas com volume mediano ≥ {a.corte:.2f} M USD/h")
+    for r_ in rot_f:
+        print("  " + r_)
 
-    def rodar(cfg):
+    def rodar(cfg, serie):
         ops = []
         for sim, _, _ in cru:
-            h = h8[sim]
+            h = serie[sim]
             for g in historico(h, cfg):
                 fim, saida, m = resolver(h, g)
                 if fim is None:
@@ -272,6 +284,8 @@ def main():
                 horas = (m-g['idx'])*8
                 q = dt.datetime.fromtimestamp(g['vela_ms']/1000, BRT)
                 ops.append(dict(g, sim=sim, h=h, fim=fim, q=q, ano=q.year,
+                                faixa=faixa[sim],
+                                mes=q.strftime('%Y-%m'),
                                 liq=pos*mov - pos*TAXA*2 -
                                 pos*(horas/8)*FUND8))
         ops.sort(key=lambda o: o['q'])
@@ -289,17 +303,44 @@ def main():
         ('sem exigir extensão', dict(BASE, est_min=0.0)),
     ]
     base_ops = None
-    for titulo, filtro in (('AS GRANDES', lambda o: True),
-                           ('O TERÇO MAIOR',
-                            lambda o: o['sim'] in grandes)):
-        print(f"\n{'='*124}\n  {titulo} — explosão de REVERSÃO em H8\n"
-              f"{'='*124}")
+    for tf in [int(x) for x in a.tf.split(',')]:
+        serie = {s: juntar(h, tf) for s, h, _ in cru}
+        print(f"\n{'#'*124}\n#  TEMPO GRÁFICO: H{tf}\n{'#'*124}")
+        guardados = {}
+        print(f"\n{'='*124}\n  TODAS AS MOEDAS — explosão de REVERSÃO "
+              f"em H{tf}\n{'='*124}")
         cab()
         for rot, cfg in VAR:
-            ops = rodar(cfg)
-            if base_ops is None:
+            ops = rodar(cfg, serie)
+            guardados[rot] = ops
+            if base_ops is None and tf == int(a.tf.split(',')[0]):
                 base_ops = ops
-            painel(rot, [o for o in ops if filtro(o)])
+            painel(rot, ops)
+        if a.faixas > 1:
+            for i_ in range(a.faixas):
+                print(f"\n  {rot_f[i_].upper()}")
+                cab()
+                for rot, cfg in VAR:
+                    painel(rot, [o for o in guardados[rot]
+                                 if o['faixa'] == i_])
+        if a.mes:
+            sel = guardados[VAR[0][0]]
+            if sel:
+                print(f"\n  mês a mês — {VAR[0][0]}, H{tf}, todas as moedas")
+                print(f"  {'mês':<9}{'n':>4}{'gain':>6}{'loss':>6}"
+                      f"{'acerto':>8}{'resultado':>12}{'acumulado':>12}")
+                ac = 0.0
+                for m_ in sorted({o['mes'] for o in sel}):
+                    v_ = [o for o in sel if o['mes'] == m_]
+                    g_ = sum(1 for o in v_ if o['liq'] > 0)
+                    s_ = sum(o['liq'] for o in v_); ac += s_
+                    print(f"  {m_:<9}{len(v_):>4}{g_:>6}{len(v_)-g_:>6}"
+                          f"{g_/len(v_)*100:>7.0f}%{s_:>+12.0f}{ac:>+12.0f}")
+                vv = sorted((o['liq'] for o in sel), reverse=True)
+                if sum(vv) > 0 and len(vv) > 5:
+                    print(f"  as 3 maiores valem "
+                          f"{sum(vv[:3])/sum(vv)*100:.0f}% do total; sem elas "
+                          f"sobram ${(sum(vv)-sum(vv[:3]))/(len(vv)-3):+,.1f}/op")
 
     if a.desenhar and base_ops:
         os.makedirs(a.desenhar, exist_ok=True)

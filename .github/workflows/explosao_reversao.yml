@@ -1,0 +1,68 @@
+name: Explosão de reversão (universo inteiro)
+
+# O preco vinha caindo e uma vela unica rompe o ultimo topo. Baixa todos
+# os pares USDT de futuros, roda em H4 e H8 com corte por faixa de
+# volume e abre mes a mes. O dado nao entra no repositorio.
+
+on:
+  workflow_dispatch:
+    inputs:
+      inicio:
+        description: 'Mês inicial (YYYY-MM)'
+        required: false
+        default: '2025-01'
+      tf:
+        description: 'Tempos gráficos, em horas'
+        required: false
+        default: '8,4'
+      faixas:
+        description: 'Em quantas faixas de volume dividir'
+        required: false
+        default: '4'
+      corte:
+        description: 'Volume mediano mínimo, em M USD/h (0 = todas)'
+        required: false
+        default: '0'
+      threads:
+        description: 'Downloads em paralelo'
+        required: false
+        default: '16'
+
+permissions:
+  contents: read
+
+jobs:
+  reversao:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install requests
+
+      - name: Baixar o universo inteiro em 1h
+        env:
+          BAIXAR_THREADS: ${{ inputs.threads || '16' }}
+        run: |
+          set -o pipefail
+          python -u baixar_futuros.py \
+            --inicio ${{ inputs.inicio || '2025-01' }} \
+            --intervalo 1h --top 9999 --pasta dados_universo 2>&1 | tail -5
+          echo "pares baixados: $(ls dados_universo | wc -l)"
+
+      - name: Rodar a reversão
+        run: |
+          set -o pipefail
+          python -u analise/explosao_reversao.py dados_universo \
+            --tf "${{ inputs.tf || '8,4' }}" \
+            --faixas "${{ inputs.faixas || '4' }}" \
+            --corte "${{ inputs.corte || '0' }}" \
+            --mes 2>&1 | tee reversao.log
+
+      - name: Resumo
+        if: always()
+        run: |
+          { echo '```'; tail -160 reversao.log; echo '```'; } \
+            >> $GITHUB_STEP_SUMMARY
