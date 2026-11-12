@@ -1,23 +1,15 @@
-início 12/11 14:55 BRT
-ETHUSDT: gatilho antigo (22 velas atrás)
-XRPUSDT: gatilho antigo (205 velas atrás)
-SUIUSDT: gatilho antigo (71 velas atrás)
-ZECUSDT: gatilho antigo (159 velas atrás)
-LINKUSDT: gatilho antigo (72 velas atrás)
-LTCUSDT: gatilho antigo (71 velas atrás)
-AAVEUSDT: gatilho antigo (143 velas atrás)
-PENGUUSDT: gatilho antigo (72 velas atrás)
-HBARUSDT: gatilho antigo (84 velas atrás)
-STRKUSDT: gatilho antigo (165 velas atrás)
+início 12/11 15:45 BRT
+ETHUSDT: gatilho antigo (23 velas atrás)
+XRPUSDT: gatilho antigo (206 velas atrás)
+SUIUSDT: gatilho antigo (72 velas atrás)
+ZECUSDT: gatilho antigo (160 velas atrás)
+LINKUSDT: gatilho antigo (73 velas atrás)
+LTCUSDT: gatilho antigo (72 velas atrás)
+AAVEUSDT: gatilho antigo (144 velas atrás)
+PENGUUSDT: gatilho antigo (73 velas atrás)
+HBARUSDT: gatilho antigo (85 velas atrás)
+STRKUSDT: gatilho antigo (166 velas atrás)
 pares (50): BTCUSDT, ETHUSDT, SOLUSDT, XRPUSDT, DOGEUSDT, HYPEUSDT, SUIUSDT, BNBUSDT, ADAUSDT, ZECUSDT, ENAUSDT, LINKUSDT, AVAXUSDT, LTCUSDT, TRUMPUSDT, AAVEUSDT, WLDUSDT, TAOUSDT, NEARUSDT, BCHUSDT, FILUSDT, PUMPUSDT, UNIUSDT, DOTUSDT, ASTERUSDT, ONDOUSDT, PENGUUSDT, TRXUSDT, CRVUSDT, ARBUSDT, XLMUSDT, APTUSDT, TIAUSDT, HBARUSDT, OPUSDT, XPLUSDT, VIRTUALUSDT, FETUSDT, INJUSDT, WLFIUSDT, TONUSDT, SEIUSDT, EIGENUSDT, ICPUSDT, PENDLEUSDT, ZROUSDT, REUSDT, POLUSDT, DASHUSDT, STRKUSDT
 gatilhos 0 | cenários 0
-enviados 0 gatilhos, 0 desfechos
-placar  8 fechados: 3 gain / 5 loss  (38%)  total +4.98R  ·  0 abertos  ·  29 cenários encerrados sem entrada
-por que os cenários morreram:
-  11x  nem varreu o order block nem chegou perto dele
-  8x  furou o order block fundo demais (> 2.5 ATR): virou continuação, não varredura
-  6x  varreu mas não reverteu em 4 velas
-  1x  varredura com 0.86x o volume médio, mínimo 1.20x — não vira gatilho
-  1x  varredura com 0.63x o volume médio, mínimo 1.20x — não vira gatilho
-  1x  varredura com 1.02x o volume médio, mínimo 1.20x — não vira gatilho
-  1x  piscina a 1.7R da entrada, máximo 1.5R
+explosão 8h: 50 pares olhados, 0 gatilho(s)
+🧪 explosão de 8h em teste: 0 aberta(s), nenhuma resolvida ainda
