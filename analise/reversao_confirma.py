@@ -248,7 +248,9 @@ def rodar(cru, cfg, faixa, tfe=4, tfp=8):
             ops.append(dict(sim=sim, bruto=pos*mov, custo=custo,
                             liq=pos*mov - custo, ano=q.year, q=q,
                             faixa=faixa[sim], rr=dist/risco,
-                            risco_pct=risco/ent*100,
+                            risco_pct=risco/ent*100, horas=horas,
+                            lado='compra' if alta else 'venda',
+                            ent=ent, stop=stop, alvo=alvo, fim=fim,
                             mes=q.strftime('%Y-%m')))
     ops.sort(key=lambda o: o['q'])
     return ops
