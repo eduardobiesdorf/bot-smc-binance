@@ -20,6 +20,37 @@ BRT = dt.timezone(dt.timedelta(hours=-3))
 MAXH = 960          # ate 960 horas (40 dias) segurando a operacao
 
 
+def rsi(h, p=14):
+    """RSI de Wilder, fechado em cada vela."""
+    r = [50.0] * len(h)
+    if len(h) <= p:
+        return r
+    gan = per = 0.0
+    for i in range(1, p + 1):
+        d = h[i][4] - h[i-1][4]
+        gan += max(d, 0.0); per += max(-d, 0.0)
+    gan /= p; per /= p
+    r[p] = 100 - 100/(1 + gan/per) if per else 100.0
+    for i in range(p + 1, len(h)):
+        d = h[i][4] - h[i-1][4]
+        gan = (gan*(p-1) + max(d, 0.0)) / p
+        per = (per*(p-1) + max(-d, 0.0)) / p
+        r[i] = 100 - 100/(1 + gan/per) if per else 100.0
+    return r
+
+
+def media(h, n=50):
+    m = [None] * len(h)
+    s = 0.0
+    for i, v in enumerate(h):
+        s += v[4]
+        if i >= n:
+            s -= h[i-n][4]
+        if i >= n - 1:
+            m[i] = s / n
+    return m
+
+
 def gatilho(v, borda, alta):
     """A vela serve de gatilho? Fecha de volta pra fora do OB, a favor."""
     o, hi, lo, cl = v[1], v[2], v[3], v[4]
@@ -63,6 +94,7 @@ def varrer(sim, h1, tf, cfg):
     ag, mvg = atr(hg, 14), medvol(hg, 20)
     mv1 = medvol(h1, 20) if cfg.get('vol_h1') else None
     a1 = atr(h1, 14) if cfg.get('forca_h1') else None
+    rs, ma = rsi(hg, 14), media(hg, 50)
     jan, passo = cfg['janela'], tf * 3600_000
     out, i = [], max(jan, 21) + 1
     while i < len(hg) - 2:
@@ -144,8 +176,19 @@ def varrer(sim, h1, tf, cfg):
         if ent_1 is None and ent_g is None:
             i += 1; continue
 
+        # medidas conhecidas NA HORA da explosao, pra filtrar depois
+        rp, rq = rs[i-1], rs[i]
+        if not alta:                       # "exausto do lado contrario"
+            rp, rq = 100 - rp, 100 - rq
         reg = dict(sim=sim, alta=alta, pico=pico, ob_base=ob_base,
-                   ob_topo=ob_topo, atr=ag[i], i=i)
+                   ob_topo=ob_topo, atr=ag[i], i=i,
+                   rsi_antes=rp, rsi_depois=rq,
+                   estende=abs(pico - hg[i][4]) / ag[i] if ag[i] else 0.0,
+                   dist_ma=((hg[i][4] - ma[i]) / ag[i] * (1 if alta else -1))
+                   if ma[i] and ag[i] else None,
+                   espera_h=(h1[tocou][0] - hg[i][0] - passo) / 3600_000
+                   if tocou is not None else None,
+                   ms_exp=hg[i][0])
         for rot, e in (('grande', ent_g), ('h1', ent_1)):
             if e is None:
                 reg[rot] = None; continue
