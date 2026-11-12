@@ -32,13 +32,21 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import explosao8 as exp8
 from explosao import ler, juntar, curva, RISCO, TAXA, FUND8
-from explosao_reversao import ultimo_topo
+from explosao_reversao import ultimo_topo as _ut_base
 
 BRT = dt.timezone(dt.timedelta(hours=-3))
 
-BASE = dict(sigma=2.5, vol=1.5, ob_busca=6, pivo=2, busca_topo=30,
-            tend_jan=20, tend_atr=2.0, perto_do_fundo=0.35,
-            espera=30,        # velas de 8h esperando o encosto
+# As janelas valem em HORAS, nao em velas. Os valores sao os que o H8
+# usava (20, 30 e 30 velas de 8h), para que o mesmo setup em H4, H2 e H1
+# continue exigindo o MESMO tempo de calendario. Sem isso, "vinha
+# caindo nas ultimas 20 velas" virava 20 horas no H1 -- nao e tendencia,
+# e ruido, e o teste media outro setup.
+BASE = dict(sigma=2.5, vol=1.5, ob_busca=6,
+            pivo_h=16,        # 2 velas de 8h de cada lado do pivo
+            topo_h=240,       # 30 velas de 8h procurando o ultimo topo
+            tend_h=160,       # 20 velas de 8h medindo a queda
+            espera_h=240,     # 30 velas de 8h esperando o encosto
+            tend_atr=2.0, perto_do_fundo=0.35,
             gat_h4=12,        # velas de 4h para a confirmacao aparecer
             furo_max=1.0, rr_min=1.2, stop_folga=0.10, est_min=0.5,
             alvo_proj=0.9, modo='direta', vol_min=0.0, tfp=8)
@@ -47,9 +55,14 @@ BASE = dict(sigma=2.5, vol=1.5, ob_busca=6, pivo=2, busca_topo=30,
 def explosoes(h8, cfg):
     """As velas de explosao de reversao, com o order block e o alvo."""
     a, mv = exp8.atr(h8, 14), exp8.medvol(h8, 20)
+    tfp = cfg['tfp']
+    # as janelas, convertidas de horas para velas deste tempo grafico
+    pv = max(1, round(cfg['pivo_h']/tfp))
+    bt = max(5, round(cfg['topo_h']/tfp))
+    tj = max(5, round(cfg['tend_h']/tfp))
+    cfg = dict(cfg, pivo=pv, busca_topo=bt)
     fora = []
-    for i in range(max(cfg['tend_jan'], cfg['busca_topo'], 21) + 1,
-                   len(h8) - 2):
+    for i in range(max(tj, bt, 21) + 1, len(h8) - 2):
         o, hi, lo, cl, vol = h8[i][1], h8[i][2], h8[i][3], h8[i][4], h8[i][5]
         rng = hi - lo
         if rng <= 0 or a[i-1] <= 0 or mv[i-1] <= 0 \
@@ -57,9 +70,9 @@ def explosoes(h8, cfg):
                 or vol < cfg['vol']*mv[i-1]:
             continue
         alta = cl > o
-        jan = h8[i-cfg['tend_jan']:i]
-        queda = (h8[i-cfg['tend_jan']][4] - h8[i-1][4]) / a[i-1] if alta \
-            else (h8[i-1][4] - h8[i-cfg['tend_jan']][4]) / a[i-1]
+        jan = h8[i-tj:i]
+        queda = (h8[i-tj][4] - h8[i-1][4]) / a[i-1] if alta \
+            else (h8[i-1][4] - h8[i-tj][4]) / a[i-1]
         if queda < cfg['tend_atr']:
             continue
         tmax = max(x[2] for x in jan); tmin = min(x[3] for x in jan)
@@ -67,7 +80,7 @@ def explosoes(h8, cfg):
             pos_ = (lo-tmin)/(tmax-tmin) if alta else (tmax-hi)/(tmax-tmin)
             if pos_ > cfg['perto_do_fundo']:
                 continue
-        topo_ant, _ = ultimo_topo(h8, i, alta, cfg)
+        topo_ant, _ = _ut_base(h8, i, alta, cfg)
         if topo_ant is None or ((cl <= topo_ant) if alta else (cl >= topo_ant)):
             continue
         ob_base = ob_topo = None
@@ -100,7 +113,7 @@ def entrada_h4(h4, mv4, e, cfg, pos4, tfe=4, tfp=8):
     tocou = extremo = seguidas = None
     seguidas = 0
     # as janelas valem em HORAS, para H4 e H1 esperarem o mesmo tempo
-    lim = min(k0 + int(cfg['espera']*tfp/tfe), len(h4))
+    lim = min(k0 + int(cfg['espera_h']/tfe), len(h4))
     gat = max(1, int(cfg['gat_h4']*4/tfe))
     for k in range(k0, lim):
         hi, lo, o, cl = h4[k][2], h4[k][3], h4[k][1], h4[k][4]
