@@ -1,29 +1,29 @@
-início 12/11 06:58 BRT
-ETHUSDT: gatilho antigo (14 velas atrás)
-XRPUSDT: gatilho antigo (197 velas atrás)
-SUIUSDT: gatilho antigo (327 velas atrás)
-ZECUSDT: gatilho antigo (151 velas atrás)
-LINKUSDT: gatilho antigo (64 velas atrás)
-AVAXUSDT: gatilho antigo (327 velas atrás)
-LTCUSDT: gatilho antigo (63 velas atrás)
-AAVEUSDT: gatilho antigo (135 velas atrás)
-TAOUSDT: gatilho antigo (328 velas atrás)
-PENGUUSDT: gatilho antigo (64 velas atrás)
-HBARUSDT: gatilho antigo (76 velas atrás)
-INJUSDT: gatilho antigo (330 velas atrás)
-STRKUSDT: gatilho antigo (157 velas atrás)
+início 12/11 08:02 BRT
+ETHUSDT: gatilho antigo (16 velas atrás)
+XRPUSDT: gatilho antigo (199 velas atrás)
+SUIUSDT: gatilho antigo (329 velas atrás)
+ZECUSDT: gatilho antigo (153 velas atrás)
+LINKUSDT: gatilho antigo (66 velas atrás)
+AVAXUSDT: gatilho antigo (329 velas atrás)
+LTCUSDT: gatilho antigo (65 velas atrás)
+AAVEUSDT: gatilho antigo (137 velas atrás)
+TAOUSDT: gatilho antigo (330 velas atrás)
+PENGUUSDT: gatilho antigo (66 velas atrás)
+HBARUSDT: gatilho antigo (78 velas atrás)
+INJUSDT: gatilho antigo (332 velas atrás)
+STRKUSDT: gatilho antigo (159 velas atrás)
 pares (50): BTCUSDT, ETHUSDT, SOLUSDT, XRPUSDT, DOGEUSDT, HYPEUSDT, SUIUSDT, BNBUSDT, ADAUSDT, ZECUSDT, ENAUSDT, LINKUSDT, AVAXUSDT, LTCUSDT, TRUMPUSDT, AAVEUSDT, WLDUSDT, TAOUSDT, NEARUSDT, BCHUSDT, FILUSDT, PUMPUSDT, UNIUSDT, DOTUSDT, ASTERUSDT, ONDOUSDT, PENGUUSDT, TRXUSDT, CRVUSDT, ARBUSDT, XLMUSDT, APTUSDT, TIAUSDT, HBARUSDT, OPUSDT, XPLUSDT, VIRTUALUSDT, FETUSDT, INJUSDT, WLFIUSDT, TONUSDT, SEIUSDT, EIGENUSDT, ICPUSDT, PENDLEUSDT, ZROUSDT, REUSDT, POLUSDT, DASHUSDT, STRKUSDT
 gatilhos 0 | cenários 0
 stop móvel — o que o bot está vendo:
-  LTCUSDT venda: entrada 51.53  stop 50.315209  preço 49.56  (+2.48R)  | 15m até 12/11 06:30  | 6 estruturas a favor
-      F 09/11 20:30  stop daria 51.686611 = -0.20R  recusa (< +0.30R)
-      F 10/11 12:30  stop daria 51.894778 = -0.46R  recusa (< +0.30R)
+  LTCUSDT venda: entrada 51.53  stop 49.934721  preço 49.49  (+2.56R)  | 15m até 12/11 07:45  | 6 estruturas a favor
+      F 09/11 20:30  stop daria 51.686527 = -0.20R  recusa (< +0.30R)
+      F 10/11 12:30  stop daria 51.894777 = -0.46R  recusa (< +0.30R)
       F 12/11 02:00  stop daria 50.315209 = +1.53R  ACEITA
       F 12/11 06:00  stop daria 49.934721 = +2.01R  ACEITA
-  ETHUSDT venda: entrada 2083.57  stop 2105.4176  preço 2045.69  (+1.73R)  | 15m até 12/11 06:30  | 0 estruturas a favor
+  ETHUSDT venda: entrada 2083.57  stop 2105.4176  preço 2044.51  (+1.79R)  | 15m até 12/11 07:45  | 0 estruturas a favor
 TOKEN: ok 46 chars | CHAT_ID: ok 10 chars
-HTTP 200: {"ok":true,"result":{"message_id":282,"from":{"id":9205915638,"is_bot":true,"first_name":"SMC Trading Bot","username":"smc_crypto_alerts_bot"},"chat":{"id":[removido],"first_name":"Eduardo","last_name
-stop móvel: 🔒 <b>LTC/USDT</b> — stop movido   🔴 venda | gatilho de 09/11 14:00 |  | de   <code>50.315209</code> | para <code>49.934721</code>   <b>+2.01
+HTTP 200: {"ok":true,"result":{"message_id":283,"from":{"id":9205915638,"is_bot":true,"first_name":"SMC Trading Bot","username":"smc_crypto_alerts_bot"},"chat":{"id":[removido],"first_name":"Eduardo","last_name
+stop móvel: 🔒 <b>LTC/USDT</b> — stop movido   🔴 venda | gatilho de 09/11 14:00 |  | de   <code>49.934721</code> | para <code>49.934721</code>   <b>+2.01
 enviados 0 gatilhos, 0 desfechos
 placar  6 fechados: 1 gain / 5 loss  (17%)  total -1.43R  ·  2 abertos  ·  29 cenários encerrados sem entrada
 por que os cenários morreram:
