@@ -33,8 +33,9 @@ from explosao import ler, RISCO, TAXA, FUND8
 BRT = dt.timezone(dt.timedelta(hours=-3))
 
 CFG5 = dict(
-    lat_jan=150,       # velas da lateralidade. 150 velas de H1 = 6 dias; e o que
-                       # da uma faixa de VERDADE, com rompimento falso de verdade
+    lat_jan=60,        # velas da lateralidade. 150 velas (6 dias) perdeu nas OITO
+                       # combinacoes testadas, de -18 a -26 por operacao; 30 velas
+                       # nao e faixa, e ruido. O ponto doce e 60 velas = 2,5 dias
     aperto=0.70,       # o quanto a faixa e mais estreita que o normal.
                        # Uma janela de L velas anda ~raiz(L) volatilidades por
                        # natureza: 5.5 em 30 velas, 12.2 em 150. Entao o limite e
@@ -53,10 +54,11 @@ CFG5 = dict(
     forca_sigma=2.0,   # a vela contraria, em volatilidades
     forca_corpo=0.5,
     falha_max=16,      # velas para a falha e a volta acontecerem
-    stop_em='forca',   # 'extremo' = acima da maxima da IDA INTEIRA (o original,
-                       # que dava risco de 6 a 8% por operacao e travava o R:R
-                       # em 1:1.8); 'forca' = so acima da VELA DE FORCA, que e
-                       # o alerta de verdade. Mesma logica do furo raso do setup 1
+    stop_em='extremo', # 'extremo' = acima da maxima da IDA INTEIRA; 'forca' = so
+                       # acima da VELA DE FORCA. Eu previ que 'forca' era a chave:
+                       # dobrou as operacoes e subiu o R:R de 1:1.85 para 1:2.49,
+                       # mas CORTOU o dinheiro por operacao pela metade
+                       # (+8.93 -> +3.28). Errei; fica no extremo
     alvo_em='piscina', # 'piscina' = o ultimo topo/fundo NAO CONSUMIDO acima
                        # (ou abaixo) de TODA a faixa antiga, que e o alvo que o
                        # Eduardo descreveu e nao tem parametro meu nenhum dentro.
@@ -65,6 +67,9 @@ CFG5 = dict(
                        # 1.0 = a borda oposta, 0.5 = o meio da faixa
     pre_jan=300,       # velas de historico ANTES da faixa, onde se procura o topo
                        # ou fundo anterior que a faixa rompeu
+    pre_pivo=10,       # quantas velas de cada lado definem o pivo. 'Mais
+                       # expressivo' e isto -- um topo que e o mais alto de 21
+                       # velas --, nao a maxima absoluta da janela
     pre_folga=0.0,     # o quanto a faixa tem de estar LIMPA do nivel rompido,
                        # medido na altura dela. 0.0 = so nao pode encostar
     pre_modo='off',    # o contexto, pedido pelo Eduardo: a faixa aconteceu DEPOIS
@@ -114,16 +119,25 @@ def achar(h, cfg=None, a=None, mv=None):
         # 1b) O CONTEXTO: a faixa esta em cima de um topo rompido, ou embaixo
         # de um fundo rompido? Olha o historico ANTES da faixa e exige que ela
         # esteja inteira do outro lado do nivel, limpa dele.
+        # Tem de ser um PIVO, nao o extremo da janela: exigir que a faixa fique
+        # acima da maxima absoluta de 300 velas nunca acontece, e foi por isso
+        # que a primeira versao deste filtro deu zero ocorrencia em 83 meses.
         ctx = None
-        p0 = max(0, i - L - cfg['pre_jan'])
-        if p0 < i - L - 20:
-            ant = h[p0:i-L]
-            t_ant = max(x[2] for x in ant)
-            f_ant = min(x[3] for x in ant)
-            if base > t_ant + cfg['pre_folga']*alt:
-                ctx = 'alta'           # acumulando acima de resistencia virada
-            elif topo < f_ant - cfg['pre_folga']*alt:
-                ctx = 'baixa'          # distribuindo abaixo de suporte perdido
+        q = cfg['pre_pivo']
+        p0, p1 = max(q, i - L - cfg['pre_jan']), i - L - q
+        if p1 > p0 + 20:
+            for k in range(p0, p1):
+                if ctx:
+                    break
+                alto = all(h[k][2] >= h[k-m][2] and h[k][2] >= h[k+m][2]
+                           for m in range(1, q+1))
+                if alto and base > h[k][2] + cfg['pre_folga']*alt:
+                    ctx = 'alta'       # acumulando acima de resistencia virada
+                    continue
+                baixo = all(h[k][3] <= h[k-m][3] and h[k][3] <= h[k+m][3]
+                            for m in range(1, q+1))
+                if baixo and topo < h[k][3] - cfg['pre_folga']*alt:
+                    ctx = 'baixa'      # distribuindo abaixo de suporte perdido
         if cfg['pre_modo'] != 'off' and ctx is None:
             i += 1; continue
         cl = h[i][4]
@@ -400,22 +414,17 @@ def main():
         for ap in (0.45, 0.55, 0.70, 0.85, 1.00):
             resumo(rodar(dict(CFG5, aperto=ap)),
                    f"{ap:.2f}x ({ap*CFG5['lat_jan']**0.5:.1f} vol)")
-        print("\n  ONDE FICA O STOP x ATE ONDE VAI O ALVO\n")
-        for L in (60, 150):
-            for se in ('extremo', 'forca'):
-                resumo(rodar(dict(CFG5, lat_jan=L, stop_em=se,
-                                  alvo_em='piscina')),
-                       f"{L}v {se[:4]} piscina")
-                for fr in (1.0, 0.7, 0.5):
-                    resumo(rodar(dict(CFG5, lat_jan=L, stop_em=se,
-                                      alvo_em='frac', alvo_frac=fr)),
-                           f"{L}v {se[:4]} faixa {fr:.1f}")
-        print("\n  O CONTEXTO: a faixa veio DEPOIS de romper topo/fundo anterior?\n")
-        for L in (60, 150):
+        print("\n  O CONTEXTO: a faixa veio DEPOIS de romper topo/fundo"
+              " anterior?\n")
+        for L in (60, 100):
             for pm in ('off', 'qualquer', 'alinhado', 'contra'):
                 resumo(rodar(dict(CFG5, lat_jan=L, pre_modo=pm)),
                        f"{L}v {pm}")
-        print("\n  E com que folga do nível rompido (janela de 150, alinhado)\n")
+        print("\n  TAMANHO DO PIVÔ anterior (velas de cada lado), alinhado\n")
+        for pv in (5, 10, 20, 40):
+            resumo(rodar(dict(CFG5, pre_modo='alinhado', pre_pivo=pv)),
+                   f"pivô de {pv}")
+        print("\n  FOLGA do nível rompido, alinhado\n")
         for pf in (0.0, 0.5, 1.0):
             resumo(rodar(dict(CFG5, pre_modo='alinhado', pre_folga=pf)),
                    f"folga {pf:.1f}x")
