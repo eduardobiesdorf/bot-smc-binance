@@ -73,6 +73,37 @@ def main():
         for nome_, cfg_ in lista:
             painel(nome_, rodar(cru, cfg_, faixa, 1, 8))
 
+    print(f"\n{'#'*132}\n#  QUANTAS MOEDAS? (configuração com espera de "
+          f"30 dias)\n{'#'*132}")
+    cfgs_u = [
+        ('30d · volume · ±2', dict(VAL, espera_h=720)),
+        ('30d · volume · ±1', dict(VAL, espera_h=720, pivo_h=8)),
+        ('30d · sem volume · ±2', dict(VAL, espera_h=720, vol_min=0.0)),
+        ('30d · sem volume · ±1', dict(VAL, espera_h=720, vol_min=0.0,
+                                       pivo_h=8)),
+    ]
+    import statistics as _st
+    todas = sorted(glob.glob(os.path.join(a.pasta, '*_1h.csv')))
+    full = []
+    for pp in todas:
+        hh = ler(pp)
+        if len(hh) >= 400:
+            full.append((os.path.basename(pp).replace('_1h.csv', ''), hh,
+                         _st.median(v[4]*v[5] for v in hh)))
+    full.sort(key=lambda x: -x[2])
+    for n_ in (150, 200, 300, 450, len(full)):
+        sub = full[:n_]
+        if not sub:
+            continue
+        fx = {s: 0 for s, _, _ in sub}
+        print(f"\n  as {len(sub)} maiores  (até "
+              f"{sub[-1][2]/1e6:,.2f} M USD/h)")
+        cab()
+        for nome_, cfg_ in cfgs_u:
+            painel(nome_, rodar(sub, cfg_, fx, 1, 8))
+        if len(sub) >= len(full):
+            break
+
     print(f"\n{'#'*132}\n#  COMBINANDO O QUE PASSOU\n{'#'*132}")
     cab()
     MELHOR = dict(VAL, espera_h=720, alvo_proj=1.0)
