@@ -83,17 +83,28 @@ alvo a 5x o risco, risco fixo de 100 USD por operacao)
 
   Cai a intensidade conforme o universo deixa de ajudar, nunca o sinal.
 
-  BATE ENTRADA ALEATORIA POR +4,89 DESVIOS -- medido na compra com o
-  alvo antigo. Para cada operacao real, 20 compras na MESMA moeda com o
-  MESMO stop em %, o MESMO R:R e a MESMA janela, em momento sorteado:
+  BATE ENTRADA ALEATORIA POR +4,51 DESVIOS. Para cada operacao real, 20
+  compras na MESMA moeda com o MESMO stop em %, o MESMO R:R e a MESMA
+  janela, em momento sorteado:
 
-      o setup      47 op,  59,6% de acerto, +183,40/op
-      o controle  914 op,  19,5% de acerto,  -17,60/op
+      com o alvo de 5x o risco (o de hoje)
+        o setup      44 op,  47,7% de acerto, +178,40/op
+        o controle  836 op,  13,2% de acerto,  -25,60/op
+        diferenca +204,00/op  ->  +4,51 DESVIOS
+
+      com o alvo projetado de 90% (o antigo)
+        o setup      47 op,  59,6% de acerto, +183,40/op
+        o controle  914 op,  19,5% de acerto,  -17,60/op
+        diferenca +201,00/op  ->  +4,89 DESVIOS
+
+  O alvo de 5x e uma barra MAIS alta: a compra sorteada acerta 13,2%
+  contra 19,5%, porque pedir 5x o risco e mais exigente para qualquer
+  um. O setup continua passando.
 
   O controle PERDE dinheiro nas mesmas moedas e no mesmo periodo. Ou
   seja: comprar essas moedas a esmo nesses 4 anos nao paga, nem com a
-  mare a favor nem com o universo escolhido a favor. Os 59,6% vem de
-  ESCOLHER O MOMENTO. Ver analise/setup3_controle.py.
+  mare a favor nem com o universo escolhido a favor. O acerto do setup
+  vem de ESCOLHER O MOMENTO. Ver analise/setup3_controle.py.
 
   ATENCAO -- OS NUMEROS ANTIGOS DESTE ARQUIVO ERAM VICIADOS.
   Ate 13/11/2026 este bloco dizia 48,6% de acerto, 1:3,69 e +116,10
@@ -531,7 +542,7 @@ def msg(sim, g, quando, fmt, msg_mao):
         +
         f"\n\n<i>No histórico: 33% de acerto, risco/retorno 1:5, "
         f"1,4 alerta por mês. Positivo nos 4 anos. Bate entrada "
-        f"aleatória por 4,9 desvios. Só compra. "
+        f"aleatória por 4,5 desvios. Só compra. "
         f"Em teste: anota, não opera.</i>")
 
 

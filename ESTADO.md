@@ -50,43 +50,97 @@ dá −$5,40.
 ## Setup 3 — os números que valem
 
 Universo rolante (a cada trimestre, as 150 maiores pelo volume do
-trimestre anterior), **só compra**, nenhuma informação do futuro,
-risco fixo de $100:
+trimestre anterior), **só compra**, **alvo a 5× o risco**, nenhuma
+informação do futuro, risco fixo de $100:
 
-- **65 operações · 1,4 por mês · 40,0% de acerto · 1:4,17**
-- **+$69,40 por operação** · total +$4.508
-- rebaixamento $1.521 = **15× o risco de uma entrada**
-- pior sequência: **10 stops seguidos** (esperado com 40% de acerto)
-- z = +2,24 · 2023 −6(5) · 2024 +159(11) · 2025 +13(19) · 2026 +84(30)
+- **63 operações · 1,4 por mês · 33,3% de acerto · 1:5**
+- **+$93,50 por operação** · total +$5.888
+- rebaixamento $1.143 = **11× o risco de uma entrada**
+- pior sequência: **11 stops seguidos** (esperado com 33% de acerto)
+- z = +2,39 · 2023 +15(5) · 2024 +74(10) · 2025 +28(18) · 2026 +152(30)
+- **positivo nos quatro anos**
 
 Passa em três testes independentes:
 
-1. **sobrevive à troca de universo**, com gradiente suave: +$183,40
-   (150 do período) → +$98,10 (rolante 50) → +$69,40 (rolante 150) →
-   +$55,20 (rolante 300) → +$39,60 (todas as 461). Cai a intensidade,
-   nunca o sinal.
-2. **positivo em todos os anos** em praticamente todos os universos
-   (2023 fica −$6 sobre 5 operações no rolante — cara ou coroa).
-3. **bate entrada aleatória por +4,89 desvios**: 914 compras nas mesmas
-   moedas, mesmo stop%, mesmo R:R, momento sorteado → −$17,60/op com
-   19,5% de acerto (precisa 21% para empatar). Comprar essas moedas a
-   esmo **não paga**, nem com a maré a favor.
+1. **sobrevive à troca de universo**, com gradiente suave: +$113,20
+   (150 do período) → +$91,90 (rolante 50) → +$45,90 (rolante 150) →
+   +$33,40 (rolante 300) → +$22,90 (todas as 461). Medido com o alvo
+   antigo e os dois lados, que era a configuração da auditoria. Cai a
+   intensidade, nunca o sinal.
+2. **positivo em todos os quatro anos** com a configuração de hoje.
+3. **bate entrada aleatória por +4,51 desvios**: 836 compras nas mesmas
+   moedas, mesmo stop%, mesmo R:R, momento sorteado → −$25,60/op com
+   13,2% de acerto. Comprar essas moedas a esmo **não paga**, nem com a
+   maré a favor. (Com o alvo antigo eram +4,89 desvios.)
 
-Com $60 arriscando $1 por entrada, o pior momento do histórico custa
-$15 (25% da conta).
+Com $60 arriscando $1,50 por entrada, o pior momento do histórico custa
+$17 (28% da conta).
 
-### Só compra desde 13/11
+### O alvo mudou em 13/11: de projeção para 5× o risco
 
-| | n | acerto | R:R | líq/op | z | anos+ |
-|---|---|---|---|---|---|---|
-| compras | 119 | 31,9% | 1:4,94 | +$39,60 | +1,95 | 4/4 |
-| vendas | 50 | 26,0% | 1:2,96 | −$16,90 | −0,85 | 1/4 |
+As **mesmas 63-65 operações**, nenhum filtro de entrada mexido — só
+onde colher:
 
-Não é azar, é aritmética do alvo: 90% do tamanho da vela projetado além
-do extremo. Uma queda não passa de 100%, uma alta não tem teto. Na
-venda o alvo é caro demais. `CFG['so_compra'] = False` volta a ponta.
-**O problema da venda é o ALVO, não a leitura** — vale remedir com
-outro alvo.
+| alvo da compra | n | acerto | líq/op | total | rebaix. | z | anos+ |
+|---|---|---|---|---|---|---|---|
+| projeção 90% (antes) | 65 | 40,0% | +$69,40 | +$4.508 | $1.521 | +2,24 | 3/4 |
+| 1:4 de risco | 64 | 37,5% | +$81,70 | +$5.228 | $1.143 | +2,71 | 3/4 |
+| **1:5 de risco** | 63 | 33,3% | **+$93,50** | **+$5.888** | **$1.143** | +2,39 | **4/4** |
+| 1:6 de risco | 60 | 28,3% | +$91,80 | +$5.505 | $1.670 | +2,27 | 4/4 |
+
+1:4, 1:5 e 1:6 são **todos** melhores que a projeção, então é platô e
+não pico de sorte. O 1:5 ganha 35% mais dinheiro, **derruba** o
+rebaixamento e é o único que fecha os quatro anos no positivo.
+
+### Só compra — e o que decidiu foi o aleatório
+
+| | n | acerto | méd/op |
+|---|---|---|---|
+| a venda do setup | 31 | 29,0% | −$3,30 |
+| venda em momento sorteado | 580 | 31,9% | **+$5,60** |
+
+**−0,29 desvios.** A venda sorteada se saiu melhor que a do setup. São
+31 operações, então não prova que a venda é ruim — prova que não há
+indício de que ela leia nada. A compra bate o aleatório por +4,51.
+
+O argumento de manter a venda era 2023 ficar negativo sem ela. Mas o
+2023 negativo era **alvo curto**: com o alvo em 1:5 a compra sozinha faz
+2023 = +$15. O problema foi resolvido pelo lado certo.
+
+A hipótese de que o alvo projetado era injusto com a venda (uma queda
+não passa de 100%, uma alta não tem teto) estava **errada na direção**:
+encurtar o alvo da venda piora de forma monótona — 90% −$3,30, 75%
+−$10,60, 60% −$17,80, 45% −$25,00, 30% −$33,10, o extremo sem projeção
+−$16,90. O acerto mal se mexe (fica entre 26% e 30%), então encurtar não
+transforma perdedora em ganhadora, só corta o prêmio das que iam longe.
+
+### Avisos no Telegram — dois momentos
+
+- **🟡 ENCOSTOU** — o preço tocou a borda do order block, e a janela de
+  48h do gatilho começou. Traz o bloco, o **meio do bloco** (a linha que
+  mata o setup) e quanto já afundou, as horas que faltam, stop, alvo,
+  R:R e a mão. Provisório, medido no preço do momento.
+  **2,8 por mês · 60% viram entrada · 7h de antecedência na mediana.**
+- **🟢 GATILHO** — a vela de 1h confirmou. Números finais e entrada.
+
+Uma montagem avisa uma vez. Avisos de encosto usam status `avisado`,
+então não entram no placar nem no CSV.
+
+### A espera de 30 dias já é o número certo
+
+| espera | n | acerto | líq/op | total |
+|---|---|---|---|---|
+| **30 dias (hoje)** | 65 | **40,0%** | **+$69,40** | +$4.508 |
+| 60 dias | 77 | 39,0% | +$55,80 | +$4.293 |
+| 90 dias | 88 | 35,2% | +$39,30 | +$3.454 |
+| 120 dias | 89 | 34,8% | +$37,60 | +$3.348 |
+| 150 dias | 89 | 34,8% | +$37,60 | +$3.348 |
+
+150 = 120 porque **nenhuma montagem demora mais que ~120 dias** para
+encostar. E as operações extras são ruins: de 30 para 90 dias ganha 23
+operações e perde $30 por operação. Elas caem em 2023, quando o encosto
+demorava porque o preço continuava caindo. O total em dinheiro **cai**.
+(Medido com só compra e o alvo antigo.)
 
 ## O parentesco dos setups
 
@@ -138,7 +192,11 @@ seguida de uma vela de força é um evento de 8 horas.
   dinheiro atrás, sem backtest que o sustente. Opções: desligar, ou
   tentar consertar (pista: ele precisa de um filtro de contexto que a
   lista de moedas fazia por ele de graça).
-- Remedir a ponta de venda do setup 3 com um alvo próprio.
+- **Testar a hipótese do funding de 8h** — medir se o resultado muda
+  conforme a explosão acontece na vela que fecha no funding ou em outra.
+  É o que explicaria a descontinuidade entre 8h e 12h.
+- Refazer a varredura da espera com a configuração de hoje (a medida
+  atual é com o alvo antigo).
 - Oracle Cloud (removeria a fila do GitHub Actions, ~6 min por rodada).
 - Bug conhecido: `analise/trailing_tf.py` calcula rebaixamento por par,
   não em ordem cronológica.
