@@ -67,7 +67,8 @@ def desenhar(sim, h1, h8, e, g, caminho):
 
     ax.axvspan(d(e['i']-tj)-0.5, d(e['i'])-0.5, color='#ef5350', alpha=.06,
                zorder=0)
-    ax.annotate(f"7 dias caindo  ({e['queda']:.1f} volatilidades)",
+    ax.annotate(f"7 dias {'caindo' if alta else 'subindo'}  "
+                f"({e['queda']:.1f} volatilidades)",
                 ((d(e['i']-tj)+d(e['i']))/2, teto), color='#ef9a9a',
                 fontsize=10, ha='center', xytext=(0, -14),
                 textcoords='offset points')
@@ -119,11 +120,9 @@ def desenhar(sim, h1, h8, e, g, caminho):
             (ent, '#ffffff', f"entrada  {ent:,.{c}f}"),
             (stop, '#ef5350', f"stop  {stop:,.{c}f}   "
                               f"({g['risco_pct']:.2f}% de risco)"),
-            (alvo, '#26a69a', f"alvo  {alvo:,.{c}f}   "
-                              f"(o extremo da explosão)"),
-            (e['topo'], '#78909c',
-             f"{'topo' if alta else 'fundo'} da explosão  "
-             f"{e['topo']:,.{c}f}")):
+            (alvo, '#26a69a',
+             f"alvo  {alvo:,.{c}f}   "
+             f"(o {'topo' if alta else 'fundo'} da vela de explosão)"),):
         ax.axhline(y, color=cor, linewidth=1.2, alpha=.92,
                    linestyle='--' if cor == '#78909c' else '-', zorder=6)
         ax.annotate(rot, (len(vel)-1, y), color=cor, fontsize=9,
