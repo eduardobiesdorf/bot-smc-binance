@@ -128,7 +128,7 @@ def main():
     t = t0 + TRI
     while t < t1:
         janelas.append((t, sorted(serie,
-                                  key=lambda s: -vol(serie[s], t-TRI, t))[:a.n]))
+                                  key=lambda s: -vol(serie[s], t-TRI, t))))
         t += TRI
     cache = {}
 
@@ -138,7 +138,7 @@ def main():
         ch = tuple(sorted((k, str(v)) for k, v in kw.items()))
         ops = []
         for t, jan in janelas:
-            for s in jan:
+            for s in jan[:a.n] if len(jan) > a.n else jan:
                 key = (s, ch)
                 if key not in cache:
                     cache[key] = ops_setup1(serie[s], s, **kw)
@@ -151,6 +151,24 @@ def main():
         return sorted(ops, key=lambda o: o['q'])
 
     print(f"universo rolante de {a.n} · {meses:.0f} meses · setup 1\n")
+
+    print(f"{'='*134}\n  0) H1 E H2 NAS MOEDAS GRANDES — o buraco que faltava\n"
+          f"     (o furo raso só tinha sido medido nas 150; o tamanho da "
+          f"moeda pesa muito)\n{'='*134}")
+    for n_univ in (20, 50, 100):
+        janelas_old = list(janelas)
+        janelas[:] = [(t, j[:n_univ]) for t, j in janelas_old]
+        cache.clear()
+        print(f"\n  as {n_univ} maiores:")
+        cab()
+        for tf in (1, 2, 4):
+            painel(f'H{tf} · sem filtro', rolante(tf=tf), meses)
+            for f in (0.10, 0.15, 0.25, 0.50):
+                painel(f'H{tf} · furo <= {f:.2f}x', rolante(tf=tf, furo_ob=f),
+                       meses)
+            print()
+        janelas[:] = janelas_old
+        cache.clear()
 
     print(f"{'='*134}\n  A) O FURO RASO EM TODOS OS TEMPOS GRÁFICOS\n"
           f"     (o filtro só tinha sido medido em H1 e H4)\n{'='*134}")
