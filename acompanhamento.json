@@ -728,5 +728,17 @@
   "nota": "limpou o order block, esperando a reversão",
   "vol_varr": 2.771895053383169,
   "nucleo": false
+ },
+ "cen-SEIUSDT-1794538800000": {
+  "tipo": "cenario",
+  "sim": "SEIUSDT",
+  "lado": "venda",
+  "status": "aberto",
+  "vela_ms": 1794553200000,
+  "imp_fim_ms": 1794538800000,
+  "alvo": 0.04108,
+  "nota": "chegou no order block, esperando a limpeza",
+  "vol_varr": 0.0,
+  "nucleo": false
  }
 }
