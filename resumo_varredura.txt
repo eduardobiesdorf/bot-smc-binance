@@ -1,6 +1,5 @@
-13/11 06:57 BRT
+13/11 07:34 BRT
 radar   TAOUSDT venda — chegou no order block, esperando a limpeza
 radar   PUMPUSDT venda — chegou no order block, esperando a limpeza
 radar   FETUSDT venda — chegou no order block, esperando a limpeza
-radar   SEIUSDT venda — chegou no order block, esperando a limpeza
-GATILHO [extra] ZROUSDT venda R:R 1:1.66 risco 3.30%
+GATILHO [extra] ZROUSDT venda R:R 1:1.66 risco 3.30%  (vela anterior)
