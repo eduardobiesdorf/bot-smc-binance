@@ -32,32 +32,41 @@ from explosao import ler, RISCO, TAXA, FUND8
 BRT = dt.timezone(dt.timedelta(hours=-3))
 
 CFG5 = dict(
-    lat_jan=30,        # velas da lateralidade
-    lat_max_atr=2.5,   # altura da faixa, em volatilidades. 5.0 nao filtrava NADA:
-                       # 30 velas de H1 medem 5 volatilidades por natureza
+    lat_jan=150,       # velas da lateralidade. 150 velas de H1 = 6 dias; e o que
+                       # da uma faixa de VERDADE, com rompimento falso de verdade
+    aperto=0.70,       # o quanto a faixa e mais estreita que o normal.
+                       # Uma janela de L velas anda ~raiz(L) volatilidades por
+                       # natureza: 5.5 em 30 velas, 12.2 em 150. Entao o limite e
+                       # aperto*raiz(L) volatilidades -- escala sozinho com a
+                       # janela. Medir em volatilidades fixas nao funciona: 2.5
+                       # deixou passar 1 ocorrencia em 83 meses, 5.0 nao filtrou nada
     deriva_max=0.35,   # a deriva da faixa (10 primeiros fechamentos x 10 ultimos),
                        # medida na altura dela. Sem isto, TENDENCIA entra como faixa
-    toques_min=3,      # quantas vezes o preco cruza o meio da faixa.
+    toques_div=18,     # cruzamentos minimos do meio da faixa = L/18, no minimo 3.
                        # Faixa de verdade oscila; tendencia atravessa uma vez so
-    ida_max=12,        # ate quantas velas a ida pode durar
+    ida_max=24,        # ate quantas velas a ida pode durar
     ida_min=2,         # e pelo menos quantas
-    ida_min_alt=0.4,   # o quanto a ida tem de ANDAR para fora da faixa, medido
+    ida_min_alt=0.25,  # o quanto a ida tem de ANDAR para fora da faixa, medido
                        # na altura dela. Sem isto, um pavio de 3 velas vira sweep
     vol_sobe=1.3,      # volume medio da ida / volume medio da lateralidade
     forca_sigma=2.0,   # a vela contraria, em volatilidades
     forca_corpo=0.5,
-    falha_max=8,       # velas para a falha e a volta acontecerem
+    falha_max=16,      # velas para a falha e a volta acontecerem
     stop_folga=0.15,
     rr_min=1.2,
 )
 
 
-def achar(h, cfg=None):
+def achar(h, cfg=None, a=None, mv=None):
     cfg = cfg or CFG5
-    if len(h) < 120:
-        return []
-    a, mv = e8.atr(h, 14), e8.medvol(h, 20)
     L = cfg['lat_jan']
+    if len(h) < L + 60:
+        return []
+    if a is None:
+        a, mv = e8.atr(h, 14), e8.medvol(h, 20)
+    # a faixa tem de ser mais estreita que o passeio normal de L velas
+    teto = cfg['aperto'] * (L ** 0.5)
+    cruz_min = max(3, round(L / cfg['toques_div']))
     out, i = [], L + 20
     while i < len(h) - 4:
         if a[i-1] <= 0 or mv[i-1] <= 0:
@@ -67,7 +76,7 @@ def achar(h, cfg=None):
         base = min(x[3] for x in faixa)
         alt = topo - base
         # 1) a lateralidade tem de ser ESTREITA, SEM DERIVA e OSCILANTE
-        if alt <= 0 or alt > cfg['lat_max_atr']*a[i-1]:
+        if alt <= 0 or alt > teto*a[i-1]:
             i += 1; continue
         ini = statistics.mean(x[4] for x in faixa[:10])
         fim_ = statistics.mean(x[4] for x in faixa[-10:])
@@ -76,7 +85,7 @@ def achar(h, cfg=None):
         meio = (topo + base)/2
         cruz = sum(1 for n in range(1, L)
                    if (faixa[n-1][4] - meio)*(faixa[n][4] - meio) < 0)
-        if cruz < cfg['toques_min']:
+        if cruz < cruz_min:
             i += 1; continue           # atravessou uma vez so: tendencia
         cl = h[i][4]
         # 2) a ida: fecha para fora da faixa
@@ -260,6 +269,7 @@ def main():
     ap.add_argument('--tf', type=int, default=1)
     ap.add_argument('--n', type=int, default=150)
     ap.add_argument('--desenhar', type=int, default=3)
+    ap.add_argument('--varrer', type=int, default=1)
     a = ap.parse_args()
     cru = []
     for p in sorted(glob.glob(os.path.join(a.pasta, '*_1h.csv'))):
@@ -269,40 +279,62 @@ def main():
                         statistics.median(v[4]*v[5] for v in h)))
     cru.sort(key=lambda x: -x[2])
     cru = cru[:a.n]
-    achados = []
+    # o atr e o medvol sao a parte cara: calcula UMA vez por moeda
+    pre = []
     for sim, h1, _ in cru:
         h = rev.juntar(h1, a.tf) if a.tf > 1 else h1
-        for g in achar(h):
-            achados.append((sim, g, h))
-    achados.sort(key=lambda x: x[1]['vela_ms'])
-    meses = max(len(h) for _, h, _ in cru) / (24*30.4)
-    print(f"{len(achados)} ocorrências nas {len(cru)} maiores, "
-          f"velas de {a.tf}h, {meses:.0f} meses "
-          f"= {len(achados)/meses:.1f} por mês")
+        pre.append((sim, h, e8.atr(h, 14), e8.medvol(h, 20)))
+    meses = max(len(h) for _, h, _, _ in pre) / (24*30.4/a.tf)
 
-    res = [(s, g, resolver(h, g, a.tf)) for s, g, h in achados]
-    res = [(s, g, r) for s, g, r in res if r]
-    if res:
+    def rodar(cfg):
+        ach = []
+        for sim, h, at, mv in pre:
+            for g in achar(h, cfg, at, mv):
+                ach.append((sim, g, h))
+        ach.sort(key=lambda x: x[1]['vela_ms'])
+        return ach
+
+    def resumo(ach, rotulo):
+        res = [(s, g, resolver(h, g, a.tf)) for s, g, h in ach]
+        res = [(s, g, r) for s, g, r in res if r]
+        if not res:
+            print(f"  {rotulo:<16} {len(ach):>5} ocorrências — nenhuma resolvida")
+            return None
         alvo = sum(1 for _, _, r in res if r['fim'] == 'alvo')
-        bruto = sum(r['bruto'] for _, _, r in res)
         liq = sum(r['liq'] for _, _, r in res)
-        hs = statistics.median(r['horas'] for _, _, r in res)
+        bruto = sum(r['bruto'] for _, _, r in res)
         rrm = statistics.mean(g['rr'] for _, g, _ in res)
-        gan = [r['liq'] for _, _, r in res if r['liq'] > 0]
-        per = [r['liq'] for _, _, r in res if r['liq'] <= 0]
+        hs = statistics.median(r['horas'] for _, _, r in res)
         pior, pico, atual, seq, pseq = 0, 0, 0, 0, 0
         for _, _, r in res:
             atual += r['liq']; pico = max(pico, atual)
             pior = min(pior, atual - pico)
             seq = seq + 1 if r['fim'] == 'stop' else 0
             pseq = max(pseq, seq)
-        print(f"  {len(res)} resolvidas · acerto {alvo/len(res)*100:.1f}% · "
-              f"R:R médio 1:{rrm:.2f} · mediana {hs:.0f}h na posição")
-        print(f"  com $100 de risco por operação: bruto ${bruto:,.0f} · "
-              f"líquido ${liq:,.0f} · ${liq/len(res):+.2f} por operação")
-        print(f"  ganho médio ${statistics.mean(gan) if gan else 0:,.0f} · "
-              f"perda média ${statistics.mean(per) if per else 0:,.0f} · "
-              f"pior rebaixamento ${pior:,.0f} · {pseq} stops seguidos\n")
+        print(f"  {rotulo:<16} {len(res):>5} op {len(res)/meses:>5.1f}/mês "
+              f"acerto {alvo/len(res)*100:>5.1f}%  R:R 1:{rrm:<4.2f} "
+              f"{hs:>4.0f}h  bruto ${bruto:>9,.0f}  líquido ${liq:>9,.0f} "
+              f"(${liq/len(res):>+7.2f}/op)  rebaix ${pior:>8,.0f}  "
+              f"{pseq:>2} stops seguidos")
+        return res
+
+    if a.varrer:
+        print(f"{len(cru)} maiores · velas de {a.tf}h · {meses:.0f} meses · "
+              f"$100 de risco por operação\n")
+        print("  JANELA DA LATERALIDADE (velas), com o aperto em "
+              f"{CFG5['aperto']:.2f}x o passeio normal\n")
+        for L in (30, 60, 100, 150, 200, 300):
+            resumo(rodar(dict(CFG5, lat_jan=L)), f"{L} velas")
+        print(f"\n  APERTO DA FAIXA, com a janela em {CFG5['lat_jan']} velas\n")
+        for ap in (0.45, 0.55, 0.70, 0.85, 1.00):
+            resumo(rodar(dict(CFG5, aperto=ap)),
+                   f"{ap:.2f}x ({ap*CFG5['lat_jan']**0.5:.1f} vol)")
+        print()
+    achados = rodar(CFG5)
+    print(f"\nCONFIGURAÇÃO ESCOLHIDA: {CFG5['lat_jan']} velas de lateralidade, "
+          f"aperto {CFG5['aperto']:.2f}")
+    resumo(achados, 'escolhida')
+    print()
     for k, (sim, g, h) in enumerate(achados[-a.desenhar:][::-1], 1):
         nome = f"setup5_{k}_{sim}.png"
         r = desenhar(sim, h, g, a.tf, nome)
