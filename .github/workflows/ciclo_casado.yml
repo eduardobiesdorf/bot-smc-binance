@@ -1,0 +1,53 @@
+name: Cada par na grade do seu ciclo de funding
+
+on:
+  workflow_dispatch:
+    inputs:
+      inicio:
+        description: 'Mês inicial (YYYY-MM)'
+        required: false
+        default: '2020-01'
+
+permissions:
+  contents: read
+
+jobs:
+  casar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install requests
+      - name: Data de hoje
+        id: dia
+        run: echo "d=$(date -u +%Y-%m-%d)" >> $GITHUB_OUTPUT
+      - name: Cache dos klines
+        uses: actions/cache@v4
+        with:
+          path: dados_universo
+          key: universo-${{ inputs.inicio || '2020-01' }}-${{ steps.dia.outputs.d }}
+          restore-keys: |
+            universo-${{ inputs.inicio || '2020-01' }}-
+      - name: Cache do funding
+        uses: actions/cache@v4
+        with:
+          path: dados_funding
+          key: funding-${{ inputs.inicio || '2020-01' }}-${{ steps.dia.outputs.d }}
+          restore-keys: |
+            funding-${{ inputs.inicio || '2020-01' }}-
+      - name: Confere
+        run: |
+          echo "klines: $(ls dados_universo 2>/dev/null | wc -l)"
+          echo "funding: $(ls dados_funding 2>/dev/null | wc -l)"
+      - name: Rodar
+        run: |
+          set -o pipefail
+          python -u analise/ciclo_casado.py dados_universo dados_funding \
+            2>&1 | tee casado.log
+      - name: Resumo
+        if: always()
+        run: |
+          { echo '```'; cat casado.log; echo '```'; } >> $GITHUB_STEP_SUMMARY
