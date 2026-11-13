@@ -63,6 +63,19 @@ CFG5 = dict(
                        # 'frac' usa alvo_frac abaixo
     alvo_frac=1.0,     # so com alvo_em='frac': quanto da faixa o alvo atravessa.
                        # 1.0 = a borda oposta, 0.5 = o meio da faixa
+    pre_jan=300,       # velas de historico ANTES da faixa, onde se procura o topo
+                       # ou fundo anterior que a faixa rompeu
+    pre_folga=0.0,     # o quanto a faixa tem de estar LIMPA do nivel rompido,
+                       # medido na altura dela. 0.0 = so nao pode encostar
+    pre_modo='off',    # o contexto, pedido pelo Eduardo: a faixa aconteceu DEPOIS
+                       # de romper um topo/fundo anterior mais expressivo?
+                       #   'off'       -- sem filtro
+                       #   'qualquer'  -- exige contexto, de qualquer lado
+                       #   'alinhado'  -- faixa acima de topo rompido (contexto
+                       #                  comprador) e o rompimento falso e para
+                       #                  BAIXO, entao a compra vem A FAVOR dele.
+                       #                  E o espelho
+                       #   'contra'    -- o inverso, para servir de controle
     stop_folga=0.15,
     rr_min=1.2,
 )
@@ -98,6 +111,21 @@ def achar(h, cfg=None, a=None, mv=None):
                    if (faixa[n-1][4] - meio)*(faixa[n][4] - meio) < 0)
         if cruz < cruz_min:
             i += 1; continue           # atravessou uma vez so: tendencia
+        # 1b) O CONTEXTO: a faixa esta em cima de um topo rompido, ou embaixo
+        # de um fundo rompido? Olha o historico ANTES da faixa e exige que ela
+        # esteja inteira do outro lado do nivel, limpa dele.
+        ctx = None
+        p0 = max(0, i - L - cfg['pre_jan'])
+        if p0 < i - L - 20:
+            ant = h[p0:i-L]
+            t_ant = max(x[2] for x in ant)
+            f_ant = min(x[3] for x in ant)
+            if base > t_ant + cfg['pre_folga']*alt:
+                ctx = 'alta'           # acumulando acima de resistencia virada
+            elif topo < f_ant - cfg['pre_folga']*alt:
+                ctx = 'baixa'          # distribuindo abaixo de suporte perdido
+        if cfg['pre_modo'] != 'off' and ctx is None:
+            i += 1; continue
         cl = h[i][4]
         # 2) a ida: fecha para fora da faixa
         if cl > topo:
@@ -105,6 +133,14 @@ def achar(h, cfg=None, a=None, mv=None):
         elif cl < base:
             alta = False
         else:
+            i += 1; continue
+        # faixa acima de topo rompido + rompimento falso para BAIXO = a compra
+        # vem a favor do contexto. 'alta' aqui e a direcao da IDA, e o trade e
+        # o contrario dela
+        alinhado = (ctx == 'alta' and not alta) or (ctx == 'baixa' and alta)
+        if cfg['pre_modo'] == 'alinhado' and not alinhado:
+            i += 1; continue
+        if cfg['pre_modo'] == 'contra' and alinhado:
             i += 1; continue
         vol_lat = statistics.mean(x[5] for x in faixa)
         # segue a ida ate a vela de forca contraria
@@ -175,7 +211,8 @@ def achar(h, cfg=None, a=None, mv=None):
                         idx=ent_k, entrada=ent, stop=stop, alvo=alvo,
                         rr=dist/risco, risco_pct=risco/ent*100,
                         vol_x=vol_ida/vol_lat, vela_ms=h[ent_k][0],
-                        lat_atr=alt/a[i-1], excur=excur/alt, cruz=cruz))
+                        lat_atr=alt/a[i-1], excur=excur/alt, cruz=cruz,
+                        ctx=ctx, alinhado=alinhado))
         i = ent_k + 1
     return out
 
@@ -373,6 +410,15 @@ def main():
                     resumo(rodar(dict(CFG5, lat_jan=L, stop_em=se,
                                       alvo_em='frac', alvo_frac=fr)),
                            f"{L}v {se[:4]} faixa {fr:.1f}")
+        print("\n  O CONTEXTO: a faixa veio DEPOIS de romper topo/fundo anterior?\n")
+        for L in (60, 150):
+            for pm in ('off', 'qualquer', 'alinhado', 'contra'):
+                resumo(rodar(dict(CFG5, lat_jan=L, pre_modo=pm)),
+                       f"{L}v {pm}")
+        print("\n  E com que folga do nível rompido (janela de 150, alinhado)\n")
+        for pf in (0.0, 0.5, 1.0):
+            resumo(rodar(dict(CFG5, pre_modo='alinhado', pre_folga=pf)),
+                   f"folga {pf:.1f}x")
         print()
     achados = rodar(CFG5)
     print(f"\nCONFIGURAÇÃO ESCOLHIDA: {CFG5['lat_jan']} velas de lateralidade, "
