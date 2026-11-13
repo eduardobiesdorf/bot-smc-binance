@@ -167,6 +167,76 @@ def main():
                 painel(f'H{tf} · extremo + encosto <= {f:.2f}x',
                        rolante(tf, 0.0, f, n), meses)
             print()
+            for pr in (1.00, 1.25, 1.50, 2.00, 3.00):
+                painel(f'H{tf} · projeção {pr*100:.0f}%',
+                       rolante(tf, pr, None, n), meses)
+            for pr in (1.00, 1.50, 2.00):
+                painel(f'H{tf} · proj {pr*100:.0f}% + encosto <= 0,25x',
+                       rolante(tf, pr, 0.25, n), meses)
+            if n == 150:
+                cands = []
+                for pr in (0.90, 1.00, 1.25, 1.50, 2.00, 3.00):
+                    for f in (None, 0.25):
+                        o = rolante(tf, pr, f, n)
+                        if o:
+                            cands.append((statistics.mean(
+                                x['liq'] for x in o), pr, f, o))
+                if cands:
+                    cands.sort(reverse=True, key=lambda c: c[0])
+                    m, pr, f, o = cands[0]
+                    print(f"  melhor célula do H{tf}: projeção "
+                          f"{pr*100:.0f}%"
+                          + (f" + encosto <= {f}x" if f else "")
+                          + f" · {m:+.1f} por operação")
+                    controle(o, serie, tf)
+            print()
+
+
+def controle(ops, serie, tf, k=200):
+    """A melhor celula bate entrada aleatoria, por lote?"""
+    import random as _r
+    rng = _r.Random(57)
+    hp = {}
+    for o in ops:
+        if o['sim'] not in hp:
+            hp[o['sim']] = (rev.juntar(serie[o['sim']], tf) if tf > 1
+                            else serie[o['sim']])
+    L = lotes_de(ops)
+    reais = [sum(y['liq'] for y in x) for x in L]
+    sort = []
+    for x in L:
+        for _ in range(k):
+            s_, ok = 0.0, 0
+            for o in x:
+                h = hp[o['sim']]
+                lo_i, hi_i = 30, len(h) - MAXBAR - 1
+                if hi_i <= lo_i:
+                    continue
+                i = rng.randrange(lo_i, hi_i)
+                ent = h[i][4]
+                stop = ent*(1 - o['stop_pct']/100)
+                alvo = ent + (ent-stop)*o['rr']
+                fim = saida = None
+                for m in range(i+1, min(i+1+MAXBAR, len(h))):
+                    if h[m][3] <= stop: fim, saida = 1, stop; break
+                    if h[m][2] >= alvo: fim, saida = 1, alvo; break
+                if fim is None:
+                    continue
+                pos = RISCO/(o['stop_pct']/100)
+                s_ += pos*(saida-ent)/ent - pos*TAXA*2 - \
+                    pos*((m-i)*tf/8)*FUND8
+                ok += 1
+            if ok:
+                sort.append(s_*len(x)/ok)
+    mr, ms_ = statistics.mean(reais), statistics.mean(sort)
+    er = statistics.pstdev(reais)/len(reais)**.5
+    es = statistics.pstdev(sort)/len(sort)**.5
+    d = mr - ms_
+    e = (er**2 + es**2) ** .5
+    print(f"    lote real {mr:>+8.0f} ±{er:<5.0f}"
+          f"({sum(1 for x in reais if x > 0)}/{len(reais)})  ·  "
+          f"sorteado {ms_:>+8.0f}  ·  diferença {d:>+8.0f} ±{e:<5.0f}"
+          f"  ->  {d/e if e else 0:+.2f} DESVIOS")
 
 
 if __name__ == '__main__':
