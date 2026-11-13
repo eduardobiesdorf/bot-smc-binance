@@ -53,6 +53,12 @@ CFG5 = dict(
     vol_sobe=1.3,      # volume medio da ida / volume medio da lateralidade
     forca_sigma=2.0,   # a vela contraria, em volatilidades
     forca_corpo=0.5,
+    forca_apos=99,     # quantas velas a forca contraria pode chegar DEPOIS da
+                       # maxima da ida. No CELO ela veio 2 velas depois do topo
+                       # (risco 3.98%); no ZEN, 25 velas depois, quando o
+                       # movimento ja tinha falhado sozinho e o stop ficou la em
+                       # cima (risco 5.80%). Ela e o ALERTA: tem de avisar na
+                       # hora. 99 = sem trava, como estava
     falha_max=16,      # velas para a falha e a volta acontecerem
     stop_em='extremo', # 'extremo' = acima da maxima da IDA INTEIRA; 'forca' = so
                        # acima da VELA DE FORCA. Eu previ que 'forca' era a chave:
@@ -159,17 +165,20 @@ def achar(h, cfg=None, a=None, mv=None):
         vol_lat = statistics.mean(x[5] for x in faixa)
         # segue a ida ate a vela de forca contraria
         ext = h[i][2] if alta else h[i][3]
+        k_ext = i
         k_forca = None
         for k in range(i+1, min(i+1+cfg['ida_max'], len(h))):
             hk, lk, ok, ck = h[k][2], h[k][3], h[k][1], h[k][4]
             rk = hk - lk
-            ext = max(ext, hk) if alta else min(ext, lk)
+            if (hk > ext) if alta else (lk < ext):
+                ext, k_ext = (hk if alta else lk), k
             if k - i < cfg['ida_min']:
                 continue
             # 3) a vela de forca CONTRARIA
             if rk > 0 and rk >= cfg['forca_sigma']*a[k-1] \
                     and abs(ck-ok)/rk >= cfg['forca_corpo'] \
-                    and ((ck < ok) if alta else (ck > ok)):
+                    and ((ck < ok) if alta else (ck > ok)) \
+                    and k - k_ext <= cfg['forca_apos']:
                 k_forca = k
                 break
         if k_forca is None:
@@ -225,6 +234,7 @@ def achar(h, cfg=None, a=None, mv=None):
                         idx=ent_k, entrada=ent, stop=stop, alvo=alvo,
                         rr=dist/risco, risco_pct=risco/ent*100,
                         vol_x=vol_ida/vol_lat, vela_ms=h[ent_k][0],
+                        apos=k_forca-k_ext,
                         lat_atr=alt/a[i-1], excur=excur/alt, cruz=cruz,
                         ctx=ctx, alinhado=alinhado))
         i = ent_k + 1
@@ -430,6 +440,10 @@ def main():
         for pf in (0.0, 0.5, 1.0):
             resumo(rodar(dict(CFG5, pre_modo='alinhado', pre_folga=pf)),
                    f"folga {pf:.1f}x")
+        print("\n  A FORÇA tem de chegar COLADA na máxima da ida?\n")
+        for fa in (1, 2, 3, 5, 8, 99):
+            resumo(rodar(dict(CFG5, forca_apos=fa)),
+                   f"até {fa} velas depois" if fa < 99 else "sem trava")
         print()
     achados = rodar(CFG5)
     print(f"\nCONFIGURAÇÃO ESCOLHIDA: {CFG5['lat_jan']} velas de lateralidade, "
@@ -452,7 +466,9 @@ def main():
         q = dt.datetime.fromtimestamp(g['vela_ms']/1000, BRT)
         print(f"  {k}. {sim:<13} {q:%d/%m/%Y %H:%M}  {g['lado']:<6} "
               f"R:R 1:{g['rr']:.2f}  risco {g['risco_pct']:.2f}%  "
-              f"faixa {g['lat_atr']:.1f} vol ({g['cruz']} cruzamentos)  volume {g['vol_x']:.1f}x  ida {g['excur']:.2f}x  "
+              f"faixa {g['lat_atr']:.1f} vol ({g['cruz']} cruz)  "
+              f"volume {g['vol_x']:.1f}x  ida {g['excur']:.2f}x  "
+              f"força {g['apos']} velas após a máxima  "
               f"→ {r}   ({nome})")
 
 
