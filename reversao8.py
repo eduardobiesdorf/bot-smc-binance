@@ -6,39 +6,62 @@ vela de 1 hora confirma com volume. Entra ali.
 
 Estado e historico proprios. Nao mexe nos outros dois setups.
 
-O QUE O BACKTEST MEDE  (2023-01 a 2026-11, 46 meses, SO COMPRA,
+O QUE O BACKTEST MEDE  (2023-01 a 2026-11, 46 meses, OS DOIS LADOS,
 risco fixo de 100 USD por operacao)
 
   O NUMERO QUE VALE -- universo rolante: a cada trimestre as 150
   maiores pelo volume do trimestre ANTERIOR, contando so as operacoes
   do trimestre seguinte. Nenhuma informacao do futuro em momento algum:
 
-      65 operacoes, 1,4 por mes, 40,0% de acerto
-      risco/retorno medio 1:4,17  ·  +69,40 por operacao
-      total +4.508  ·  pior rebaixamento 1.521 (15x o risco de uma
-      entrada)  ·  pior sequencia 10 stops
-      teste do acaso z = +2,24
-      2023 -6 (5 op) · 2024 +159 (11) · 2025 +13 (19) · 2026 +84 (30)
+      96 operacoes, 2,1 por mes, 36,5% de acerto
+      risco/retorno medio 1:3,76  ·  +45,90 por operacao
+      total +4.404  ·  pior rebaixamento 1.729 (17x o risco de uma
+      entrada)  ·  pior sequencia 12 stops
+      teste do acaso z = +2,10
+      2023 +12 (13 op) · 2024 +77 (16) · 2025 +11 (32) · 2026 +76 (35)
+      POSITIVO NOS QUATRO ANOS
 
-  Com 40% de acerto, 10 stops seguidos sao esperados, nao sao a
-  estrategia quebrando. 2023 fica em -6 sobre 5 operacoes -- cara ou
-  coroa, nao um ano ruim: nos outros universos 2023 e positivo.
+  So com a compra: 65 operacoes, 1,4 por mes, 40,0% de acerto, 1:4,17,
+  +69,40 por operacao, total +4.508, z +2,24, mas 3 de 4 anos -- 2023
+  fica -6. O dinheiro total e praticamente o mesmo (+4.404 contra
+  +4.508): so-compra ganha mais por operacao com menos operacoes.
+
+  POR QUE OS DOIS LADOS. A venda ficou desligada por algumas horas em
+  13/11 e foi religada. O ano que cai fora quando se tira a venda e
+  2023, o ano ruim de cripto -- era a venda que dava dinheiro ali. A
+  venda nao e peso morto, e o que segura o setup quando o mercado
+  vira. Tirar ela troca 4/4 anos por 3/4 sem ganhar dinheiro nenhum.
+
+  A venda no universo rolante: 31 operacoes, 29,0% de acerto, 1:2,91,
+  -3,30 por operacao, z -0,10, 3 de 4 anos positivos. Empate, nao
+  prejuizo. O que afunda a media e 2024: -103 em 5 operacoes.
+
+  O ALVO DA VENDA. A hipotese de que a projecao de 90% era injusta com
+  a venda (porque uma queda nao passa de 100% e uma alta nao tem teto)
+  esta ERRADA na direcao: encurtar o alvo piora de forma monotona --
+  projecao 90% -3,30/op, 75% -10,60, 60% -17,80, 45% -25,00, 30%
+  -33,10, o extremo sem projecao -16,90. Alvo por multiplo de risco vai
+  junto: 1:1,5 -14,30, 1:2 -6,50, 1:3 +2,60, 1:4 +28,90. O acerto mal
+  se mexe quando o alvo se aproxima (fica entre 26% e 30%), entao
+  encurtar nao transforma perdedora em ganhadora, so corta o premio das
+  que iam longe. Na venda a operacao vai ou nao vai.
 
   SOBREVIVE A TROCA DE UNIVERSO, e e isso que sustenta o setup:
 
-      universo                     n   /mes  acerto    R:R   liq/op      z
-      150 maiores do periodo      47    1,0   59,6%   4,15  +183,40  +3,84
-      escolhido em jan/2023       37    0,8   40,5%   4,24   +60,60  +1,69
-      todas as 461 moedas        119    2,6   31,9%   4,94   +39,60  +1,95
-      rolante · 50 maiores        23    0,5   47,8%   3,69   +98,10
-      rolante · 150 maiores       65    1,4   40,0%   4,17   +69,40  +2,24
-      rolante · 300 maiores       97    2,1   35,1%   4,61   +55,20  +2,04
+      universo (os dois lados)     n   /mes  acerto    R:R   liq/op      z
+      150 maiores do periodo      73    1,6   47,9%   3,66  +113,20  +3,26
+      escolhido em jan/2023       66    1,4   33,3%   3,75   +25,50  +1,03
+      todas as 461 moedas        169    3,6   30,2%   4,35   +22,90  +1,33
+      rolante · 50 maiores        31    0,7   48,4%   3,42   +91,90  +2,14
+      rolante · 150 maiores       96    2,1   36,5%   3,76   +45,90  +2,10
+      rolante · 300 maiores      142    3,1   32,4%   4,11   +33,40  +1,90
 
   Cai a intensidade conforme o universo deixa de ajudar, nunca o sinal.
   Quanto mais larga a lista, mais operacoes e menos dinheiro por
   operacao -- o gradiente e suave, nao desaba.
 
-  BATE ENTRADA ALEATORIA POR +4,89 DESVIOS. Para cada operacao real, 20
+  BATE ENTRADA ALEATORIA POR +4,89 DESVIOS -- MEDIDO SO NA COMPRA. A
+  venda ainda nao passou por esse teste. Para cada operacao real, 20
   compras na MESMA moeda com o MESMO stop em %, o MESMO R:R e a MESMA
   janela, entrando numa vela de 8h sorteada:
 
@@ -51,17 +74,7 @@ risco fixo de 100 USD por operacao)
   nem com o universo escolhido a favor. Os 59,6% vem de ESCOLHER O
   MOMENTO. Ver analise/setup3_controle.py.
 
-  SO COMPRA desde 13/11/2026. Nas 461 moedas, por ponta:
-
-      compras  119 op, 31,9% de acerto, 1:4,94, +39,60/op, z +1,95, 4/4
-      vendas    50 op, 26,0% de acerto, 1:2,96, -16,90/op, z -0,85, 1/4
-
-  O alvo e 90% do tamanho da vela projetado alem do extremo. Uma queda
-  nao passa de 100%, uma alta nao tem teto: na venda o alvo e caro
-  demais (1:2,96 contra 1:4,94). Tirar as vendas leva o total de +3.868
-  para +4.715 -- 30% menos alertas e MAIS dinheiro.
-  CFG['so_compra'] = False volta a ponta, se um dia a gente medir a
-  venda com outro alvo. O problema da venda e o ALVO, nao a leitura.
+  CFG['so_compra'] = True desliga a ponta de venda. Fica em False.
 
   ATENCAO -- OS NUMEROS ANTIGOS DESTE ARQUIVO ERAM VICIADOS.
   Ate 13/11/2026 este bloco dizia 48,6% de acerto, 1:3,69 e +116,10
@@ -492,9 +505,9 @@ def msg(sim, g, quando, fmt, msg_mao):
            "com este alvo (1:2,96 contra 1:4,94 da compra). O alvo próprio "
            "da venda está sendo medido. Olha com reserva.</i>"
            if g['lado'] == 'venda' else "") +
-        f"\n\n<i>No histórico: 40% de acerto, risco/retorno 1:4,17, "
-        f"1,4 alerta por mês. Bate entrada aleatória por 4,9 "
-        f"desvios. Só compra. "
+        f"\n\n<i>No histórico: 36,5% de acerto, risco/retorno 1:3,76, "
+        f"2,1 alertas por mês. Positivo nos 4 anos. A compra bate "
+        f"entrada aleatória por 4,9 desvios. "
         f"Em teste: anota, não opera.</i>")
 
 
@@ -607,5 +620,5 @@ def placar(d):
             f"({len(g)/len(fech)*100:.0f}%) · {len(abertas)} abertas\n"
             f"soma: <b>{soma:+.0f}</b> para cada 100 arriscados por operação\n"
             f"média: <b>{soma/len(fech):+.0f}</b> por operação\n"
-            f"<i>o backtest esperava 40% de acerto e ~+69 por operação. "
+            f"<i>o backtest esperava 36,5% de acerto e ~+46 por operação. "
             f"Decisão em 20 operações.</i>")
