@@ -37,7 +37,7 @@ from venda_topo import lotes_de
 MAXBAR = 120
 
 
-def ops_setup1(h1, sim, tf=1, cfg_extra=None, furo_ob=None):
+def ops_setup1(h1, sim, tf=1, cfg_extra=None):
     """tf: horas da vela. furo_ob: furo maximo como fracao da altura do
     order block (substitui o furo_max em ATR)."""
     cfg = dict(bot.CFG)
@@ -59,11 +59,8 @@ def ops_setup1(h1, sim, tf=1, cfg_extra=None, furo_ob=None):
         ext = g['stop'] + a[k]*cfg['stop_folga'] if compra else \
               g['stop'] - a[k]*cfg['stop_folga']
         alt = imp['ob_topo'] - imp['ob_base']
-        if furo_ob is not None and alt > 0:
-            fundura = ((imp['ob_base'] - ext) if compra else
-                       (ext - imp['ob_topo'])) / alt
-            if fundura > furo_ob:
-                continue
+        fundura = (((imp['ob_base'] - ext) if compra else
+                    (ext - imp['ob_topo'])) / alt) if alt > 0 else 0.0
         risco = abs(g['entrada'] - g['stop'])
         if risco <= 0:
             continue
@@ -84,6 +81,7 @@ def ops_setup1(h1, sim, tf=1, cfg_extra=None, furo_ob=None):
         q = dt.datetime.fromtimestamp(g['vela_ms']/1000, BRT)
         out.append(dict(sim=sim, ms=g['vela_ms'], q=q, fim=fim,
                         rr=g['rr'], stop_pct=g['risco_pct'],
+                        fundura=fundura,
                         liq=pos*mov - pos*TAXA*2 - pos*(horas/8)*FUND8))
     return out
 
@@ -134,7 +132,9 @@ def main():
         t += TRI
     cache = {}
 
-    def rolante(**kw):
+    def rolante(furo_ob=None, **kw):
+        # a deteccao e cara e NAO depende do furo: cacheia so por
+        # (moeda, tempo grafico, cfg) e aplica o furo depois
         ch = tuple(sorted((k, str(v)) for k, v in kw.items()))
         ops = []
         for t, jan in janelas:
@@ -143,8 +143,11 @@ def main():
                 if key not in cache:
                     cache[key] = ops_setup1(serie[s], s, **kw)
                 for o in cache[key]:
-                    if t <= o['ms'] < t + TRI:
-                        ops.append(o)
+                    if not (t <= o['ms'] < t + TRI):
+                        continue
+                    if furo_ob is not None and o['fundura'] > furo_ob:
+                        continue
+                    ops.append(o)
         return sorted(ops, key=lambda o: o['q'])
 
     print(f"universo rolante de {a.n} · {meses:.0f} meses · setup 1\n")
