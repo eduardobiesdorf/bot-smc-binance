@@ -692,5 +692,41 @@
   "vol_varr": 8.56168962747569,
   "nucleo": false,
   "motivo": "piscina a 4.6R da entrada, máximo 1.5R"
+ },
+ "cen-PUMPUSDT-1794542400000": {
+  "tipo": "cenario",
+  "sim": "PUMPUSDT",
+  "lado": "venda",
+  "status": "aberto",
+  "vela_ms": 1794549600000,
+  "imp_fim_ms": 1794542400000,
+  "alvo": 0.003251,
+  "nota": "chegou no order block, esperando a limpeza",
+  "vol_varr": 0.0,
+  "nucleo": false
+ },
+ "cen-FETUSDT-1794538800000": {
+  "tipo": "cenario",
+  "sim": "FETUSDT",
+  "lado": "venda",
+  "status": "aberto",
+  "vela_ms": 1794549600000,
+  "imp_fim_ms": 1794538800000,
+  "alvo": 0.1392,
+  "nota": "chegou no order block, esperando a limpeza",
+  "vol_varr": 0.0,
+  "nucleo": false
+ },
+ "cen-ZROUSDT-1794542400000": {
+  "tipo": "cenario",
+  "sim": "ZROUSDT",
+  "lado": "venda",
+  "status": "aberto",
+  "vela_ms": 1794549600000,
+  "imp_fim_ms": 1794542400000,
+  "alvo": 1.485,
+  "nota": "limpou o order block, esperando a reversão",
+  "vol_varr": 2.771895053383169,
+  "nucleo": false
  }
 }

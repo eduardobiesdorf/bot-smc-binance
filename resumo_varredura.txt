@@ -1,2 +1,4 @@
-13/11 02:59 BRT
-nada
+13/11 04:13 BRT
+radar   PUMPUSDT venda — chegou no order block, esperando a limpeza
+radar   FETUSDT venda — chegou no order block, esperando a limpeza
+radar   ZROUSDT venda — limpou o order block, esperando a reversão
