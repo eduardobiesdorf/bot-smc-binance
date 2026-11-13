@@ -721,7 +721,7 @@
   "tipo": "cenario",
   "sim": "ZROUSDT",
   "lado": "venda",
-  "status": "aberto",
+  "status": "virou_gatilho",
   "vela_ms": 1794549600000,
   "imp_fim_ms": 1794542400000,
   "alvo": 1.485,
@@ -740,5 +740,43 @@
   "nota": "chegou no order block, esperando a limpeza",
   "vol_varr": 0.0,
   "nucleo": false
+ },
+ "gat-ZROUSDT-1794556800000": {
+  "tipo": "gatilho",
+  "sim": "ZROUSDT",
+  "lado": "venda",
+  "status": "aberto",
+  "vela_ms": 1794556800000,
+  "entrada": 1.571,
+  "stop": 1.6228357142857144,
+  "stop_ini": 1.6228357142857144,
+  "movs": 0,
+  "degraus": [
+   [
+    1794556800000,
+    1.6228357142857144
+   ]
+  ],
+  "alvo": 1.485,
+  "rr": 1.6590877773184438,
+  "risco_pct": 3.299536237155597,
+  "vol_varr": 2.771895053383169,
+  "liq_r": 1.1575031004547311,
+  "rsi_varr": 59.006471807347744,
+  "rsi_gat": 54.129545985137455,
+  "rsi_varr_norm": 40.993528192652256,
+  "nucleo": false
+ },
+ "cen-TAOUSDT-1794542400000": {
+  "tipo": "cenario",
+  "sim": "TAOUSDT",
+  "lado": "venda",
+  "status": "aberto",
+  "vela_ms": 1794556800000,
+  "imp_fim_ms": 1794542400000,
+  "alvo": 200.8,
+  "nota": "chegou no order block, esperando a limpeza",
+  "vol_varr": 0.0,
+  "nucleo": true
  }
 }

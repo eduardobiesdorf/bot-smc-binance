@@ -1,21 +1,24 @@
-início 13/11 05:55 BRT
-ETHUSDT: gatilho antigo (37 velas atrás)
-XRPUSDT: gatilho antigo (220 velas atrás)
-SUIUSDT: gatilho antigo (86 velas atrás)
-ZECUSDT: gatilho antigo (174 velas atrás)
-LINKUSDT: gatilho antigo (87 velas atrás)
-AVAXUSDT: gatilho antigo (287 velas atrás)
-LTCUSDT: gatilho antigo (86 velas atrás)
-AAVEUSDT: gatilho antigo (158 velas atrás)
-PENGUUSDT: gatilho antigo (87 velas atrás)
-HBARUSDT: gatilho antigo (99 velas atrás)
-STRKUSDT: gatilho antigo (180 velas atrás)
+início 13/11 06:57 BRT
+ETHUSDT: gatilho antigo (38 velas atrás)
+XRPUSDT: gatilho antigo (221 velas atrás)
+SUIUSDT: gatilho antigo (87 velas atrás)
+ZECUSDT: gatilho antigo (175 velas atrás)
+LINKUSDT: gatilho antigo (88 velas atrás)
+AVAXUSDT: gatilho antigo (288 velas atrás)
+LTCUSDT: gatilho antigo (87 velas atrás)
+AAVEUSDT: gatilho antigo (159 velas atrás)
+PENGUUSDT: gatilho antigo (88 velas atrás)
+HBARUSDT: gatilho antigo (100 velas atrás)
+GATILHO ZROUSDT venda vela 13/11 05:00 entrada 1.571 R:R 1:1.66
+STRKUSDT: gatilho antigo (181 velas atrás)
 pares (50): BTCUSDT, ETHUSDT, SOLUSDT, XRPUSDT, DOGEUSDT, HYPEUSDT, SUIUSDT, BNBUSDT, ADAUSDT, ZECUSDT, ENAUSDT, LINKUSDT, AVAXUSDT, LTCUSDT, TRUMPUSDT, AAVEUSDT, WLDUSDT, TAOUSDT, NEARUSDT, BCHUSDT, FILUSDT, PUMPUSDT, UNIUSDT, DOTUSDT, ASTERUSDT, ONDOUSDT, PENGUUSDT, TRXUSDT, CRVUSDT, ARBUSDT, XLMUSDT, APTUSDT, TIAUSDT, HBARUSDT, OPUSDT, XPLUSDT, VIRTUALUSDT, FETUSDT, INJUSDT, WLFIUSDT, TONUSDT, SEIUSDT, EIGENUSDT, ICPUSDT, PENDLEUSDT, ZROUSDT, REUSDT, POLUSDT, DASHUSDT, STRKUSDT
-gatilhos 0 | cenários 4
+gatilhos 1 | cenários 4
+stop móvel — o que o bot está vendo:
+  ZROUSDT venda: entrada 1.571  stop 1.6228357  preço 1.561  (+0.19R)  | 15m até 13/11 06:30  | 0 estruturas a favor
 reversão 8h: 150 pares olhados, 0 gatilho(s)
 🧪 reversão de 8h em teste: 0 aberta(s), nenhuma resolvida ainda
-enviados 0 gatilhos, 0 desfechos
-placar  8 fechados: 3 gain / 5 loss  (38%)  total +4.98R  ·  0 abertos  ·  30 cenários encerrados sem entrada
+enviados 1 gatilhos, 0 desfechos
+placar  8 fechados: 3 gain / 5 loss  (38%)  total +4.98R  ·  1 abertos  ·  30 cenários encerrados sem entrada
 por que os cenários morreram:
   11x  nem varreu o order block nem chegou perto dele
   8x  furou o order block fundo demais (> 2.5 ATR): virou continuação, não varredura
