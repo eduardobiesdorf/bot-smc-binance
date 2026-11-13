@@ -1,0 +1,61 @@
+name: Setup 1 como o bot roda (com trailing)
+
+on:
+  workflow_dispatch:
+    inputs:
+      inicio:
+        description: 'Mês inicial (YYYY-MM)'
+        required: false
+        default: '2023-01'
+      n:
+        description: 'Quantas moedas (as N maiores por volume)'
+        required: false
+        default: '150'
+
+permissions:
+  contents: read
+
+jobs:
+  cruzar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install requests matplotlib
+      # Mesma chave de cache do reversao_detalhe: se ele já rodou hoje,
+      # o download sai de graça.
+      - name: Data de hoje (chave do cache)
+        id: dia
+        run: echo "d=$(date -u +%Y-%m-%d)" >> $GITHUB_OUTPUT
+      - name: Cache dos dados
+        id: cache
+        uses: actions/cache@v4
+        with:
+          path: dados_universo
+          key: universo-${{ inputs.inicio || '2023-01' }}-${{ steps.dia.outputs.d }}
+          restore-keys: |
+            universo-${{ inputs.inicio || '2023-01' }}-
+      - name: Baixar (só se o cache não tiver)
+        if: steps.cache.outputs.cache-hit != 'true'
+        env:
+          BAIXAR_THREADS: '16'
+        run: |
+          set -o pipefail
+          python -u baixar_futuros.py --inicio ${{ inputs.inicio || '2023-01' }} \
+            --intervalo 1h --top 9999 --pasta dados_universo 2>&1 | tail -3
+      - name: O que tem na pasta
+        run: |
+          echo "pares: $(ls dados_universo | wc -l)"
+          du -sh dados_universo
+      - name: Rodar
+        run: |
+          set -o pipefail
+          python -u analise/setup1_real.py dados_universo \
+            --n 50 --topo 150 2>&1 | tee setup1.log
+      - name: Resumo
+        if: always()
+        run: |
+          { echo '```'; cat setup1.log; echo '```'; } >> $GITHUB_STEP_SUMMARY
