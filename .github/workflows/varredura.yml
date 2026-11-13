@@ -69,6 +69,15 @@ on:
         required: false
         default: false
         type: boolean
+      sem_reversao8:
+        description: 'Desligar o terceiro alerta (reversão de 8h, em teste)'
+        required: false
+        default: false
+        type: boolean
+      rev_top:
+        description: 'Quantas moedas a reversão escaneia'
+        required: false
+        default: '150'
       sem_explosao8:
         description: 'Desligar o segundo alerta (explosão de 8h, em teste)'
         required: false
@@ -120,6 +129,8 @@ jobs:
           [ "${{ inputs.so_gatilho }}" = "true" ] && ARGS="$ARGS --so-gatilho"
           [ "${{ inputs.teste }}" = "true" ] && ARGS="$ARGS --teste"
           [ "${{ inputs.sem_explosao8 }}" = "true" ] && ARGS="$ARGS --sem-explosao8"
+          [ "${{ inputs.sem_reversao8 }}" = "true" ] && ARGS="$ARGS --sem-reversao8"
+          ARGS="$ARGS --rev-top ${{ inputs.rev_top || '150' }}"
           ARGS="$ARGS --exemplos ${{ inputs.exemplos || '2' }}"
           [ "${{ inputs.novos }}" = "true" ] && ARGS="$ARGS --novos"
           [ -n "${{ inputs.explicar }}" ] && ARGS="$ARGS --explicar ${{ inputs.explicar }}"
@@ -137,7 +148,8 @@ jobs:
           for f in varredura_enviados.json acompanhamento.json \
                    historico_ao_vivo.csv diagnostico_varredura.txt \
                    resumo_varredura.txt explosao8_estado.json \
-                   historico_explosao8.csv; do
+                   historico_explosao8.csv reversao8_estado.json \
+                   historico_reversao8.csv; do
             if [ -f "$f" ]; then git add "$f"; fi
           done
           if git diff --cached --quiet; then

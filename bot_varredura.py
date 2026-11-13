@@ -38,6 +38,7 @@ import requests
 import grafico_varredura as graf
 import acompanhamento as acomp
 import explosao8 as exp8
+import reversao8 as rev8
 
 BRT = timezone(timedelta(hours=-3))
 BASE_URL = "https://data-api.binance.vision/api/v3"
@@ -742,6 +743,11 @@ def main():
     ap.add_argument('--explicar', default='',
                     help='par para auditar: lista todo impulso achado e '
                          'onde cada um foi recusado')
+    ap.add_argument('--sem-reversao8', action='store_true',
+                    help='não roda o terceiro alerta (reversão de 8h, '
+                         'em teste)')
+    ap.add_argument('--rev-top', type=int, default=150,
+                    help='quantas moedas a reversão escaneia')
     ap.add_argument('--sem-explosao8', action='store_true',
                     help='não roda o segundo alerta (explosão de 8h, '
                          'em teste)')
@@ -986,6 +992,66 @@ def main():
             diag(exp8.placar(exp8_d).replace('<b>', '').replace('</b>', ''))
         except Exception as e:
             diag(f"explosão 8h falhou, o resto segue: {e}")
+
+    # --- terceiro alerta: REVERSAO de 8h, entrada no H1 (EM TESTE) ----
+    # O preco cai por uma semana, UMA vela de 8h rompe o ultimo topo, o
+    # preco volta e ENCOSTA no order block sem afundar nele, e uma vela
+    # de 1h confirma com volume. Estado proprio, em reversao8_estado.json
+    # e historico_reversao8.csv.
+    #
+    # Busca 1h com limite 1300 (54 dias) e monta as velas de 8h a partir
+    # dai: uma requisicao por par em vez de duas, e a mesma serie serve
+    # para achar o gatilho de uma hora.
+    if not a.sem_reversao8:
+        try:
+            rev_d = rev8.ler()
+            fila_rev = candidatos(a.rev_top)
+            abertos_rev = {r['sim'] for r in rev_d.values()
+                           if r.get('status') == 'aberto'}
+            s8r, achados_r, vistos_r = {}, [], 0
+            for sim in sorted(set(fila_rev) | abertos_rev):
+                try:
+                    v = buscar(sim, '1h', 1300)
+                except Exception:
+                    continue
+                if len(v) < 500:
+                    continue
+                vistos_r += 1
+                h8r = rev8.juntar(v, 8)
+                if h8r:
+                    s8r[sim] = h8r
+                if sim not in fila_rev:
+                    continue
+                g = rev8.achar(v)
+                if g:
+                    achados_r.append((sim, g))
+                    diag(f"REVERSÃO 8h {sim} {g['lado']} "
+                         f"vela {quando(g['vela_ms'])} "
+                         f"entrada {fmt(g['entrada'])} "
+                         f"R:R 1:{g['rr']:.2f} "
+                         f"queda {g['queda']:.1f} vol "
+                         f"gatilho {g['vol_gat']:.1f}x")
+            diag(f"reversão 8h: {vistos_r} pares olhados, "
+                 f"{len(achados_r)} gatilho(s)")
+            for sim, g in achados_r:
+                if not rev8.registrar(rev_d, sim, g):
+                    continue
+                texto = rev8.msg(sim, g, quando, fmt, msg_mao)
+                if a.teste:
+                    print(texto, "\n")
+                else:
+                    enviar(texto)
+            for m in rev8.revisar(rev_d, s8r, fmt, quando):
+                if a.teste:
+                    print(m, "\n")
+                else:
+                    enviar(m)
+                diag("reversão 8h, desfecho: " + m.replace("\n", " | ")[:140])
+            if not a.teste:
+                rev8.gravar(rev_d)
+            diag(rev8.placar(rev_d).replace('<b>', '').replace('</b>', ''))
+        except Exception as e:
+            diag(f"reversão 8h falhou, o resto segue: {e}")
 
     desfechos = acomp.revisar(acomps, series, CFG, seguir, achar_impulsos,
                               atr, media_volume)
