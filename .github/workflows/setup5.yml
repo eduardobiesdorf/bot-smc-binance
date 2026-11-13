@@ -1,0 +1,59 @@
+name: Setup 5 - rompimento falso e volta a faixa
+
+on:
+  workflow_dispatch:
+    inputs:
+      inicio:
+        description: 'Mês inicial (YYYY-MM)'
+        required: false
+        default: '2020-01'
+      tf:
+        description: 'Horas por vela (1 = H1)'
+        required: false
+        default: '1'
+
+permissions:
+  contents: write
+
+jobs:
+  s5:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install requests matplotlib
+      - name: Data de hoje
+        id: dia
+        run: echo "d=$(date -u +%Y-%m-%d)" >> $GITHUB_OUTPUT
+      - name: Cache dos klines
+        uses: actions/cache@v4
+        with:
+          path: dados_universo
+          key: universo-${{ inputs.inicio || '2020-01' }}-${{ steps.dia.outputs.d }}
+          restore-keys: |
+            universo-${{ inputs.inicio || '2020-01' }}-
+      - name: Rodar
+        run: |
+          set -o pipefail
+          python -u analise/setup5_falha.py dados_universo \
+            --tf ${{ inputs.tf || '1' }} --desenhar 3 2>&1 | tee s5.log
+      - name: Commitar as imagens
+        if: always()
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -f setup5_*.png 2>/dev/null || true
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m "exemplos do setup 5 [skip ci]"
+          for t in 1 2 3; do
+            git push origin HEAD:main && exit 0
+            git pull --rebase --autostash origin main || exit 0
+            sleep $((t * 4))
+          done
+      - name: Resumo
+        if: always()
+        run: |
+          { echo '```'; cat s5.log; echo '```'; } >> $GITHUB_STEP_SUMMARY
