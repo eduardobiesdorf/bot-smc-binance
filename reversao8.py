@@ -303,7 +303,8 @@ def msg(sim, g, quando, fmt, msg_mao):
         f"<i>gatilho com {g['vol_gat']:.1f}x o volume médio</i>\n"
         + msg_mao(g['risco_pct']) +
         f"\n\n<i>No histórico: 36,5% de acerto, risco/retorno 1:3,76, "
-        f"1,6 alerta por mês. Positivo nos 4 anos. "
+        f"2,1 alertas por mês. Positivo nos 4 anos, em todos os "
+        f"universos testados. "
         f"Em teste: anota, não opera.</i>")
 
 
