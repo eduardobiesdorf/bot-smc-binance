@@ -33,9 +33,16 @@ BRT = dt.timezone(dt.timedelta(hours=-3))
 
 CFG5 = dict(
     lat_jan=30,        # velas da lateralidade
-    lat_max_atr=5.0,   # altura da faixa, em volatilidades: quanto menor, mais estreita
+    lat_max_atr=2.5,   # altura da faixa, em volatilidades. 5.0 nao filtrava NADA:
+                       # 30 velas de H1 medem 5 volatilidades por natureza
+    deriva_max=0.35,   # a deriva da faixa (10 primeiros fechamentos x 10 ultimos),
+                       # medida na altura dela. Sem isto, TENDENCIA entra como faixa
+    toques_min=3,      # quantas vezes o preco cruza o meio da faixa.
+                       # Faixa de verdade oscila; tendencia atravessa uma vez so
     ida_max=12,        # ate quantas velas a ida pode durar
     ida_min=2,         # e pelo menos quantas
+    ida_min_alt=0.4,   # o quanto a ida tem de ANDAR para fora da faixa, medido
+                       # na altura dela. Sem isto, um pavio de 3 velas vira sweep
     vol_sobe=1.3,      # volume medio da ida / volume medio da lateralidade
     forca_sigma=2.0,   # a vela contraria, em volatilidades
     forca_corpo=0.5,
@@ -59,9 +66,18 @@ def achar(h, cfg=None):
         topo = max(x[2] for x in faixa)
         base = min(x[3] for x in faixa)
         alt = topo - base
-        # 1) a lateralidade tem de ser ESTREITA
+        # 1) a lateralidade tem de ser ESTREITA, SEM DERIVA e OSCILANTE
         if alt <= 0 or alt > cfg['lat_max_atr']*a[i-1]:
             i += 1; continue
+        ini = statistics.mean(x[4] for x in faixa[:10])
+        fim_ = statistics.mean(x[4] for x in faixa[-10:])
+        if abs(fim_ - ini)/alt > cfg['deriva_max']:
+            i += 1; continue           # isto aqui e tendencia, nao faixa
+        meio = (topo + base)/2
+        cruz = sum(1 for n in range(1, L)
+                   if (faixa[n-1][4] - meio)*(faixa[n][4] - meio) < 0)
+        if cruz < cfg['toques_min']:
+            i += 1; continue           # atravessou uma vez so: tendencia
         cl = h[i][4]
         # 2) a ida: fecha para fora da faixa
         if cl > topo:
@@ -87,6 +103,10 @@ def achar(h, cfg=None):
                 k_forca = k
                 break
         if k_forca is None:
+            i += 1; continue
+        # 2b) a ida tem de ANDAR para fora da faixa, nao ser um pavio
+        excur = (ext - topo) if alta else (base - ext)
+        if excur/alt < cfg['ida_min_alt']:
             i += 1; continue
         vol_ida = statistics.mean(x[5] for x in h[i:k_forca+1])
         # 2b) o volume da ida tem de ser MAIOR que o da lateralidade
@@ -116,9 +136,32 @@ def achar(h, cfg=None):
                         idx=ent_k, entrada=ent, stop=stop, alvo=alvo,
                         rr=dist/risco, risco_pct=risco/ent*100,
                         vol_x=vol_ida/vol_lat, vela_ms=h[ent_k][0],
-                        lat_atr=alt/a[i-1]))
+                        lat_atr=alt/a[i-1], excur=excur/alt, cruz=cruz))
         i = ent_k + 1
     return out
+
+
+def resolver(h, g, tf, limite=240):
+    """Leva a operacao ate o alvo ou o stop. Risco fixo de $100 na conta."""
+    venda = g['lado'] == 'venda'
+    k = g['idx']
+    for m in range(k+1, min(k+1+limite, len(h))):
+        hi, lo = h[m][2], h[m][3]
+        bate_stop = (hi >= g['stop']) if venda else (lo <= g['stop'])
+        bate_alvo = (lo <= g['alvo']) if venda else (hi >= g['alvo'])
+        if bate_stop and bate_alvo:
+            bate_alvo = False               # o pior caso: assume o stop
+        if bate_stop or bate_alvo:
+            saida = g['stop'] if bate_stop else g['alvo']
+            pos = RISCO / (g['risco_pct']/100)      # tamanho da posicao em $
+            mov = (g['entrada'] - saida)/g['entrada'] if venda else \
+                  (saida - g['entrada'])/g['entrada']
+            bruto = pos * mov
+            horas = (m - k) * tf
+            custo = pos*TAXA*2 + pos*FUND8*(horas/8)
+            return dict(fim='alvo' if bate_alvo else 'stop', bruto=bruto,
+                        liq=bruto-custo, horas=horas, k_fim=m)
+    return None
 
 
 def desenhar(sim, h, g, tf, caminho):
@@ -235,14 +278,38 @@ def main():
     meses = max(len(h) for _, h, _ in cru) / (24*30.4)
     print(f"{len(achados)} ocorrências nas {len(cru)} maiores, "
           f"velas de {a.tf}h, {meses:.0f} meses "
-          f"= {len(achados)/meses:.1f} por mês\n")
+          f"= {len(achados)/meses:.1f} por mês")
+
+    res = [(s, g, resolver(h, g, a.tf)) for s, g, h in achados]
+    res = [(s, g, r) for s, g, r in res if r]
+    if res:
+        alvo = sum(1 for _, _, r in res if r['fim'] == 'alvo')
+        bruto = sum(r['bruto'] for _, _, r in res)
+        liq = sum(r['liq'] for _, _, r in res)
+        hs = statistics.median(r['horas'] for _, _, r in res)
+        rrm = statistics.mean(g['rr'] for _, g, _ in res)
+        gan = [r['liq'] for _, _, r in res if r['liq'] > 0]
+        per = [r['liq'] for _, _, r in res if r['liq'] <= 0]
+        pior, pico, atual, seq, pseq = 0, 0, 0, 0, 0
+        for _, _, r in res:
+            atual += r['liq']; pico = max(pico, atual)
+            pior = min(pior, atual - pico)
+            seq = seq + 1 if r['fim'] == 'stop' else 0
+            pseq = max(pseq, seq)
+        print(f"  {len(res)} resolvidas · acerto {alvo/len(res)*100:.1f}% · "
+              f"R:R médio 1:{rrm:.2f} · mediana {hs:.0f}h na posição")
+        print(f"  com $100 de risco por operação: bruto ${bruto:,.0f} · "
+              f"líquido ${liq:,.0f} · ${liq/len(res):+.2f} por operação")
+        print(f"  ganho médio ${statistics.mean(gan) if gan else 0:,.0f} · "
+              f"perda média ${statistics.mean(per) if per else 0:,.0f} · "
+              f"pior rebaixamento ${pior:,.0f} · {pseq} stops seguidos\n")
     for k, (sim, g, h) in enumerate(achados[-a.desenhar:][::-1], 1):
         nome = f"setup5_{k}_{sim}.png"
         r = desenhar(sim, h, g, a.tf, nome)
         q = dt.datetime.fromtimestamp(g['vela_ms']/1000, BRT)
         print(f"  {k}. {sim:<13} {q:%d/%m/%Y %H:%M}  {g['lado']:<6} "
               f"R:R 1:{g['rr']:.2f}  risco {g['risco_pct']:.2f}%  "
-              f"faixa {g['lat_atr']:.1f} vol  volume {g['vol_x']:.1f}x  "
+              f"faixa {g['lat_atr']:.1f} vol ({g['cruz']} cruzamentos)  volume {g['vol_x']:.1f}x  ida {g['excur']:.2f}x  "
               f"→ {r}   ({nome})")
 
 
