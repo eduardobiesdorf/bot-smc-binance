@@ -57,12 +57,14 @@ def painel(rot, sel, larg=34):
         z = f"{(statistics.mean(v)-statistics.mean(nu))/(statistics.pstdev(nu) or 1e-9):+.2f}"
     print(f"{rot:<{larg}}{len(v):>5}{len(g)/len(v)*100:>8.1f}%"
           f"{statistics.mean(o['rr'] for o in sel):>7.2f}"
+          f"{statistics.mean(o.get('stop_pct', 0) for o in sel):>7.2f}%"
           f"{statistics.mean(v):>+10.1f}{tot:>+9.0f}{dd:>8.0f}{ps(v):>5}"
           f"{z:>8}{bons}/{len(anos):>2}  {' '.join(por)}")
 
 
 def cab(larg=34):
-    print(f"{'':<{larg}}{'n':>5}{'acerto':>9}{'R:R':>7}{'méd/op':>10}"
+    print(f"{'':<{larg}}{'n':>5}{'acerto':>9}{'R:R':>7}{'stop':>8}"
+          f"{'méd/op':>10}"
           f"{'total':>9}{'rb':>8}{'seq':>5}{'z':>8}{'anos+':>5}"
           f"  por ano")
 
@@ -99,6 +101,12 @@ def varredura(h1, sim, cfg, extra):
             continue
         compra = g['lado'] == 'compra'
         risco = abs(g['entrada'] - g['stop'])
+        if extra.get('stop_min') and \
+                risco/g['entrada']*100 < extra['stop_min']:
+            continue
+        if extra.get('stop_max') and \
+                risco/g['entrada']*100 > extra['stop_max']:
+            continue
         d = bot.piscina(h1, g['idx'], compra, g['entrada'], cfg['liq_janela'])
         if d is None or d/risco > cfg['liq_max_r']:
             continue
@@ -135,12 +143,13 @@ def varredura(h1, sim, cfg, extra):
         q_ = dt.datetime.fromtimestamp(g['vela_ms']/1000, BRT)
         ops.append(dict(sim=sim, ms=g['vela_ms'], q=q_, ano=q_.year,
                         rr=dist/risco, lado=g['lado'],
+                        stop_pct=risco/g['entrada']*100,
                         liq=dinheiro(g['entrada'], saida, g['stop'],
                                      compra, k-g['idx'])))
     return ops
 
 
-def reversao(h1, sim):
+def reversao(h1, sim, stop_min=0.0, stop_max=0.0):
     h8 = rev.juntar(h1, 8)
     if len(h8) < 60:
         return []
@@ -152,6 +161,11 @@ def reversao(h1, sim):
         if not g:
             continue
         compra = g['lado'] == 'compra'
+        r_ = abs(g['entrada'] - g['stop'])/g['entrada']*100
+        if stop_min and r_ < stop_min:
+            continue
+        if stop_max and r_ > stop_max:
+            continue
         i8 = bisect.bisect_right([v[0] for v in h8], g['vela_ms']) - 1
         fim, saida, m = resolver(h8, i8, g['entrada'], g['stop'], g['alvo'],
                                  compra, rev.MAX_BARRAS)
@@ -159,7 +173,7 @@ def reversao(h1, sim):
             continue
         q_ = dt.datetime.fromtimestamp(g['vela_ms']/1000, BRT)
         ops.append(dict(sim=sim, ms=g['vela_ms'], q=q_, ano=q_.year,
-                        rr=g['rr'], lado=g['lado'],
+                        rr=g['rr'], lado=g['lado'], stop_pct=r_,
                         liq=dinheiro(g['entrada'], saida, g['stop'],
                                      compra, (m-i8)*8)))
     return ops
@@ -233,6 +247,34 @@ def main():
             ops += varredura(h1, sim, CFG, extra)
         ops.sort(key=lambda o: o['q'])
         painel(rot, ops)
+
+    print(f"\n{'='*140}\n  4) O STOP MÍNIMO — sobe o acerto e baixa o R:R?\n"
+          f"     (nos 5 minutos esse filtro levou o acerto de 32,4% a 40,7%\n"
+          f"      e o R:R de 3,20 a 2,18, de graça. Aqui tem lucro embaixo.)\n"
+          f"{'='*140}")
+    cab()
+    for sm in (0.0, 0.5, 0.8, 1.0, 1.5, 2.0, 3.0):
+        ops = []
+        for sim, h1, _ in cru:
+            ops += varredura(h1, sim, CFG, dict(stop_min=sm))
+        ops.sort(key=lambda o: o['q'])
+        painel(f'setup 1 · stop >= {sm:.1f}%' if sm else 'setup 1 · sem mínimo',
+               ops)
+    print()
+    for sm in (0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 7.0):
+        ops = []
+        for sim, h1, _ in cru:
+            ops += reversao(h1, sim, stop_min=sm)
+        ops.sort(key=lambda o: o['q'])
+        painel(f'setup 3 · stop >= {sm:.1f}%' if sm else 'setup 3 · sem mínimo',
+               ops)
+    print()
+    for sx in (3.0, 5.0, 8.0, 12.0):
+        ops = []
+        for sim, h1, _ in cru:
+            ops += varredura(h1, sim, CFG, dict(stop_max=sx))
+        ops.sort(key=lambda o: o['q'])
+        painel(f'setup 1 · stop <= {sx:.1f}%', ops)
 
 
 if __name__ == '__main__':
