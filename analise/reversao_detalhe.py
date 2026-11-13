@@ -73,9 +73,28 @@ def main():
         for nome_, cfg_ in lista:
             painel(nome_, rodar(cru, cfg_, faixa, 1, 8))
 
+    print(f"\n{'#'*132}\n#  COMBINANDO O QUE PASSOU\n{'#'*132}")
+    cab()
+    MELHOR = dict(VAL, espera_h=720, alvo_proj=1.0)
+    for nome_, cfg_ in (
+            ('base (10 dias, +90%, ±2)', VAL),
+            ('espera 30 dias', dict(VAL, espera_h=720)),
+            ('espera 30d + alvo +100%', MELHOR),
+            ('espera 30d + alvo +100% + pivô ±1',
+             dict(MELHOR, pivo_h=8)),
+            ('espera 30d + pivô ±1', dict(VAL, espera_h=720, pivo_h=8)),
+            ('espera 20 dias + alvo +100%',
+             dict(VAL, espera_h=480, alvo_proj=1.0)),
+            ('o mesmo, sem exigir volume',
+             dict(MELHOR, vol_min=0.0)),
+            ('sem volume + pivô ±1',
+             dict(MELHOR, vol_min=0.0, pivo_h=8)),
+    ):
+        painel(nome_, rodar(cru, cfg_, faixa, 1, 8))
+
     for rot, cfg, nome in (
-            ('ENCOSTO RASO', dict(BASE, modo='raso'), 'raso'),
-            ('ENCOSTO RASO + VOLUME ≥1,2x', VAL, 'raso_volume')):
+            ('ENCOSTO RASO + VOLUME, AJUSTADO', MELHOR, 'ajustado'),
+            ('ENCOSTO RASO + VOLUME ≥1,2x (base)', VAL, 'raso_volume')):
         ops = rodar(cru, cfg, faixa, 1, 8)
         if not ops:
             print(f"\n{rot}: nenhuma"); continue
