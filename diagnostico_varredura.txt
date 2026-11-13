@@ -1,4 +1,4 @@
-início 13/11 08:10 BRT
+início 13/11 08:54 BRT
 ETHUSDT: gatilho antigo (40 velas atrás)
 XRPUSDT: gatilho antigo (223 velas atrás)
 SUIUSDT: gatilho antigo (89 velas atrás)
@@ -13,7 +13,7 @@ STRKUSDT: gatilho antigo (183 velas atrás)
 pares (50): BTCUSDT, ETHUSDT, SOLUSDT, XRPUSDT, DOGEUSDT, HYPEUSDT, SUIUSDT, BNBUSDT, ADAUSDT, ZECUSDT, ENAUSDT, LINKUSDT, AVAXUSDT, LTCUSDT, TRUMPUSDT, AAVEUSDT, WLDUSDT, TAOUSDT, NEARUSDT, BCHUSDT, FILUSDT, PUMPUSDT, UNIUSDT, DOTUSDT, ASTERUSDT, ONDOUSDT, PENGUUSDT, TRXUSDT, CRVUSDT, ARBUSDT, XLMUSDT, APTUSDT, TIAUSDT, HBARUSDT, OPUSDT, XPLUSDT, VIRTUALUSDT, FETUSDT, INJUSDT, WLFIUSDT, TONUSDT, SEIUSDT, EIGENUSDT, ICPUSDT, PENDLEUSDT, ZROUSDT, REUSDT, POLUSDT, DASHUSDT, STRKUSDT
 gatilhos 0 | cenários 5
 stop móvel — o que o bot está vendo:
-  ZROUSDT venda: entrada 1.571  stop 1.6228357  preço 1.584  (-0.25R)  | 15m até 13/11 07:45  | 0 estruturas a favor
+  ZROUSDT venda: entrada 1.571  stop 1.6228357  preço 1.601  (-0.58R)  | 15m até 13/11 08:30  | 0 estruturas a favor
 reversão 8h: 150 pares olhados, 0 gatilho(s), 0 encosto(s) esperando
 🧪 reversão de 8h em teste: 0 aberta(s), nenhuma resolvida ainda
 enviados 0 gatilhos, 0 desfechos
