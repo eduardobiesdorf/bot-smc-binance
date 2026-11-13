@@ -136,7 +136,7 @@ CFG = dict(
     rr_min=1.2,
     alvo_proj=0.90,
     tf_h=8,               # horas da vela do padrao; 24 roda no diario
-    so_compra=True,       # as vendas dao -16,90/op; ver o comentario em explosoes
+    so_compra=False,      # os DOIS lados; ver o comentario em explosoes
 )
 
 
@@ -198,15 +198,20 @@ def explosoes(h8, cfg):
         if vol < cfg['vol']*mv[i-1]:
             continue
         alta = cl > o
-        # 0) SO COMPRA. Medido em 169 operacoes nas 461 moedas:
+        # 0) Os DOIS lados. A venda ficou desligada por algumas horas em
+        #    13/11 e foi religada: medida em 169 operacoes nas 461 moedas,
         #      compras  119 op, 31,9% de acerto, 1:4,94, +39,60/op, 4/4 anos
         #      vendas    50 op, 26,0% de acerto, 1:2,96, -16,90/op, 1/4 anos
-        #    Nao e azar, e aritmetica: o alvo e 90% do tamanho da vela
-        #    projetado alem do extremo, e uma queda nao passa de 100%
-        #    enquanto uma alta nao tem teto. Na venda o alvo e caro
-        #    demais -- 1:2,96 contra 1:4,94. Tirar as vendas leva o total
-        #    de +3.868 para +4.715: menos alertas e MAIS dinheiro.
-        if not alta and cfg.get('so_compra', True):
+        #    mas 50 operacoes e pouco para amputar metade do setup, e o
+        #    diagnostico aponta para o ALVO e nao para a leitura: o alvo e
+        #    90% do tamanho da vela projetado alem do extremo, e uma queda
+        #    nao passa de 100% enquanto uma alta nao tem teto. A mesma
+        #    projecao em porcentagem e uma distancia muito maior para
+        #    baixo -- 1:2,96 contra 1:4,94. A venda esta sendo obrigada a
+        #    andar um caminho que a compra nao precisa andar. O alvo
+        #    proprio para a venda esta sendo medido em
+        #    analise/venda_alvo.py. Ate la, os dois lados alertam.
+        if not alta and cfg.get('so_compra', False):
             continue
         # 1) vinha caindo de verdade
         queda = (h8[i-jan][4] - h8[i-1][4]) / a[i-1] if alta else \
@@ -482,7 +487,11 @@ def msg(sim, g, quando, fmt, msg_mao):
         f"<i>topo da explosão em {fmt(g['topo'])}; o alvo fica 90% do "
         f"tamanho da vela além dele</i>\n"
         f"<i>gatilho com {g['vol_gat']:.1f}x o volume médio</i>\n"
-        + msg_mao(g['risco_pct']) +
+        + msg_mao(g['risco_pct'])
+        + ("\n<i>⚠️ ponta de VENDA: no histórico ela dá −17 por operação "
+           "com este alvo (1:2,96 contra 1:4,94 da compra). O alvo próprio "
+           "da venda está sendo medido. Olha com reserva.</i>"
+           if g['lado'] == 'venda' else "") +
         f"\n\n<i>No histórico: 40% de acerto, risco/retorno 1:4,17, "
         f"1,4 alerta por mês. Bate entrada aleatória por 4,9 "
         f"desvios. Só compra. "
