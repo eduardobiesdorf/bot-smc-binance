@@ -52,6 +52,12 @@ CFG5 = dict(
     forca_sigma=2.0,   # a vela contraria, em volatilidades
     forca_corpo=0.5,
     falha_max=16,      # velas para a falha e a volta acontecerem
+    stop_em='forca',   # 'extremo' = acima da maxima da IDA INTEIRA (o original,
+                       # que dava risco de 6 a 8% por operacao e travava o R:R
+                       # em 1:1.8); 'forca' = so acima da VELA DE FORCA, que e
+                       # o alerta de verdade. Mesma logica do furo raso do setup 1
+    alvo_frac=1.0,     # quanto da faixa o alvo atravessa: 1.0 = a borda oposta,
+                       # 0.5 = o meio da faixa
     stop_folga=0.15,
     rr_min=1.2,
 )
@@ -133,9 +139,18 @@ def achar(h, cfg=None, a=None, mv=None):
         if ent_k is None:
             i += 1; continue
         ent = h[ent_k][4]
-        stop = ext + a[ent_k]*cfg['stop_folga'] if alta else \
-               ext - a[ent_k]*cfg['stop_folga']
-        alvo = base if alta else topo      # 6) o outro lado da faixa
+        # o STOP: no extremo da ida inteira, ou so no extremo da VELA DE FORCA.
+        # A vela de forca E o alerta -- medir nela e o equivalente ao furo raso
+        # do setup 1: a estrutura que disparou, nao a perna toda
+        base_stop = ext if cfg['stop_em'] == 'extremo' else \
+                    (h[k_forca][2] if alta else h[k_forca][3])
+        stop = base_stop + a[ent_k]*cfg['stop_folga'] if alta else \
+               base_stop - a[ent_k]*cfg['stop_folga']
+        if (stop <= ent) if alta else (stop >= ent):
+            i += 1; continue               # a forca ja fechou abaixo da entrada
+        # o ALVO: a borda oposta da faixa, ou uma fracao dela
+        f = cfg['alvo_frac']
+        alvo = (topo - f*alt) if alta else (base + f*alt)
         risco = abs(ent-stop)
         dist = (ent-alvo) if alta else (alvo-ent)
         if risco <= 0 or dist <= 0 or dist/risco < cfg['rr_min']:
@@ -329,6 +344,13 @@ def main():
         for ap in (0.45, 0.55, 0.70, 0.85, 1.00):
             resumo(rodar(dict(CFG5, aperto=ap)),
                    f"{ap:.2f}x ({ap*CFG5['lat_jan']**0.5:.1f} vol)")
+        print("\n  ONDE FICA O STOP x ATE ONDE VAI O ALVO\n")
+        for L in (60, 150):
+            for se in ('extremo', 'forca'):
+                for fr in (1.0, 0.7, 0.5):
+                    resumo(rodar(dict(CFG5, lat_jan=L, stop_em=se,
+                                      alvo_frac=fr)),
+                           f"{L}v {se[:4]} {fr:.1f}")
         print()
     achados = rodar(CFG5)
     print(f"\nCONFIGURAÇÃO ESCOLHIDA: {CFG5['lat_jan']} velas de lateralidade, "
