@@ -172,7 +172,13 @@ def seguir(h, a, i, alta, cfg):
         return dict(lado='compra' if alta else 'venda', entrada=ent,
                     stop=stop, alvo=alvo, rr=dist/risco, rr_topo=ate_topo/risco,
                     risco_pct=risco/ent*100, idx=k, vela_ms=h[k][0],
-                    topo=pico, exp_ms=h[i][0], exp_idx=i)
+                    topo=pico, exp_ms=h[i][0], exp_idx=i,
+                    # 13/11/2026: expostos para a reavaliacao em
+                    # analise/setup2_novo.py -- o filtro de profundidade do
+                    # encosto precisa do bloco e do extremo, e o alvo no
+                    # extremo da explosao precisa de exp_topo
+                    ob_base=ob_base, ob_topo=ob_topo, extremo=extremo,
+                    exp_topo=topo, tam=tam)
 
 
 def achar(h, cfg=None, atraso_max=1):
