@@ -1,0 +1,67 @@
+name: A reversao em H1 H2 H4 e H8 com o alvo novo
+
+on:
+  workflow_dispatch:
+    inputs:
+      inicio:
+        description: 'Mês inicial (YYYY-MM)'
+        required: false
+        default: '2023-01'
+      quantos:
+        description: 'Quantos gatilhos desenhar'
+        required: false
+        default: '2'
+
+permissions:
+  contents: write
+
+jobs:
+  desenhar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install requests matplotlib
+      - name: Data de hoje (chave do cache)
+        id: dia
+        run: echo "d=$(date -u +%Y-%m-%d)" >> $GITHUB_OUTPUT
+      - name: Cache dos dados
+        id: cache
+        uses: actions/cache@v4
+        with:
+          path: dados_universo
+          key: universo-${{ inputs.inicio || '2023-01' }}-${{ steps.dia.outputs.d }}
+          restore-keys: |
+            universo-${{ inputs.inicio || '2023-01' }}-
+      - name: Baixar (só se o cache não tiver)
+        if: steps.cache.outputs.cache-hit != 'true'
+        env:
+          BAIXAR_THREADS: '16'
+        run: |
+          set -o pipefail
+          python -u baixar_futuros.py --inicio ${{ inputs.inicio || '2023-01' }} \
+            --intervalo 1h --top 9999 --pasta dados_universo 2>&1 | tail -3
+      - name: Listar
+        run: |
+          set -o pipefail
+          python -u analise/rev_tempos.py dados_universo \
+            2>&1 | tee revtempos.log
+      - name: Commitar as imagens
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -f operacoes_reversao.csv
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m "lista de operações da reversão [skip ci]"
+          for t in 1 2 3; do
+            git push origin HEAD:main && exit 0
+            git pull --rebase --autostash origin main || exit 0
+            sleep $((t * 4))
+          done
+      - name: Resumo
+        if: always()
+        run: |
+          { echo '```'; cat revtempos.log; echo '```'; } >> $GITHUB_STEP_SUMMARY
