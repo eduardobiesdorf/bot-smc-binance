@@ -13,6 +13,7 @@ O QUE O BACKTEST MEDE  (2023-01 a 2026-11, 46 meses, risco fixo de
   trimestre ANTERIOR, reescolhidas a cada trimestre, sem nenhuma
   informacao do futuro em momento algum:
 
+      (ainda contando compra E venda; so-compra abaixo)
       96 operacoes, 2,1 por mes, 36,5% de acerto
       risco/retorno medio 1:3,76  ·  +45,90 por operacao
       total +4.404  ·  pior rebaixamento 1.729 (17x o risco de uma
@@ -30,6 +31,16 @@ O QUE O BACKTEST MEDE  (2023-01 a 2026-11, 46 meses, risco fixo de
       todas as 461 moedas        169    30,2%    +22,90  +1,33   4/4
       rolante · 150 maiores       96    36,5%    +45,90  +2,10   4/4
       rolante · 50 maiores        31    48,4%    +91,90  +2,14   4/4
+
+  SO COMPRA (13/11/2026). Nas 461 moedas, separando as pontas:
+
+      compras  119 op, 31,9% de acerto, 1:4,94, +39,60/op, z +1,95, 4/4
+      vendas    50 op, 26,0% de acerto, 1:2,96, -16,90/op, z -0,85, 1/4
+
+  O alvo e 90% do tamanho da vela projetado alem do extremo. Uma queda
+  nao passa de 100%, uma alta nao tem teto: na venda o alvo e caro
+  demais. Tirar as vendas leva o total de +3.868 para +4.715 -- 30%
+  menos alertas e MAIS dinheiro. CFG['so_compra'] desliga a ponta.
 
   ATENCAO -- OS NUMEROS ANTIGOS DESTE ARQUIVO ERAM VICIADOS.
   Ate 13/11/2026 este bloco dizia 48,6% de acerto, 1:3,69 e +116,10
@@ -100,6 +111,7 @@ CFG = dict(
     stop_folga=0.10,
     rr_min=1.2,
     alvo_proj=0.90,
+    so_compra=True,       # as vendas dao -16,90/op; ver o comentario em explosoes
 )
 
 
@@ -161,6 +173,16 @@ def explosoes(h8, cfg):
         if vol < cfg['vol']*mv[i-1]:
             continue
         alta = cl > o
+        # 0) SO COMPRA. Medido em 169 operacoes nas 461 moedas:
+        #      compras  119 op, 31,9% de acerto, 1:4,94, +39,60/op, 4/4 anos
+        #      vendas    50 op, 26,0% de acerto, 1:2,96, -16,90/op, 1/4 anos
+        #    Nao e azar, e aritmetica: o alvo e 90% do tamanho da vela
+        #    projetado alem do extremo, e uma queda nao passa de 100%
+        #    enquanto uma alta nao tem teto. Na venda o alvo e caro
+        #    demais -- 1:2,96 contra 1:4,94. Tirar as vendas leva o total
+        #    de +3.868 para +4.715: menos alertas e MAIS dinheiro.
+        if not alta and cfg.get('so_compra', True):
+            continue
         # 1) vinha caindo de verdade
         queda = (h8[i-jan][4] - h8[i-1][4]) / a[i-1] if alta else \
                 (h8[i-1][4] - h8[i-jan][4]) / a[i-1]
