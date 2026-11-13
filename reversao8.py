@@ -135,6 +135,7 @@ CFG = dict(
     stop_folga=0.10,
     rr_min=1.2,
     alvo_proj=0.90,
+    tf_h=8,               # horas da vela do padrao; 24 roda no diario
     so_compra=True,       # as vendas dao -16,90/op; ver o comentario em explosoes
 )
 
@@ -236,7 +237,8 @@ def explosoes(h8, cfg):
             continue
         fora.append(dict(i=i, alta=alta, ob_base=ob_base, ob_topo=ob_topo,
                          atr=a[i], topo=hi if alta else lo, tam=hi-lo,
-                         fim_ms=h8[i][0] + 8*3600_000, queda=queda,
+                         fim_ms=h8[i][0] + cfg['tf_h']*3600_000,
+                         queda=queda,
                          topo_ant=topo_ant, exp_ms=h8[i][0]))
     fora.reverse()
     return fora
@@ -254,7 +256,7 @@ def entrada(h1, mv1, e, cfg, pos1):
             (e['ob_topo'] + e['atr']*cfg['furo_max'])
     pico = e['topo']
     tocou = extremo = None
-    lim = min(k0 + cfg['espera']*8, len(h1))
+    lim = min(k0 + cfg['espera']*cfg['tf_h'], len(h1))
     for k in range(k0, lim):
         hi, lo, o, cl = h1[k][2], h1[k][3], h1[k][1], h1[k][4]
         if tocou is None:
@@ -323,7 +325,7 @@ def encosto(h1, mv1, e, cfg, pos1):
             (e['ob_topo'] + e['atr']*cfg['furo_max'])
     pico = e['topo']
     tocou = extremo = None
-    lim = min(k0 + cfg['espera']*8, len(h1))
+    lim = min(k0 + cfg['espera']*cfg['tf_h'], len(h1))
     for k in range(k0, lim):
         hi, lo, o, cl = h1[k][2], h1[k][3], h1[k][1], h1[k][4]
         if tocou is None:
@@ -380,7 +382,7 @@ def encosto(h1, mv1, e, cfg, pos1):
 def achar_encosto(h1, cfg=None):
     """O encosto pendente mais recente, se houver."""
     cfg = cfg or CFG
-    h8 = juntar(h1, 8)
+    h8 = juntar(h1, cfg['tf_h'])
     if len(h8) < 60 or len(h1) < 200:
         return None
     mv1 = exp8.medvol(h1, 20)
@@ -442,7 +444,7 @@ def registrar_encosto(d, sim, g):
 def achar(h1, cfg=None, atraso_max=1):
     """O gatilho que acabou de fechar, se houver."""
     cfg = cfg or CFG
-    h8 = juntar(h1, 8)
+    h8 = juntar(h1, cfg['tf_h'])
     if len(h8) < 60 or len(h1) < 200:
         return None
     mv1 = exp8.medvol(h1, 20)
