@@ -1,4 +1,4 @@
-name: Imagens dos últimos gatilhos da reversão
+name: Imagens dos últimos gatilhos dos dois setups
 
 on:
   workflow_dispatch:
@@ -44,16 +44,21 @@ jobs:
           set -o pipefail
           python -u baixar_futuros.py --inicio ${{ inputs.inicio || '2023-01' }} \
             --intervalo 1h --top 9999 --pasta dados_universo 2>&1 | tail -3
-      - name: Desenhar
+      - name: Desenhar a reversão
         run: |
           set -o pipefail
           python -u analise/desenha_ultimos.py dados_universo \
             --quantos ${{ inputs.quantos || '2' }} 2>&1 | tee img.log
+      - name: Desenhar a varredura
+        run: |
+          set -o pipefail
+          python -u analise/desenha_setup1.py dados_universo \
+            --quantos ${{ inputs.quantos || '2' }} 2>&1 | tee -a img.log
       - name: Commitar as imagens
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -f gatilho_*.png
+          git add -f gatilho_*.png setup1_*.png
           if git diff --cached --quiet; then exit 0; fi
           git commit -m "imagens dos últimos gatilhos da reversão [skip ci]"
           for t in 1 2 3; do

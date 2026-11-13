@@ -120,7 +120,7 @@ def desenhar(sim, h1, h8, e, g, caminho):
             (stop, '#ef5350', f"stop  {stop:,.{c}f}   "
                               f"({g['risco_pct']:.2f}% de risco)"),
             (alvo, '#26a69a', f"alvo  {alvo:,.{c}f}   "
-                              f"(5x o risco)"),
+                              f"(o extremo da explosão)"),
             (e['topo'], '#78909c',
              f"{'topo' if alta else 'fundo'} da explosão  "
              f"{e['topo']:,.{c}f}")):
