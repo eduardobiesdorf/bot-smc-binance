@@ -697,13 +697,14 @@
   "tipo": "cenario",
   "sim": "PUMPUSDT",
   "lado": "venda",
-  "status": "aberto",
+  "status": "morreu",
   "vela_ms": 1794549600000,
   "imp_fim_ms": 1794542400000,
   "alvo": 0.003251,
   "nota": "chegou no order block, esperando a limpeza",
   "vol_varr": 0.0,
-  "nucleo": false
+  "nucleo": false,
+  "motivo": "varredura com 1.02x o volume médio, mínimo 1.20x — não vira gatilho"
  },
  "cen-FETUSDT-1794538800000": {
   "tipo": "cenario",
@@ -772,13 +773,14 @@
   "tipo": "cenario",
   "sim": "TAOUSDT",
   "lado": "venda",
-  "status": "aberto",
+  "status": "morreu",
   "vela_ms": 1794556800000,
   "imp_fim_ms": 1794542400000,
   "alvo": 200.8,
   "nota": "chegou no order block, esperando a limpeza",
   "vol_varr": 0.0,
-  "nucleo": true
+  "nucleo": true,
+  "motivo": "varredura com 0.85x o volume médio, mínimo 1.20x — não vira gatilho"
  },
  "cen-DOTUSDT-1794542400000": {
   "tipo": "cenario",
@@ -791,5 +793,17 @@
   "nota": "chegou no order block, esperando a limpeza",
   "vol_varr": 0.0,
   "nucleo": false
+ },
+ "cen-SOLUSDT-1794542400000": {
+  "tipo": "cenario",
+  "sim": "SOLUSDT",
+  "lado": "venda",
+  "status": "aberto",
+  "vela_ms": 1794571200000,
+  "imp_fim_ms": 1794542400000,
+  "alvo": 77.92,
+  "nota": "chegou no order block, esperando a limpeza",
+  "vol_varr": 0.0,
+  "nucleo": true
  }
 }
