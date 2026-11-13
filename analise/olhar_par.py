@@ -16,17 +16,21 @@ import reversao8 as rev
 import explosao8 as e8
 
 BRT = dt.timezone(dt.timedelta(hours=-3))
-FAPI = "https://fapi.binance.com/fapi/v1/klines"
+FONTES = [
+    ("spot (data-api)", "https://data-api.binance.vision/api/v3/klines"),
+    ("futuros (fapi)", "https://fapi.binance.com/fapi/v1/klines"),
+]
+CDN = "https://data.binance.vision/data/futures/um/daily/klines"
 
 
-def buscar(sim, limite=1500):
+def _api(url, sim, limite):
     out, fim = [], None
     while len(out) < limite:
         p = {'symbol': sim, 'interval': '1h',
              'limit': min(1500, limite-len(out))}
         if fim:
             p['endTime'] = fim
-        r = requests.get(FAPI, params=p, timeout=25)
+        r = requests.get(url, params=p, timeout=25)
         r.raise_for_status()
         d = r.json()
         if not d:
@@ -36,6 +40,57 @@ def buscar(sim, limite=1500):
         fim = d[0][0] - 1
         if len(d) < p['limit']:
             break
+    return out
+
+
+def _cdn(sim, dias):
+    """os arquivos diarios do CDN de futuros -- vao ate ontem."""
+    import io, zipfile, csv as _csv
+    out = []
+    hoje = dt.datetime.now(dt.timezone.utc).date()
+    for k in range(dias, 0, -1):
+        d = hoje - dt.timedelta(days=k)
+        u = f"{CDN}/{sim}/1h/{sim}-1h-{d:%Y-%m-%d}.zip"
+        try:
+            r = requests.get(u, timeout=25)
+            if r.status_code != 200:
+                continue
+            z = zipfile.ZipFile(io.BytesIO(r.content))
+            with z.open(z.namelist()[0]) as f:
+                for row in _csv.reader(io.TextIOWrapper(f, 'utf-8')):
+                    if not row or not row[0].isdigit():
+                        continue
+                    out.append([int(row[0]), float(row[1]), float(row[2]),
+                                float(row[3]), float(row[4]), float(row[5])])
+        except Exception:
+            continue
+    return out
+
+
+def buscar(sim, limite=1500):
+    erros = []
+    for nome, url in FONTES:
+        try:
+            out = _api(url, sim, limite)
+            if out:
+                print(f"  (dado de {nome})")
+                break
+        except Exception as e:
+            erros.append(f"{nome}: {str(e)[:70]}")
+            out = []
+    else:
+        out = []
+    if not out:
+        print("  (as APIs falharam: " + " · ".join(erros) + ")")
+        print("  (caindo nos arquivos diários do CDN de futuros — vão até ontem)")
+        out = _cdn(sim, 70)
+    if not out:
+        raise SystemExit(f"não consegui dado nenhum de {sim}")
+    out.sort(key=lambda v: v[0])
+    vis = {}
+    for v in out:
+        vis[v[0]] = v
+    out = [vis[k] for k in sorted(vis)][-limite:]
     agora = int(dt.datetime.now(dt.timezone.utc).timestamp()*1000)
     return [v for v in out if v[0] + 3600_000 <= agora]
 
