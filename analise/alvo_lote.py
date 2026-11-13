@@ -158,6 +158,24 @@ def main():
               f"{len(lotes):>8}{sum(1 for x in lv if x>0):>6}"
               f"{statistics.mean(lv):>+8.0f}{z_de(lv):>+8.2f}"
               f"{maior:>8.0f}%{meses:>7}")
+    print(f"\n{'='*120}\n  ANO A ANO, para os tres melhores alvos\n{'='*120}")
+    print(f"{'alvo':<22}" + ''.join(f"{a:>13}" for a in range(2020, 2027)))
+    for rot, kw in (('o topo da explosão', dict(proj=0.0)),
+                    ('1:2 de risco', dict(rr_fixo=2.0)),
+                    ('projeção 45%', dict(proj=0.45)),
+                    ('1:5 de risco (hoje)', dict(rr_fixo=5.0))):
+        ops = rolante(**kw)
+        linha = f"{rot:<22}"
+        for ano in range(2020, 2027):
+            sel = [o for o in ops if o['q'].year == ano]
+            if not sel:
+                linha += f"{'—':>13}"
+                continue
+            al = sum(1 for o in sel if o['fim'] == 'alvo')
+            linha += f"{sum(o['liq'] for o in sel):>+8.0f}({al}/{len(sel)})"[-13:].rjust(13)
+        print(linha)
+    print(f"\n  cada celula: dinheiro no ano (alvos/operacoes)")
+
     print(f"\n  'maior lote' = quanto do lucro total vem do melhor lote."
           f"\n  'meses c/ acerto' = em quantos meses distintos caiu um alvo."
           f"\n  O que decide e o z POR LOTE, nao o por operação.")
