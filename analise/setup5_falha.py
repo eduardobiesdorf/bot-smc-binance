@@ -60,6 +60,13 @@ CFG5 = dict(
                        # cima (risco 5.80%). Ela e o ALERTA: tem de avisar na
                        # hora. 99 = sem trava, como estava
     falha_max=16,      # velas para a falha e a volta acontecerem
+    entrada_em='volta',# ONDE entrar: 'volta' = no fechamento de volta DENTRO da
+                       # faixa (o original; no ZEN entrou com metade do movimento
+                       # ja andado, R:R 1:1.34); 'falha' = la em cima, na falha do
+                       # topo, quando perde o extremo da propria vela de forca --
+                       # mesmo stop, entrada bem melhor, alvo bem mais longe
+                       # (no ZEN daria 1:2.6); 'forca' = no fechamento da propria
+                       # vela de forca, sem confirmacao
     stop_em='extremo', # 'extremo' = acima da maxima da IDA INTEIRA; 'forca' = so
                        # acima da VELA DE FORCA. Eu previ que 'forca' era a chave:
                        # dobrou as operacoes e subiu o R:R de 1:1.85 para 1:2.49,
@@ -191,15 +198,30 @@ def achar(h, cfg=None, a=None, mv=None):
         # 2b) o volume da ida tem de ser MAIOR que o da lateralidade
         if vol_lat <= 0 or vol_ida/vol_lat < cfg['vol_sobe']:
             i += 1; continue
-        # 4) a falha: nao faz nova maxima  5) e volta para dentro da faixa
+        # 4) a falha de continuidade, e ONDE entrar nela. Tres modos:
+        #   'volta'  -- espera fechar de volta DENTRO da faixa. O original. No ZEN
+        #               isso entrou com metade do movimento ja andado
+        #   'falha'  -- entra LA EM CIMA, na falha do topo: nao supera a maxima e
+        #               perde o extremo da PROPRIA vela de forca. Mesmo stop,
+        #               entrada muito melhor, alvo muito mais longe
+        #   'forca'  -- entra no fechamento da propria vela de forca, sem esperar
+        #               confirmacao nenhuma. O mais agressivo dos tres
+        modo = cfg['entrada_em']
         ent_k = None
-        for k in range(k_forca+1, min(k_forca+1+cfg['falha_max'], len(h))):
-            hk, lk, ck = h[k][2], h[k][3], h[k][4]
-            if (hk > ext) if alta else (lk < ext):
-                break                      # retomou: nao houve falha
-            if (ck < topo) if alta else (ck > base):
-                ent_k = k                  # voltou para dentro da faixa
-                break
+        if modo == 'forca':
+            ent_k = k_forca
+        else:
+            for k in range(k_forca+1, min(k_forca+1+cfg['falha_max'], len(h))):
+                hk, lk, ck = h[k][2], h[k][3], h[k][4]
+                if (hk > ext) if alta else (lk < ext):
+                    break                  # retomou: nao houve falha
+                if modo == 'falha':
+                    if (ck < h[k_forca][3]) if alta else (ck > h[k_forca][2]):
+                        ent_k = k          # perdeu o extremo da vela de forca
+                        break
+                elif (ck < topo) if alta else (ck > base):
+                    ent_k = k              # voltou para dentro da faixa
+                    break
         if ent_k is None:
             i += 1; continue
         ent = h[ent_k][4]
@@ -444,6 +466,12 @@ def main():
         for fa in (1, 2, 3, 5, 8, 99):
             resumo(rodar(dict(CFG5, forca_apos=fa)),
                    f"até {fa} velas depois" if fa < 99 else "sem trava")
+        print("\n  ONDE ENTRAR x trava da força  (o ZEN entrou na metade"
+              " do movimento)\n")
+        for me in ('volta', 'falha', 'forca'):
+            for fa in (3, 8, 99):
+                resumo(rodar(dict(CFG5, entrada_em=me, forca_apos=fa)),
+                       f"{me} / força {fa}" if fa < 99 else f"{me} / sem trava")
         print()
     achados = rodar(CFG5)
     print(f"\nCONFIGURAÇÃO ESCOLHIDA: {CFG5['lat_jan']} velas de lateralidade, "
