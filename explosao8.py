@@ -1,4 +1,9 @@
-"""Explosao de vela unica em H8 -- SEGUNDO ALERTA, EM TESTE.
+"""Explosao de vela unica em H8 -- DESLIGADO EM 12/11/2026.
+
+Ficou fora do bot a pedido do Eduardo: 32% de acerto e o dinheiro
+vindo de poucas operacoes grandes. A reversao de 8h (reversao8.py)
+faz o papel melhor -- 48,6% de acerto e 1:3,69. O arquivo fica aqui
+com a medicao, caso valha retomar.
 
 Nao mexe no setup que ja roda. Tem estado e historico proprios, para o
 placar da varredura nao se misturar com o que ainda esta sendo medido.

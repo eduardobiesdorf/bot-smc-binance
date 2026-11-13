@@ -37,7 +37,6 @@ import requests
 
 import grafico_varredura as graf
 import acompanhamento as acomp
-import explosao8 as exp8
 import reversao8 as rev8
 
 BRT = timezone(timedelta(hours=-3))
@@ -748,9 +747,6 @@ def main():
                          'em teste)')
     ap.add_argument('--rev-top', type=int, default=150,
                     help='quantas moedas a reversão escaneia')
-    ap.add_argument('--sem-explosao8', action='store_true',
-                    help='não roda o segundo alerta (explosão de 8h, '
-                         'em teste)')
     ap.add_argument('--velas', type=int, default=400,
                     help='quantas velas de H1 puxar no --explicar')
     a = ap.parse_args()
@@ -941,59 +937,7 @@ def main():
                 enviar(m)
             diag("stop móvel: " + m.replace("\n", " | ")[:140])
 
-    # --- segundo alerta: explosao de vela unica em H8 (EM TESTE) -----
-    # Estado e historico proprios, em explosao8_estado.json e
-    # historico_explosao8.csv, para nao contaminar o placar da varredura.
-    # Busca 8h direto da Binance em vez de remontar das velas de 1h: com
-    # 400 velas de 1h sairiam so 50 de 8h, e o padrao precisa de ~70.
-    if not a.sem_explosao8:
-        try:
-            exp8_d = exp8.ler()
-            s8, achados8 = {}, []
-            alvos8 = sorted(set(usados) |
-                            {r['sim'] for r in exp8_d.values()
-                             if r.get('status') == 'aberto'})
-            for sim in alvos8:
-                try:
-                    v = buscar(sim, '8h', 200)
-                except Exception as e:
-                    diag(f"{sim}: não busquei o 8h ({e})")
-                    continue
-                if len(v) < 70:
-                    continue
-                s8[sim] = v
-                if sim not in usados:
-                    continue
-                g8 = exp8.achar(v)
-                if g8:
-                    achados8.append((sim, g8))
-                    diag(f"EXPLOSÃO 8h {sim} {g8['lado']} "
-                         f"vela {quando(g8['vela_ms'])} "
-                         f"entrada {fmt(g8['entrada'])} "
-                         f"R:R 1:{g8['rr']:.2f} RSI {g8['rsi']:.0f}")
-            diag(f"explosão 8h: {len(s8)} pares olhados, "
-                 f"{len(achados8)} gatilho(s)")
-            for sim, g8 in achados8:
-                if not exp8.registrar(exp8_d, sim, g8):
-                    continue
-                texto = exp8.msg(sim, g8, quando, fmt, msg_mao)
-                if a.teste:
-                    print(texto, "\n")
-                else:
-                    enviar(texto)
-            for m in exp8.revisar(exp8_d, s8, fmt, quando):
-                if a.teste:
-                    print(m, "\n")
-                else:
-                    enviar(m)
-                diag("explosão 8h, desfecho: " + m.replace("\n", " | ")[:140])
-            if not a.teste:
-                exp8.gravar(exp8_d)
-            diag(exp8.placar(exp8_d).replace('<b>', '').replace('</b>', ''))
-        except Exception as e:
-            diag(f"explosão 8h falhou, o resto segue: {e}")
-
-    # --- terceiro alerta: REVERSAO de 8h, entrada no H1 (EM TESTE) ----
+    # --- segundo alerta: REVERSAO de 8h, entrada no H1 (EM TESTE) ----
     # O preco cai por uma semana, UMA vela de 8h rompe o ultimo topo, o
     # preco volta e ENCOSTA no order block sem afundar nele, e uma vela
     # de 1h confirma com volume. Estado proprio, em reversao8_estado.json
