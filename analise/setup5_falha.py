@@ -444,23 +444,48 @@ def main():
         bruto = sum(r['bruto'] for _, _, r in res)
         rrm = statistics.mean(g['rr'] for _, g, _ in res)
         hs = statistics.median(r['horas'] for _, _, r in res)
-        pior, pico, atual, seq, pseq = 0, 0, 0, 0, 0
-        for _, _, r in res:
+        pior, pico, atual = 0, 0, 0
+        corrida, pseq = [], []          # a sequencia de stops, com as datas
+        for s, g, r in res:
             atual += r['liq']; pico = max(pico, atual)
             pior = min(pior, atual - pico)
-            seq = seq + 1 if r['fim'] == 'stop' else 0
-            pseq = max(pseq, seq)
+            if r['fim'] == 'stop':
+                corrida.append((s, g['vela_ms']))
+            else:
+                corrida = []
+            if len(corrida) > len(pseq):
+                pseq = list(corrida)
+        # A PERGUNTA DO EDUARDO: a sequencia de stops sao operacoes separadas no
+        # tempo, ou um lote so -- varias moedas stopando no mesmo dia de queda
+        # geral? 24 moedas no mesmo dia e UM evento, nao 24.
+        dias = span = moedas = 0
+        if pseq:
+            d = sorted({dt.datetime.fromtimestamp(ms/1000, BRT).date()
+                        for _, ms in pseq})
+            dias, moedas = len(d), len({s for s, _ in pseq})
+            span = (d[-1] - d[0]).days + 1
         print(f"  {rotulo:<16} {len(res):>5} op {len(res)/meses:>5.1f}/mês "
               f"acerto {alvo/len(res)*100:>5.1f}%  R:R 1:{rrm:<4.2f} "
               f"{hs:>4.0f}h  bruto ${bruto:>9,.0f}  líquido ${liq:>9,.0f} "
               f"(${liq/len(res):>+7.2f}/op)  rebaix ${pior:>8,.0f}  "
-              f"{pseq:>2} stops seguidos")
+              f"{len(pseq):>2} stops seguidos em {dias:>2} dias distintos "
+              f"({span:>3}d corridos, {moedas:>2} moedas)")
         return res
 
     if a.varrer:
         print(f"{len(cru)} maiores · velas de {a.tf}h · {meses:.0f} meses · "
               f"$100 de risco por operação\n")
-    if a.varrer == 2:
+    if a.varrer == 3:
+        # So as duas configuracoes em disputa, para responder rapido se a
+        # sequencia de stops e um LOTE (varias moedas no mesmo dia) ou
+        # operacoes separadas de verdade.
+        print("  AS DUAS EM DISPUTA · a sequência de stops é lote ou não?\n")
+        resumo(rodar(dict(CFG5, aperto=1.00, pre_modo='off')),
+               "larga s/ contexto")
+        resumo(rodar(dict(CFG5, aperto=0.70, pre_modo='alinhado',
+                          pre_pivo=20)), "alinhado pivô 20")
+        print()
+    elif a.varrer == 2:
         # QUALIDADE x QUANTIDADE. O contexto alinhado paga +$32.66/op com 2.2
         # op/mes; afrouxar a faixa leva a 16.8 op/mes com +$8.81. Os dois somam?
         print("  O CONTEXTO AGUENTA A FAIXA MAIS LARGA?\n")
