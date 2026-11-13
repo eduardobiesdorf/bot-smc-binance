@@ -1,0 +1,36 @@
+name: Olhar um par ao vivo
+
+on:
+  workflow_dispatch:
+    inputs:
+      par:
+        description: 'O par, ex AKEUSDT'
+        required: true
+        default: 'AKEUSDT'
+      tf:
+        description: 'Tempos gráficos, separados por vírgula'
+        required: false
+        default: '8,4'
+
+permissions:
+  contents: read
+
+jobs:
+  olhar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install requests
+      - name: Olhar
+        run: |
+          set -o pipefail
+          python -u analise/olhar_par.py "${{ inputs.par }}" \
+            --tf "${{ inputs.tf || '8,4' }}" 2>&1 | tee olhar.log
+      - name: Resumo
+        if: always()
+        run: |
+          { echo '```'; cat olhar.log; echo '```'; } >> $GITHUB_STEP_SUMMARY
