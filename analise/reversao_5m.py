@@ -1,4 +1,29 @@
-"""A reversao em velas de 5 minutos, nos maiores ativos.
+"""A reversao em velas de 5 minutos.  DESCARTADO 13/11/2026.
+
+RESULTADO (150 maiores, 2023-01 -> 2026-11, 46 meses, risco de $100):
+nenhuma das nove variantes presta. A melhor -- "ancorado" com stop
+minimo de 1,5% -- da +$1,30 por operacao, z de +0,26, 2 de 4 anos
+positivos. A de stop minimo de 1,0%: 1091 operacoes, 36,7% de acerto,
+1:2,51, BRUTO de +$3,0 e taxa de -$7,1, liquido -$4,1.
+
+O MIRAGEM: nos 5 MAIORES ativos o mesmo filtro de stop >= 1% dava 28
+operacoes, 50% de acerto, 1:2,59 e BRUTO de +$82/op. Parecia que a
+taxa estava escondendo um edge. Nas 150 o bruto caiu para +$3,0 -- os
++$82 eram 28 operacoes com sorte. 28 trades nao sustentam conclusao
+nenhuma, por mais convincente que o painel pareca.
+
+O FECHAMENTO DO TEMPO GRAFICO: o BRUTO do mesmo padrao, mesmas 150
+moedas, mesmos 4 anos -- H8 +$82, H4 -$9, H2 +$10, H1 -$7, 5m +$3. O
+desenho e fractal, o comportamento nao: uma queda de uma semana
+seguida de uma vela de forca e um evento de 8 horas.
+
+O QUE FICOU: o stop minimo sobe o acerto de forma monotona (32,4% ->
+35,1% -> 36,7% -> 38,9% -> 40,7% para 0 / 0,8 / 1,0 / 1,2 / 1,5%) e o
+R:R cai junto (3,20 -> 2,18). Troca risco-retorno por acerto a custo
+zero. Inutil aqui, onde nao ha lucro para redistribuir; vale medir no
+H8 e no setup 1, onde ha.
+
+Uso original:
 
 Tres leituras de "a mesma estrategia" num tempo grafico menor:
 
