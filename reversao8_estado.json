@@ -1,1 +1,14 @@
-{}
+{
+ "enc-OSMOUSDT-1794528000000": {
+  "sim": "OSMOUSDT",
+  "tipo": "encosto",
+  "lado": "compra",
+  "toque_ms": 1794607200000,
+  "exp_ms": 1794528000000,
+  "ob_base": 0.0314,
+  "ob_topo": 0.0335,
+  "alvo": 0.0414,
+  "stop": 0.031089824471681377,
+  "status": "avisado"
+ }
+}
