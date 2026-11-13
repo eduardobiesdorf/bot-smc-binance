@@ -154,11 +154,67 @@ def main():
                       rolante(lado='venda', proj=pr),
                       key=lambda o: o['q'])
         painel(f'compra 90% + venda {pr*100:.0f}%', comb, meses)
-    for rr in (2.0, 2.5):
+    for rr in (2.0, 2.5, 3.0, 3.5, 4.0, 5.0):
         comb = sorted(rolante(lado='compra') +
                       rolante(lado='venda', rr_fixo=rr),
                       key=lambda o: o['q'])
         painel(f'compra 90% + venda 1:{rr:.1f}', comb, meses)
+
+    print(f"\n{'='*140}\n  A COMPRA tambem quer alvo por múltiplo de risco?\n"
+          f"{'='*140}")
+    cab()
+    painel('compra · projeção 90% (hoje)', rolante(lado='compra'), meses)
+    for rr in (3.0, 4.0, 5.0, 6.0):
+        painel(f'compra · alvo em 1:{rr:.1f}',
+               rolante(lado='compra', rr_fixo=rr), meses)
+
+    print(f"\n{'='*140}\n  A VENDA bate ENTRADA ALEATÓRIA?\n"
+          f"  (20 vendas por operação real, mesma moeda, mesmo stop%,\n"
+          f"   mesmo R:R, momento sorteado)\n{'='*140}")
+    import random as _r
+    from explosao import curva as _curva
+    rng = _r.Random(11)
+    reais = rolante(lado='venda')
+    ctrl = []
+    for s_ in {o['sim'] for o in reais}:
+        hp = rev.juntar(serie[s_], rev.CFG['tf_h'])
+        lo_i, hi_i = 30, len(hp) - rev.MAX_BARRAS - 1
+        if hi_i <= lo_i:
+            continue
+        for o in [x for x in reais if x['sim'] == s_]:
+            for _ in range(20):
+                i = rng.randrange(lo_i, hi_i)
+                ent = hp[i][4]
+                stop = ent * (1 + o['stop_pct']/100)
+                alvo = ent - (stop-ent)*o['rr']
+                fim = saida = None
+                for m in range(i+1, min(i+1+rev.MAX_BARRAS, len(hp))):
+                    if hp[m][2] >= stop: fim, saida = 's', stop; break
+                    if hp[m][3] <= alvo: fim, saida = 'a', alvo; break
+                if fim is None:
+                    continue
+                pos = RISCO/((stop-ent)/ent)
+                mov = (ent-saida)/ent
+                ctrl.append(pos*mov - pos*TAXA*2 -
+                            pos*((m-i)*rev.CFG['tf_h']/8)*FUND8)
+    def _res(rot, v):
+        if not v:
+            print(f"  {rot:<34}{'—':>6}"); return
+        g = [x for x in v if x > 0]
+        tot, dd = _curva(v)
+        print(f"  {rot:<34}{len(v):>6}{len(g)/len(v)*100:>9.1f}%"
+              f"{statistics.mean(v):>+10.1f}{tot:>+10.0f}{dd:>9.0f}")
+    print(f"  {'':<34}{'n':>6}{'acerto':>10}{'méd/op':>10}{'total':>10}"
+          f"{'rebaix.':>9}")
+    _res('a VENDA do setup', [o['liq'] for o in reais])
+    _res('o CONTROLE (venda aleatória)', ctrl)
+    if reais and ctrl:
+        rv = [o['liq'] for o in reais]
+        d = statistics.mean(rv) - statistics.mean(ctrl)
+        e = (statistics.pvariance(rv)/len(rv) +
+             statistics.pvariance(ctrl)/len(ctrl)) ** .5
+        print(f"\n  diferença: {d:+.1f} por operação  →  "
+              f"{d/e if e else 0:+.2f} desvios")
 
 
 if __name__ == '__main__':
