@@ -1,9 +1,45 @@
-"""Explosao de vela unica em H8 -- DESLIGADO EM 12/11/2026.
+"""Explosao de vela unica -- DESLIGADO. Reavaliado e ENCERRADO 13/11/2026.
 
-Ficou fora do bot a pedido do Eduardo: 32% de acerto e o dinheiro
-vindo de poucas operacoes grandes. A reversao de 8h (reversao8.py)
-faz o papel melhor -- 48,6% de acerto e 1:3,69. O arquivo fica aqui
-com a medicao, caso valha retomar.
+Saiu do bot em 12/11 a pedido do Eduardo (32% de acerto, dinheiro
+vindo de poucas operacoes grandes). Em 13/11 foi reavaliado com TUDO o
+que o dia ensinou -- universo rolante de 7 anos, contagem por LOTE,
+alvo no EXTREMO da estrutura, filtro de encosto raso na altura do
+proprio bloco, em H2, H4 e H8, e alvos projetados ate 300%.
+
+VINTE E NOVE variantes. Todas negativas no liquido, e o BRUTO tambem
+negativo ou nulo em quase todas -- nao e taxa, nao ha vantagem antes
+de qualquer custo.
+
+      H4 · projecao  90%   22,7% acerto, 1:4,22, bruto +2,50, liq -2,00
+      H4 · projecao 100%   22,0%,        1:4,45, bruto +3,70, liq -0,80
+      H4 · projecao 125%   19,9%,        1:5,05, bruto +4,00, liq -0,70
+      H4 · alvo no extremo 37,4%,        1:2,08, bruto -0,50, liq -4,10
+      H8 · alvo no extremo 37,8%,        1:2,03, bruto -3,10, liq -6,50
+      H2 · alvo no extremo 36,0%,        1:2,08, bruto -5,80, liq -10,30
+
+  O alvo no extremo levanta o acerto de 21,5% para 37,8% -- e derruba o
+  R:R de 4,2 para 2,0. Troca seis por meia duzia.
+
+  A melhor celula das 29 (H4, projecao 125%, encosto <= 0,25x) da +0,10
+  por operacao e bate entrada aleatoria por apenas +1,10 desvios. A
+  regua, marcada ANTES de rodar, era liquido positivo E mais de 2
+  desvios por lote. Nao passou em nenhuma das duas.
+
+A CAUSA, e e a licao que se repete: FREQUENCIA. Sao 17 a 21 operacoes
+por mes no H4 (e 44 no H2). Com 100 USD de risco isso da quase 90 USD
+por mes so de corretagem, e a vantagem bruta e de 4. O setup 3 da 1,6
+operacao por mes com bruto de +43 -- dez vezes menos operacoes, dez
+vezes mais vantagem em cada uma.
+
+E A CONCLUSAO QUE VALE MAIS QUE O TESTE: o setup 2 E o setup 3 sem os
+filtros que fazem o setup 3 funcionar. A diferenca entre eles e
+exatamente o contexto -- a queda previa de sete dias, a explosao
+saindo do terco de baixo da faixa, e o rompimento do ULTIMO PIVO em vez
+do extremo de 20 velas. Esses tres filtros levam de 10 operacoes por
+mes para 1,6, e de negativo para +39,60 por operacao. O contexto do
+setup 3 nao e decoracao: e ele que carrega o resultado inteiro.
+
+NAO RETESTAR sem dado novo. Ver analise/setup2_novo.py.
 
 Nao mexe no setup que ja roda. Tem estado e historico proprios, para o
 placar da varredura nao se misturar com o que ainda esta sendo medido.
