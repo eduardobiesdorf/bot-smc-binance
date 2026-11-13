@@ -408,7 +408,7 @@ def mover_stops(d, series15):
 # ficarem no mesmo placar, nunca se sabe qual configuracao esta sendo
 # medida. O placar conta so o que veio depois do corte; o historico
 # inteiro continua no CSV.
-CORTE_H4 = 1763046000000     # 13/11/2026 13:00 BRT
+CORTE_H4 = 1794585600000     # 13/11/2026 13:00 BRT
 
 
 def placar(d):
