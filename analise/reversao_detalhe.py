@@ -37,10 +37,45 @@ def main():
           f"({cru[0][2]/1e6:,.0f} M USD/h) a {cru[-1][0]} "
           f"({cru[-1][2]/1e6:,.2f} M/h)")
 
+    # A base validada: encosto raso + volume no gatilho.
+    VAL = dict(BASE, modo='raso', vol_min=1.2)
+    print(f"\n{'#'*132}\n#  OS TRES EIXOS, UM DE CADA VEZ, EM CIMA DA BASE "
+          f"VALIDADA\n{'#'*132}")
+    eixos = [
+        ('o último topo: quantas velas de cada lado definem o pivô', [
+            ('±1 vela  (pivô mais solto)', dict(VAL, pivo_h=8)),
+            ('±2 velas  (a base)', dict(VAL)),
+            ('±3 velas  (mais exigente)', dict(VAL, pivo_h=24)),
+        ]),
+        ('o último topo: até onde procurar para trás', [
+            ('20 velas · 160h', dict(VAL, topo_h=160)),
+            ('30 velas · 240h  (a base)', dict(VAL)),
+            ('50 velas · 400h', dict(VAL, topo_h=400)),
+            ('80 velas · 640h', dict(VAL, topo_h=640)),
+        ]),
+        ('a espera pelo preço voltar ao order block', [
+            ('10 dias · 240h  (a base)', dict(VAL)),
+            ('20 dias · 480h', dict(VAL, espera_h=480)),
+            ('30 dias · 720h', dict(VAL, espera_h=720)),
+            ('60 dias · 1440h', dict(VAL, espera_h=1440)),
+        ]),
+        ('o alvo: quanto do tamanho da vela além do topo dela', [
+            ('+90%  (a base)', dict(VAL)),
+            ('+100%', dict(VAL, alvo_proj=1.0)),
+            ('+150%', dict(VAL, alvo_proj=1.5)),
+            ('+200%', dict(VAL, alvo_proj=2.0)),
+            ('+300%', dict(VAL, alvo_proj=3.0)),
+        ]),
+    ]
+    for titulo, lista in eixos:
+        print(f"\n{'-'*132}\n  {titulo}\n{'-'*132}")
+        cab()
+        for nome_, cfg_ in lista:
+            painel(nome_, rodar(cru, cfg_, faixa, 1, 8))
+
     for rot, cfg, nome in (
             ('ENCOSTO RASO', dict(BASE, modo='raso'), 'raso'),
-            ('ENCOSTO RASO + VOLUME ≥1,2x',
-             dict(BASE, modo='raso', vol_min=1.2), 'raso_volume')):
+            ('ENCOSTO RASO + VOLUME ≥1,2x', VAL, 'raso_volume')):
         ops = rodar(cru, cfg, faixa, 1, 8)
         if not ops:
             print(f"\n{rot}: nenhuma"); continue
