@@ -6,49 +6,74 @@ vela de 1 hora confirma com volume. Entra ali.
 
 Estado e historico proprios. Nao mexe nos outros dois setups.
 
-O QUE O BACKTEST MEDE  (2023-01 a 2026-11, 46 meses, OS DOIS LADOS,
-risco fixo de 100 USD por operacao)
+O QUE O BACKTEST MEDE  (2023-01 a 2026-11, 46 meses, SO COMPRA,
+alvo a 5x o risco, risco fixo de 100 USD por operacao)
 
   O NUMERO QUE VALE -- universo rolante: a cada trimestre as 150
   maiores pelo volume do trimestre ANTERIOR, contando so as operacoes
   do trimestre seguinte. Nenhuma informacao do futuro em momento algum:
 
-      96 operacoes, 2,1 por mes, 36,5% de acerto
-      risco/retorno medio 1:3,76  ·  +45,90 por operacao
-      total +4.404  ·  pior rebaixamento 1.729 (17x o risco de uma
-      entrada)  ·  pior sequencia 12 stops
-      teste do acaso z = +2,10
-      2023 +12 (13 op) · 2024 +77 (16) · 2025 +11 (32) · 2026 +76 (35)
+      63 operacoes, 1,4 por mes, 33,3% de acerto
+      risco/retorno 1:5  ·  +93,50 por operacao
+      total +5.888  ·  pior rebaixamento 1.143 (11x o risco de uma
+      entrada)  ·  pior sequencia 11 stops
+      teste do acaso z = +2,39
+      2023 +15 (5 op) · 2024 +74 (10) · 2025 +28 (18) · 2026 +152 (30)
       POSITIVO NOS QUATRO ANOS
 
-  So com a compra: 65 operacoes, 1,4 por mes, 40,0% de acerto, 1:4,17,
-  +69,40 por operacao, total +4.508, z +2,24, mas 3 de 4 anos -- 2023
-  fica -6. O dinheiro total e praticamente o mesmo (+4.404 contra
-  +4.508): so-compra ganha mais por operacao com menos operacoes.
+  Com 33% de acerto, 11 stops seguidos sao esperados, nao sao a
+  estrategia quebrando. Duas de cada tres operacoes perdem.
 
-  POR QUE OS DOIS LADOS. A venda ficou desligada por algumas horas em
-  13/11 e foi religada. O ano que cai fora quando se tira a venda e
-  2023, o ano ruim de cripto -- era a venda que dava dinheiro ali. A
-  venda nao e peso morto, e o que segura o setup quando o mercado
-  vira. Tirar ela troca 4/4 anos por 3/4 sem ganhar dinheiro nenhum.
+  POR QUE O ALVO MUDOU (13/11/2026). Era 90% do tamanho da vela de
+  explosao projetado alem do extremo dela. Agora e 5x o risco. As
+  MESMAS 63-65 operacoes, nenhum filtro de entrada mexido -- so onde
+  colher:
 
-  A venda no universo rolante: 31 operacoes, 29,0% de acerto, 1:2,91,
-  -3,30 por operacao, z -0,10, 3 de 4 anos positivos. Empate, nao
-  prejuizo. O que afunda a media e 2024: -103 em 5 operacoes.
+      alvo da compra          n  acerto   liq/op    total      rb      z  anos+
+      projeção 90% (antes)   65   40,0%   +69,40   +4.508   1.521  +2,24   3/4
+      1:3 de risco           65   43,1%   +67,40   +4.383   1.143  +2,52   3/4
+      1:4 de risco           64   37,5%   +81,70   +5.228   1.143  +2,71   3/4
+      1:5 de risco  <-- este 63   33,3%   +93,50   +5.888   1.143  +2,39   4/4
+      1:6 de risco           60   28,3%   +91,80   +5.505   1.670  +2,27   4/4
 
-  O ALVO DA VENDA. A hipotese de que a projecao de 90% era injusta com
-  a venda (porque uma queda nao passa de 100% e uma alta nao tem teto)
-  esta ERRADA na direcao: encurtar o alvo piora de forma monotona --
-  projecao 90% -3,30/op, 75% -10,60, 60% -17,80, 45% -25,00, 30%
-  -33,10, o extremo sem projecao -16,90. Alvo por multiplo de risco vai
-  junto: 1:1,5 -14,30, 1:2 -6,50, 1:3 +2,60, 1:4 +28,90. O acerto mal
-  se mexe quando o alvo se aproxima (fica entre 26% e 30%), entao
-  encurtar nao transforma perdedora em ganhadora, so corta o premio das
-  que iam longe. Na venda a operacao vai ou nao vai.
+  1:4, 1:5 e 1:6 sao TODOS melhores que a projecao, entao e um plato e
+  nao um pico de sorte. O 1:5 ganha 35% mais dinheiro, DERRUBA o
+  rebaixamento de 1.521 para 1.143 e e o unico que fecha os quatro anos
+  no positivo -- 2023 vai de -6 para +15. Ver analise/venda_alvo.py.
 
-  SOBREVIVE A TROCA DE UNIVERSO, e e isso que sustenta o setup:
+  POR QUE SO COMPRA (13/11/2026). A venda ficou desligada, religada e
+  desligada de novo no mesmo dia. O que decidiu foi o teste de entrada
+  aleatoria, nao o resultado dela:
 
-      universo (os dois lados)     n   /mes  acerto    R:R   liq/op      z
+      a venda do setup      31 op, 29,0% de acerto, -3,30/op
+      venda aleatoria      580 op, 31,9% de acerto, +5,60/op
+      diferenca  -8,90/op  ->  -0,29 DESVIOS
+
+  A venda em momento sorteado se saiu MELHOR que a do setup. Sao 31
+  operacoes, entao isso nao prova que a venda e ruim -- prova que nao
+  existe indicio de que ela leia nada. A compra bate o aleatorio por
+  +4,89 desvios; nao e a mesma coisa.
+
+  O argumento de manter a venda era 2023, o ano ruim de cripto, que
+  ficava negativo sem ela. Mas o 2023 negativo era ALVO CURTO, nao
+  falta de venda: com o alvo em 1:5 a compra sozinha faz 2023 = +15.
+  O problema foi resolvido pelo lado certo.
+
+  A hipotese de que o alvo projetado era injusto com a venda (uma queda
+  nao passa de 100%, uma alta nao tem teto) estava ERRADA na direcao:
+  encurtar o alvo da venda piora de forma monotona -- projecao 90%
+  -3,30/op, 75% -10,60, 60% -17,80, 45% -25,00, 30% -33,10, o extremo
+  sem projecao -16,90. O acerto mal se mexe (fica entre 26% e 30%),
+  entao encurtar nao transforma perdedora em ganhadora, so corta o
+  premio das que iam longe. Na venda a operacao vai ou nao vai.
+
+  CFG['so_compra'] = False religa a venda. CFG['alvo_rr'] = None volta
+  ao alvo projetado de 90%.
+
+  SOBREVIVE A TROCA DE UNIVERSO -- medido com o alvo antigo (projecao
+  90%) e os dois lados, que era a configuracao da auditoria:
+
+      universo                     n   /mes  acerto    R:R   liq/op      z
       150 maiores do periodo      73    1,6   47,9%   3,66  +113,20  +3,26
       escolhido em jan/2023       66    1,4   33,3%   3,75   +25,50  +1,03
       todas as 461 moedas        169    3,6   30,2%   4,35   +22,90  +1,33
@@ -57,24 +82,18 @@ risco fixo de 100 USD por operacao)
       rolante · 300 maiores      142    3,1   32,4%   4,11   +33,40  +1,90
 
   Cai a intensidade conforme o universo deixa de ajudar, nunca o sinal.
-  Quanto mais larga a lista, mais operacoes e menos dinheiro por
-  operacao -- o gradiente e suave, nao desaba.
 
-  BATE ENTRADA ALEATORIA POR +4,89 DESVIOS -- MEDIDO SO NA COMPRA. A
-  venda ainda nao passou por esse teste. Para cada operacao real, 20
-  compras na MESMA moeda com o MESMO stop em %, o MESMO R:R e a MESMA
-  janela, entrando numa vela de 8h sorteada:
+  BATE ENTRADA ALEATORIA POR +4,89 DESVIOS -- medido na compra com o
+  alvo antigo. Para cada operacao real, 20 compras na MESMA moeda com o
+  MESMO stop em %, o MESMO R:R e a MESMA janela, em momento sorteado:
 
       o setup      47 op,  59,6% de acerto, +183,40/op
       o controle  914 op,  19,5% de acerto,  -17,60/op
 
-  O controle PERDE dinheiro nas mesmas moedas e no mesmo periodo (com
-  1:3,76 e preciso 21% para empatar, e ele fez 19,5%). Ou seja: comprar
-  essas moedas a esmo nesses 4 anos nao paga, nem com a mare a favor
-  nem com o universo escolhido a favor. Os 59,6% vem de ESCOLHER O
-  MOMENTO. Ver analise/setup3_controle.py.
-
-  CFG['so_compra'] = True desliga a ponta de venda. Fica em False.
+  O controle PERDE dinheiro nas mesmas moedas e no mesmo periodo. Ou
+  seja: comprar essas moedas a esmo nesses 4 anos nao paga, nem com a
+  mare a favor nem com o universo escolhido a favor. Os 59,6% vem de
+  ESCOLHER O MOMENTO. Ver analise/setup3_controle.py.
 
   ATENCAO -- OS NUMEROS ANTIGOS DESTE ARQUIVO ERAM VICIADOS.
   Ate 13/11/2026 este bloco dizia 48,6% de acerto, 1:3,69 e +116,10
@@ -114,8 +133,7 @@ AS REGRAS
      hora fecha de volta para fora do order block, a favor, com corpo
      >= 50% ou pavio >= 50%, E com volume >= 1,2x a media de 20 horas.
   8. Entrada no fechamento dessa vela. Stop logo abaixo da base do
-     order block. Alvo no topo da vela da explosao mais 90% do tamanho
-     dela.
+     order block. Alvo a 5x o risco (o risco e entrada menos stop).
   9. O filtro de risco/retorno (1:1,2) mede ate o TOPO que o preco
      deixou, nao ate o alvo projetado.
  10. Cancela se o preco atravessar o order block inteiro.
@@ -147,9 +165,10 @@ CFG = dict(
     furo_max=1.0,
     stop_folga=0.10,
     rr_min=1.2,
-    alvo_proj=0.90,
+    alvo_proj=0.90,      # so vale se alvo_rr for None
+    alvo_rr=5.0,         # o alvo fica a 5x o risco; ver o bloco do topo
     tf_h=8,               # horas da vela do padrao; 24 roda no diario
-    so_compra=False,      # os DOIS lados; ver o comentario em explosoes
+    so_compra=True,       # a venda perdeu para o aleatorio; ver explosoes
 )
 
 
@@ -314,8 +333,12 @@ def entrada(h1, mv1, e, cfg, pos1):
         ate_topo = (pico - ent) if alta else (ent - pico)
         if ate_topo <= 0 or ate_topo/risco < cfg['rr_min']:
             return None
-        alvo = (e['topo'] + cfg['alvo_proj']*e['tam']) if alta else \
-               (e['topo'] - cfg['alvo_proj']*e['tam'])
+        if cfg.get('alvo_rr'):
+            alvo = (ent + risco*cfg['alvo_rr']) if alta else \
+                   (ent - risco*cfg['alvo_rr'])
+        else:
+            alvo = (e['topo'] + cfg['alvo_proj']*e['tam']) if alta else \
+                   (e['topo'] - cfg['alvo_proj']*e['tam'])
         dist = (alvo - ent) if alta else (ent - alvo)
         if dist <= 0:
             return None
@@ -381,8 +404,12 @@ def encosto(h1, mv1, e, cfg, pos1):
     risco = abs(ref - stop)
     if risco <= 0:
         return None
-    alvo = (e['topo'] + cfg['alvo_proj']*e['tam']) if alta else \
-           (e['topo'] - cfg['alvo_proj']*e['tam'])
+    if cfg.get('alvo_rr'):
+        alvo = (ref + risco*cfg['alvo_rr']) if alta else \
+               (ref - risco*cfg['alvo_rr'])
+    else:
+        alvo = (e['topo'] + cfg['alvo_proj']*e['tam']) if alta else \
+               (e['topo'] - cfg['alvo_proj']*e['tam'])
     dist = (alvo - ref) if alta else (ref - alvo)
     if dist <= 0:
         return None
@@ -438,8 +465,8 @@ def msg_encosto(sim, g, quando, fmt, msg_mao):
         f"risco <b>{g['risco_pct']:.2f}%</b>\n"
         f"alvo     <code>{fmt(g['alvo'])}</code>   "
         f"<b>R:R 1:{g['rr']:.2f}</b>\n"
-        f"<i>topo da explosão em {fmt(g['topo'])}; o alvo fica 90% do "
-        f"tamanho da vela além dele</i>\n"
+        f"<i>o alvo fica a 5x o risco; o topo da explosão era "
+        f"{fmt(g['topo'])}</i>\n"
         + msg_mao(g['risco_pct']) +
         f"\n\n<i>Números provisórios, medidos no preço de agora. "
         f"O gatilho é uma vela de 1h fechando de volta para fora do "
@@ -497,17 +524,14 @@ def msg(sim, g, quando, fmt, msg_mao):
         f"risco <b>{g['risco_pct']:.2f}%</b>\n"
         f"alvo     <code>{fmt(g['alvo'])}</code>   "
         f"<b>R:R 1:{g['rr']:.2f}</b>\n"
-        f"<i>topo da explosão em {fmt(g['topo'])}; o alvo fica 90% do "
-        f"tamanho da vela além dele</i>\n"
+        f"<i>o alvo fica a 5x o risco; o topo da explosão era "
+        f"{fmt(g['topo'])}</i>\n"
         f"<i>gatilho com {g['vol_gat']:.1f}x o volume médio</i>\n"
         + msg_mao(g['risco_pct'])
-        + ("\n<i>⚠️ ponta de VENDA: no histórico ela dá −17 por operação "
-           "com este alvo (1:2,96 contra 1:4,94 da compra). O alvo próprio "
-           "da venda está sendo medido. Olha com reserva.</i>"
-           if g['lado'] == 'venda' else "") +
-        f"\n\n<i>No histórico: 36,5% de acerto, risco/retorno 1:3,76, "
-        f"2,1 alertas por mês. Positivo nos 4 anos. A compra bate "
-        f"entrada aleatória por 4,9 desvios. "
+        +
+        f"\n\n<i>No histórico: 33% de acerto, risco/retorno 1:5, "
+        f"1,4 alerta por mês. Positivo nos 4 anos. Bate entrada "
+        f"aleatória por 4,9 desvios. Só compra. "
         f"Em teste: anota, não opera.</i>")
 
 
@@ -620,5 +644,5 @@ def placar(d):
             f"({len(g)/len(fech)*100:.0f}%) · {len(abertas)} abertas\n"
             f"soma: <b>{soma:+.0f}</b> para cada 100 arriscados por operação\n"
             f"média: <b>{soma/len(fech):+.0f}</b> por operação\n"
-            f"<i>o backtest esperava 36,5% de acerto e ~+46 por operação. "
+            f"<i>o backtest esperava 33% de acerto e ~+94 por operação. "
             f"Decisão em 20 operações.</i>")
