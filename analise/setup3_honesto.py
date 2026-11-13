@@ -117,6 +117,16 @@ def main():
         ops.sort(key=lambda o: o['q'])
         painel(rot, ops, meses)
 
+    print(f"\n  COMPRA x VENDA — o setup só funciona porque cripto subiu?")
+    cab()
+    todas = []
+    for s_ in serie:
+        todas += ops_de(s_)
+    for rot, lado in (('  só as COMPRAS', 'compra'), ('  só as VENDAS', 'venda')):
+        sel = sorted([o for o in todas if o['lado'] == lado],
+                     key=lambda o: o['q'])
+        painel(rot, sel, meses)
+
     print(f"\n  ROLANTE — a cada trimestre, as {a.n} maiores do trimestre")
     print(f"  anterior. Nenhuma informação do futuro em nenhum momento.")
     cab()

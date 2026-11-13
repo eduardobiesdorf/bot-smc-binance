@@ -6,17 +6,45 @@ vela de 1 hora confirma com volume. Entra ali.
 
 Estado e historico proprios. Nao mexe nos outros dois setups.
 
-O que o backtest mede (as 150 maiores, 2023-01 a 2026-11, 45 meses,
-risco fixo de 100 USD por operacao):
+O QUE O BACKTEST MEDE  (2023-01 a 2026-11, 46 meses, risco fixo de
+100 USD por operacao)
 
-      72 operacoes, 1,6 por mes, 48,6% de acerto
-      risco/retorno medio 1:3,69  ·  +116,10 por operacao
-      total +8.362  ·  pior rebaixamento 826  ·  pior sequencia 8 stops
-      teste do acaso z = +3,33
-      2023 +26 (11 op) · 2024 +106 (12) · 2025 +68 (23) · 2026 +202 (26)
+  O numero HONESTO -- universo rolante, as 150 maiores pelo volume do
+  trimestre ANTERIOR, reescolhidas a cada trimestre, sem nenhuma
+  informacao do futuro em momento algum:
 
-  Positivo nos quatro anos, incluindo o mercado de baixa de 2023.
-  As 3 maiores operacoes valem 32% do total; sem elas sobram +80/op.
+      96 operacoes, 2,1 por mes, 36,5% de acerto
+      risco/retorno medio 1:3,76  ·  +45,90 por operacao
+      total +4.404  ·  pior rebaixamento 1.729 (17x o risco de uma
+      entrada)  ·  pior sequencia 12 stops
+      teste do acaso z = +2,10
+      2023 +12 (13 op) · 2024 +77 (16) · 2025 +11 (32) · 2026 +76 (35)
+      68% das operacoes sao compra
+
+  POSITIVO NOS QUATRO ANOS em TODOS os universos testados, e e isso que
+  sustenta o setup:
+
+      universo                     n   acerto   liq/op      z   anos+
+      150 maiores do periodo      73    47,9%   +113,20  +3,26   4/4
+      escolhido em jan/2023       66    33,3%    +25,50  +1,03   4/4
+      todas as 461 moedas        169    30,2%    +22,90  +1,33   4/4
+      rolante · 150 maiores       96    36,5%    +45,90  +2,10   4/4
+      rolante · 50 maiores        31    48,4%    +91,90  +2,14   4/4
+
+  ATENCAO -- OS NUMEROS ANTIGOS DESTE ARQUIVO ERAM VICIADOS.
+  Ate 13/11/2026 este bloco dizia 48,6% de acerto, 1:3,69 e +116,10
+  por operacao. Aquilo foi medido nas "150 maiores por volume mediano
+  do PERIODO", o que escolhe as moedas sabendo quem sobreviveu. A
+  escolha do universo valia 67 USD por operacao -- 60% do resultado
+  reportado. O setup continua bom; o numero era inflado.
+
+  O setup 1 (varredura do order block) nao sobreviveu a esse mesmo
+  teste: +9,40/op na lista UNIVERSO[:50] do bot contra -1,00/op no
+  universo rolante, porque aquela lista sao as 50 maiores de NOVEMBRO
+  DE 2026 e o setup compra rompimentos. Ver analise/setup1_honesto.py.
+
+  REGRA PARA TESTES NOVOS: nenhum resultado conta antes de passar pelo
+  universo rolante. Ver analise/setup3_honesto.py.
 
 AS REGRAS
 
@@ -33,7 +61,7 @@ AS REGRAS
      borda do order block. So encostar, nao precisa furar.
   6. ENCOSTO RASO: durante a volta, o preco nao pode passar do MEIO do
      order block. Se afundou, o setup morre. E o filtro que leva o
-     acerto de 33,6% para 48,6%.
+     acerto de 33,6% para 48,6% no universo viciado.
   7. Gatilho no H1: nas 48 horas seguintes ao encosto, uma vela de 1
      hora fecha de volta para fora do order block, a favor, com corpo
      >= 50% ou pavio >= 50%, E com volume >= 1,2x a media de 20 horas.
@@ -274,7 +302,7 @@ def msg(sim, g, quando, fmt, msg_mao):
         f"tamanho da vela além dele</i>\n"
         f"<i>gatilho com {g['vol_gat']:.1f}x o volume médio</i>\n"
         + msg_mao(g['risco_pct']) +
-        f"\n\n<i>No histórico: 48,6% de acerto, risco/retorno 1:3,69, "
+        f"\n\n<i>No histórico: 36,5% de acerto, risco/retorno 1:3,76, "
         f"1,6 alerta por mês. Positivo nos 4 anos. "
         f"Em teste: anota, não opera.</i>")
 
@@ -388,5 +416,5 @@ def placar(d):
             f"({len(g)/len(fech)*100:.0f}%) · {len(abertas)} abertas\n"
             f"soma: <b>{soma:+.0f}</b> para cada 100 arriscados por operação\n"
             f"média: <b>{soma/len(fech):+.0f}</b> por operação\n"
-            f"<i>o backtest esperava 48,6% de acerto e ~+116 por operação. "
+            f"<i>o backtest esperava 36,5% de acerto e ~+46 por operação. "
             f"Decisão em 20 operações.</i>")
