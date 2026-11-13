@@ -27,6 +27,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import reversao8 as rev
 import explosao8 as e8
+import bot_varredura as bot
 from explosao import ler, RISCO, TAXA, FUND8
 
 BRT = dt.timezone(dt.timedelta(hours=-3))
@@ -56,8 +57,12 @@ CFG5 = dict(
                        # que dava risco de 6 a 8% por operacao e travava o R:R
                        # em 1:1.8); 'forca' = so acima da VELA DE FORCA, que e
                        # o alerta de verdade. Mesma logica do furo raso do setup 1
-    alvo_frac=1.0,     # quanto da faixa o alvo atravessa: 1.0 = a borda oposta,
-                       # 0.5 = o meio da faixa
+    alvo_em='piscina', # 'piscina' = o ultimo topo/fundo NAO CONSUMIDO acima
+                       # (ou abaixo) de TODA a faixa antiga, que e o alvo que o
+                       # Eduardo descreveu e nao tem parametro meu nenhum dentro.
+                       # 'frac' usa alvo_frac abaixo
+    alvo_frac=1.0,     # so com alvo_em='frac': quanto da faixa o alvo atravessa.
+                       # 1.0 = a borda oposta, 0.5 = o meio da faixa
     stop_folga=0.15,
     rr_min=1.2,
 )
@@ -148,9 +153,19 @@ def achar(h, cfg=None, a=None, mv=None):
                base_stop - a[ent_k]*cfg['stop_folga']
         if (stop <= ent) if alta else (stop >= ent):
             i += 1; continue               # a forca ja fechou abaixo da entrada
-        # o ALVO: a borda oposta da faixa, ou uma fracao dela
-        f = cfg['alvo_frac']
-        alvo = (topo - f*alt) if alta else (base + f*alt)
+        # o ALVO. 'piscina' e o que o Eduardo pediu: numa compra, o ultimo
+        # topo nao consumido ACIMA DE TODA a faixa antiga -- medido a partir
+        # da BORDA da faixa, nao da entrada, para garantir que fique acima da
+        # lateralidade inteira. Zero parametro meu para escolher.
+        if cfg['alvo_em'] == 'piscina':
+            borda = base if alta else topo
+            d = bot.piscina(h, ent_k, alta, borda, min(len(h), L*2))
+            if d is None:
+                i += 1; continue           # sem liquidez parada: sem alvo
+            alvo = borda - d if alta else borda + d
+        else:
+            f = cfg['alvo_frac']
+            alvo = (topo - f*alt) if alta else (base + f*alt)
         risco = abs(ent-stop)
         dist = (ent-alvo) if alta else (alvo-ent)
         if risco <= 0 or dist <= 0 or dist/risco < cfg['rr_min']:
@@ -259,6 +274,10 @@ def desenhar(sim, h, g, tf, caminho):
                                    f"({g['risco_pct']:.2f}% de risco)"),
             (g['alvo'], '#26a69a',
              f"alvo  {g['alvo']:,.{c}f}   "
+             f"(a piscina: o último {'fundo' if venda else 'topo'} não "
+             f"consumido {'abaixo' if venda else 'acima'} de toda a faixa)"
+             if CFG5['alvo_em'] == 'piscina' else
+             f"alvo  {g['alvo']:,.{c}f}   "
              f"(o {'fundo' if venda else 'topo'} da faixa)")):
         ax.axhline(y, color=cor, linewidth=1.2, alpha=.92, zorder=6)
         ax.annotate(rot, (len(vel)-1, y), color=cor, fontsize=9,
@@ -347,10 +366,13 @@ def main():
         print("\n  ONDE FICA O STOP x ATE ONDE VAI O ALVO\n")
         for L in (60, 150):
             for se in ('extremo', 'forca'):
+                resumo(rodar(dict(CFG5, lat_jan=L, stop_em=se,
+                                  alvo_em='piscina')),
+                       f"{L}v {se[:4]} piscina")
                 for fr in (1.0, 0.7, 0.5):
                     resumo(rodar(dict(CFG5, lat_jan=L, stop_em=se,
-                                      alvo_frac=fr)),
-                           f"{L}v {se[:4]} {fr:.1f}")
+                                      alvo_em='frac', alvo_frac=fr)),
+                           f"{L}v {se[:4]} faixa {fr:.1f}")
         print()
     achados = rodar(CFG5)
     print(f"\nCONFIGURAÇÃO ESCOLHIDA: {CFG5['lat_jan']} velas de lateralidade, "
