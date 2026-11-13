@@ -24,7 +24,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      - run: pip install requests
+      - run: pip install requests matplotlib
       # Mesma chave de cache do reversao_detalhe: se ele já rodou hoje,
       # o download sai de graça.
       - name: Data de hoje (chave do cache)
