@@ -953,6 +953,7 @@ def main():
             abertos_rev = {r['sim'] for r in rev_d.values()
                            if r.get('status') == 'aberto'}
             s8r, achados_r, vistos_r = {}, [], 0
+            encostos_r = []
             for sim in sorted(set(fila_rev) | abertos_rev):
                 try:
                     v = buscar(sim, '1h', 1300)
@@ -975,12 +976,34 @@ def main():
                          f"R:R 1:{g['rr']:.2f} "
                          f"queda {g['queda']:.1f} vol "
                          f"gatilho {g['vol_gat']:.1f}x")
+                    continue
+                # sem gatilho: o preço pode estar encostado, esperando.
+                # Esse é o aviso que dá tempo de abrir o gráfico antes.
+                enc = rev8.achar_encosto(v)
+                if enc:
+                    encostos_r.append((sim, enc))
+                    diag(f"ENCOSTO 8h {sim} {enc['lado']} "
+                         f"tocou {quando(enc['toque_ms'])} "
+                         f"há {enc['horas']}h, faltam {enc['falta']}h "
+                         f"· preço {fmt(enc['ref'])} "
+                         f"stop {fmt(enc['stop'])} "
+                         f"R:R 1:{enc['rr']:.2f} "
+                         f"afundou {enc['fundura']*100:.0f}% até o meio")
             diag(f"reversão 8h: {vistos_r} pares olhados, "
-                 f"{len(achados_r)} gatilho(s)")
+                 f"{len(achados_r)} gatilho(s), "
+                 f"{len(encostos_r)} encosto(s) esperando")
             for sim, g in achados_r:
                 if not rev8.registrar(rev_d, sim, g):
                     continue
                 texto = rev8.msg(sim, g, quando, fmt, msg_mao)
+                if a.teste:
+                    print(texto, "\n")
+                else:
+                    enviar(texto)
+            for sim, enc in encostos_r:
+                if not rev8.registrar_encosto(rev_d, sim, enc):
+                    continue
+                texto = rev8.msg_encosto(sim, enc, quando, fmt, msg_mao)
                 if a.teste:
                     print(texto, "\n")
                 else:

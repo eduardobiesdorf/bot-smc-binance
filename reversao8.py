@@ -306,6 +306,139 @@ def entrada(h1, mv1, e, cfg, pos1):
                     vol_gat=(h1[k][5]/mv1[k]) if mv1[k] > 0 else 0.0)
 
 
+def encosto(h1, mv1, e, cfg, pos1):
+    """O encosto que esta ACONTECENDO: o preco ja tocou o order block,
+    o setup continua vivo e o gatilho ainda nao veio.
+
+    Mesmas regras de entrada(), parando um passo antes. Devolve None se
+    nunca tocou, se morreu no caminho, se a janela de 48h estourou, ou
+    se o gatilho ja saiu -- esse ultimo caso e trabalho de entrada()."""
+    alta = e['alta']
+    k0 = pos1.get(e['fim_ms'])
+    if k0 is None:
+        return None
+    borda = e['ob_topo'] if alta else e['ob_base']
+    meio = (e['ob_base'] + e['ob_topo']) / 2
+    morte = (e['ob_base'] - e['atr']*cfg['furo_max']) if alta else \
+            (e['ob_topo'] + e['atr']*cfg['furo_max'])
+    pico = e['topo']
+    tocou = extremo = None
+    lim = min(k0 + cfg['espera']*8, len(h1))
+    for k in range(k0, lim):
+        hi, lo, o, cl = h1[k][2], h1[k][3], h1[k][1], h1[k][4]
+        if tocou is None:
+            pico = max(pico, hi) if alta else min(pico, lo)
+            if (lo <= borda) if alta else (hi >= borda):
+                tocou, extremo = k, (lo if alta else hi)
+            else:
+                continue
+        else:
+            extremo = min(extremo, lo) if alta else max(extremo, hi)
+        if (extremo < morte) if alta else (extremo > morte):
+            return None                   # atravessou o bloco inteiro
+        if k - tocou > cfg['gat_h1']:
+            return None                   # a janela de 48h estourou
+        if (hi >= pico) if alta else (lo <= pico):
+            return None                   # foi embora sem a gente
+        if (extremo < meio) if alta else (extremo > meio):
+            return None                   # afundou: encosto raso quebrou
+        # o gatilho ja saiu? entao nao e mais um encosto pendente
+        rng = hi - lo
+        dentro = (cl > borda) if alta else (cl < borda)
+        favor = (cl > o) if alta else (cl < o)
+        if rng > 0 and dentro and favor:
+            corpo = abs(cl - o) / rng
+            pav = ((min(o, cl) - lo) if alta else (hi - max(o, cl))) / rng
+            if (corpo >= 0.5 or pav >= 0.5) and \
+                    not (mv1[k] > 0 and h1[k][5] < cfg['vol_gat']*mv1[k]):
+                return None
+    if tocou is None or lim < len(h1):
+        return None                       # nunca tocou, ou a espera acabou
+    # vivo e esperando o gatilho
+    ref = h1[-1][4]
+    stop = (e['ob_base'] - e['atr']*cfg['stop_folga']) if alta else \
+           (e['ob_topo'] + e['atr']*cfg['stop_folga'])
+    risco = abs(ref - stop)
+    if risco <= 0:
+        return None
+    alvo = (e['topo'] + cfg['alvo_proj']*e['tam']) if alta else \
+           (e['topo'] - cfg['alvo_proj']*e['tam'])
+    dist = (alvo - ref) if alta else (ref - alvo)
+    if dist <= 0:
+        return None
+    ate_topo = (pico - ref) if alta else (ref - pico)
+    fundura = abs(extremo - borda) / abs(meio - borda) if meio != borda else 0
+    return dict(lado='compra' if alta else 'venda', ref=ref, stop=stop,
+                alvo=alvo, rr=dist/risco, risco_pct=risco/ref*100,
+                ob_base=e['ob_base'], ob_topo=e['ob_topo'], meio=meio,
+                topo=pico, exp_ms=e['exp_ms'], queda=e['queda'],
+                toque_ms=h1[tocou][0], horas=len(h1)-1-tocou,
+                falta=cfg['gat_h1']-(len(h1)-1-tocou), fundura=fundura,
+                rr_topo=(ate_topo/risco if ate_topo > 0 else 0.0))
+
+
+def achar_encosto(h1, cfg=None):
+    """O encosto pendente mais recente, se houver."""
+    cfg = cfg or CFG
+    h8 = juntar(h1, 8)
+    if len(h8) < 60 or len(h1) < 200:
+        return None
+    mv1 = exp8.medvol(h1, 20)
+    pos1 = {v[0]: k for k, v in enumerate(h1)}
+    for e in explosoes(h8, cfg):
+        g = encosto(h1, mv1, e, cfg, pos1)
+        if g:
+            return g
+    return None
+
+
+def msg_encosto(sim, g, quando, fmt, msg_mao):
+    seta = "🟡" if g['lado'] == 'compra' else "🟠"
+    direcao = "caindo" if g['lado'] == 'compra' else "subindo"
+    return (
+        f"🧪 <b>EM TESTE</b> — reversão de 8h   "
+        f"<i>sem dinheiro, só para medir</i>\n\n"
+        f"{seta} <b>{sim.replace('USDT', '/USDT')}</b> — "
+        f"<b>ENCOSTOU NO ORDER BLOCK</b>\n"
+        f"<i>ainda não é entrada: agora começa a janela do gatilho</i>\n\n"
+        f"tocou às {quando(g['toque_ms'])} (Brasília), "
+        f"há {g['horas']}h\n"
+        f"<b>faltam {g['falta']}h</b> para o gatilho aparecer, "
+        f"senão o setup morre\n"
+        f"<i>vinha {direcao} {g['queda']:.1f} volatilidades em 7 dias; "
+        f"a explosão foi em {quando(g['exp_ms'])}</i>\n\n"
+        f"order block  <code>{fmt(g['ob_base'])}</code> a "
+        f"<code>{fmt(g['ob_topo'])}</code>\n"
+        f"<b>não pode passar de</b> <code>{fmt(g['meio'])}</code>   "
+        f"<i>(o meio do bloco; se afundar, acabou)</i>\n"
+        f"<i>já desceu {g['fundura']*100:.0f}% do caminho até lá</i>\n\n"
+        f"preço agora  <code>{fmt(g['ref'])}</code>   "
+        f"<i>a entrada sai no fechamento da vela de gatilho</i>\n"
+        f"stop     <code>{fmt(g['stop'])}</code>   "
+        f"risco <b>{g['risco_pct']:.2f}%</b>\n"
+        f"alvo     <code>{fmt(g['alvo'])}</code>   "
+        f"<b>R:R 1:{g['rr']:.2f}</b>\n"
+        f"<i>topo da explosão em {fmt(g['topo'])}; o alvo fica 90% do "
+        f"tamanho da vela além dele</i>\n"
+        + msg_mao(g['risco_pct']) +
+        f"\n\n<i>Números provisórios, medidos no preço de agora. "
+        f"O gatilho é uma vela de 1h fechando de volta para fora do "
+        f"bloco, a favor, com 1,2x o volume médio. Se vier, chega "
+        f"outro alerta com os números finais.</i>")
+
+
+def registrar_encosto(d, sim, g):
+    """Avisa uma vez por montagem. A chave e a vela da explosao."""
+    ch = f"enc-{sim}-{g['exp_ms']}"
+    if ch in d:
+        return False
+    d[ch] = dict(sim=sim, tipo='encosto', lado=g['lado'],
+                 toque_ms=g['toque_ms'], exp_ms=g['exp_ms'],
+                 ob_base=g['ob_base'], ob_topo=g['ob_topo'],
+                 alvo=g['alvo'], stop=g['stop'], status='avisado')
+    return True
+
+
 def achar(h1, cfg=None, atraso_max=1):
     """O gatilho que acabou de fechar, se houver."""
     cfg = cfg or CFG
