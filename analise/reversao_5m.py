@@ -37,7 +37,7 @@ def cfg5(nome):
     return c
 
 
-def rodar(h, cfg, raso=True, vol_gat=1.2):
+def rodar(h, cfg, raso=True, vol_gat=1.2, stop_min=0.0):
     mv = e8.medvol(h, 20)
     ops = []
     for e in rev.explosoes(h, cfg):
@@ -77,6 +77,7 @@ def rodar(h, cfg, raso=True, vol_gat=1.2):
                (e['ob_topo'] + e['atr']*cfg['stop_folga'])
         risco = abs(ent-stop)
         if risco <= 0: continue
+        if stop_min and risco/ent*100 < stop_min: continue
         ate = (pico-ent) if alta else (ent-pico)
         if ate <= 0 or ate/risco < cfg['rr_min']: continue
         alvo = (e['topo'] + cfg['alvo_proj']*e['tam']) if alta else \
@@ -157,9 +158,9 @@ def main():
     print(f"{'':<30}{'n':>5}{'/mês':>7}{'acerto':>9}{'R:R':>7}{'stop':>8}"
           f"{'bruto':>9}{'taxa':>7}{'líq/op':>9}{'total':>9}{'rb':>8}"
           f"{'seq':>5}{'z':>8}{'anos+':>4}  por ano")
-    for nome, rot in (('fractal', 'fractal (mesmas contagens)'),
+    for nome, rot in (('ancorado', 'ancorado (mesmos 7 dias)'),
                       ('meio', 'meio-termo (janelas de horas)'),
-                      ('ancorado', 'ancorado (mesmos 7 dias)')):
+                      ('fractal', 'fractal (mesmas contagens)')):
         cfg = cfg5(nome)
         ops = []
         for s, h in cru:
@@ -171,6 +172,22 @@ def main():
             ops2 += rodar(h, cfg, vol_gat=0.0)
         ops2.sort(key=lambda o: o['q'])
         painel(f'  {nome}, sem volume', ops2, meses)
+
+    print()
+    print('  o stop mínimo: a taxa escala com a posição, e a posição é')
+    print('  $100 dividido pelo stop. Um stop maior = posição menor =')
+    print('  taxa menor. Só vale se o padrão sobreviver ao filtro.')
+    print()
+    for nome in ('ancorado', 'meio'):
+        cfg = cfg5(nome)
+        for sm in (0.0, 1.0, 1.5, 2.0, 3.0, 4.0):
+            ops = []
+            for s, h in cru:
+                ops += rodar(h, cfg, stop_min=sm)
+            ops.sort(key=lambda o: o['q'])
+            painel(f'{nome} · stop ≥ {sm:.1f}%' if sm else
+                   f'{nome} · sem mínimo', ops, meses)
+        print()
 
 
 if __name__ == '__main__':
