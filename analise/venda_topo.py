@@ -130,14 +130,14 @@ def main():
     t = t0 + TRI
     while t < t1:
         janelas.append((t, sorted(serie,
-                                  key=lambda s: -vol(serie[s], t-TRI, t))[:a.n]))
+                                  key=lambda s: -vol(serie[s], t-TRI, t))))
         t += TRI
     cache = {}
 
     def rolante(lado, **kw):
         ops = []
         for t, jan in janelas:
-            for s in jan:
+            for s in jan[:a.n]:
                 k = (s, lado, kw.get('proj'), kw.get('rr_fixo'))
                 if k not in cache:
                     cache[k] = ops_lado(serie[s], s, lado, **kw)
@@ -148,6 +148,42 @@ def main():
 
     print(f"universo rolante de {a.n} · "
           f"{(t1-t0)/(1000*3600*24*30.4):.0f} meses\n")
+    print(f"{'='*118}\n  0) O TAMANHO DO UNIVERSO, com a config de hoje\n"
+          f"     (o alvo no extremo da vela escala com a moeda; o "
+          f"projetado não escalava)\n{'='*118}")
+
+    def rolante_n(n, lado=None):
+        """universo rolante de n moedas"""
+        ops = []
+        for t, jan in janelas:
+            for s in jan[:n]:
+                for ld in (['compra', 'venda'] if lado is None else [lado]):
+                    k = (s, ld, 0.0, None)
+                    if k not in cache:
+                        cache[k] = ops_lado(serie[s], s, ld, proj=0.0)
+                    for o in cache[k]:
+                        if t <= o['ms'] < t + TRI:
+                            ops.append(o)
+        return sorted(ops, key=lambda o: o['q'])
+
+    cab()
+    for n in (20, 50, 150, 300, 9999):
+        ops = rolante_n(n)
+        rot = (f'as {n} maiores' if n < 9999 else 'TODAS as moedas')
+        painel(rot + ('  ← hoje' if n == 150 else ''), ops)
+    print()
+    print("  e por ano, quantas operações o universo inteiro daria:")
+    ops = rolante_n(9999)
+    for y in range(2020, 2027):
+        sel = [o for o in ops if o['q'].year == y]
+        if not sel:
+            continue
+        al = sum(1 for o in sel if o['fim'] == 'alvo')
+        print(f"    {y}: {len(sel):>3} operações ({len(sel)/12:.1f}/mês)  "
+              f"{al/len(sel)*100:>4.0f}% de acerto  "
+              f"{sum(o['liq'] for o in sel):>+8.0f}")
+    print()
+
     print(f"{'='*118}\n  1) A VENDA COM CADA ALVO\n{'='*118}")
     cab()
     painel('a COMPRA, p/ comparar', rolante('compra', proj=0.0))
