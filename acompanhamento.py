@@ -403,24 +403,36 @@ def mover_stops(d, series15):
 
 
 # ------------------------------------------------------------- placar
+# 13/11/2026: o setup 1 passou de H1 para H4 e ganhou o filtro de furo
+# raso. As operacoes de antes foram tiradas com outras regras -- se
+# ficarem no mesmo placar, nunca se sabe qual configuracao esta sendo
+# medida. O placar conta so o que veio depois do corte; o historico
+# inteiro continua no CSV.
+CORTE_H4 = 1763046000000     # 13/11/2026 13:00 BRT
+
+
 def placar(d):
     """Uma linha com o que o bot acertou e errou desde que entrou no ar."""
     g = [r for r in d.values() if r['tipo'] == 'gatilho']
+    antigos = [r for r in g if r.get('vela_ms', 0) < CORTE_H4]
+    g = [r for r in g if r.get('vela_ms', 0) >= CORTE_H4]
     fechados = [r for r in g if r['status'] in ('alvo', 'stop', 'expirou')]
     abertos = [r for r in g if r['status'] == 'aberto']
     cen = [r for r in d.values() if r['tipo'] == 'cenario']
     cen_mortos = [r for r in cen if r['status'] == 'morreu']
+    velho = (f"  ·  <i>{len(antigos)} do H1 antigo, fora da conta</i>"
+             if antigos else "")
     if not fechados:
-        return (f"<b>placar</b>  {len(g)} gatilhos "
+        return (f"<b>placar</b> (H4, desde 13/11)  {len(g)} gatilhos "
                 f"({len(abertos)} abertos)  ·  {len(cen)} cenários, "
-                f"{len(cen_mortos)} encerrados sem entrada")
+                f"{len(cen_mortos)} encerrados sem entrada{velho}")
     ganhos = [r for r in fechados if r['resultado_r'] > 0]
     soma = sum(r['resultado_r'] for r in fechados)
-    return (f"<b>placar</b>  {len(fechados)} fechados: "
+    return (f"<b>placar</b> (H4, desde 13/11)  {len(fechados)} fechados: "
             f"{len(ganhos)} gain / {len(fechados) - len(ganhos)} loss  "
             f"({len(ganhos) / len(fechados) * 100:.0f}%)  "
             f"total <b>{soma:+.2f}R</b>  ·  {len(abertos)} abertos  ·  "
-            f"{len(cen_mortos)} cenários encerrados sem entrada")
+            f"{len(cen_mortos)} cenários encerrados sem entrada{velho}")
 
 
 def motivos(d):
