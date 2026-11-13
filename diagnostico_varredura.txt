@@ -1,4 +1,4 @@
-início 13/11 07:34 BRT
+início 13/11 07:57 BRT
 ETHUSDT: gatilho antigo (39 velas atrás)
 XRPUSDT: gatilho antigo (222 velas atrás)
 SUIUSDT: gatilho antigo (88 velas atrás)
@@ -13,15 +13,10 @@ STRKUSDT: gatilho antigo (182 velas atrás)
 pares (50): BTCUSDT, ETHUSDT, SOLUSDT, XRPUSDT, DOGEUSDT, HYPEUSDT, SUIUSDT, BNBUSDT, ADAUSDT, ZECUSDT, ENAUSDT, LINKUSDT, AVAXUSDT, LTCUSDT, TRUMPUSDT, AAVEUSDT, WLDUSDT, TAOUSDT, NEARUSDT, BCHUSDT, FILUSDT, PUMPUSDT, UNIUSDT, DOTUSDT, ASTERUSDT, ONDOUSDT, PENGUUSDT, TRXUSDT, CRVUSDT, ARBUSDT, XLMUSDT, APTUSDT, TIAUSDT, HBARUSDT, OPUSDT, XPLUSDT, VIRTUALUSDT, FETUSDT, INJUSDT, WLFIUSDT, TONUSDT, SEIUSDT, EIGENUSDT, ICPUSDT, PENDLEUSDT, ZROUSDT, REUSDT, POLUSDT, DASHUSDT, STRKUSDT
 gatilhos 1 | cenários 3
 stop móvel — o que o bot está vendo:
-  ZROUSDT venda: entrada 1.571  stop 1.6228357  preço 1.565  (+0.12R)  | 15m até 13/11 07:15  | 0 estruturas a favor
+  ZROUSDT venda: entrada 1.571  stop 1.6228357  preço 1.57  (+0.02R)  | 15m até 13/11 07:30  | 0 estruturas a favor
 reversão 8h: 150 pares olhados, 0 gatilho(s), 0 encosto(s) esperando
 🧪 reversão de 8h em teste: 0 aberta(s), nenhuma resolvida ainda
-TOKEN: ok 46 chars | CHAT_ID: ok 10 chars
-HTTP 200: {"ok":true,"result":{"message_id":308,"from":{"id":9205915638,"is_bot":true,"first_name":"SMC Trading Bot","username":"smc_crypto_alerts_bot"},"chat":{"id":[removido],"first_name":"Eduardo","last_name
-desfecho: ⚪ <b>SEI/USDT</b> — cenário de venda encerrado <b>sem entrada</b> | <i>nem varreu o order block nem chegou perto dele</i>
-TOKEN: ok 46 chars | CHAT_ID: ok 10 chars
-HTTP 200: {"ok":true,"result":{"message_id":309,"from":{"id":9205915638,"is_bot":true,"first_name":"SMC Trading Bot","username":"smc_crypto_alerts_bot"},"chat":{"id":[removido],"first_name":"Eduardo","last_name
-enviados 0 gatilhos, 1 desfechos
+enviados 0 gatilhos, 0 desfechos
 placar  8 fechados: 3 gain / 5 loss  (38%)  total +4.98R  ·  1 abertos  ·  31 cenários encerrados sem entrada
 por que os cenários morreram:
   12x  nem varreu o order block nem chegou perto dele

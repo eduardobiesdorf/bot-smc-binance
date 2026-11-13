@@ -1,4 +1,4 @@
-13/11 07:34 BRT
+13/11 07:58 BRT
 radar   TAOUSDT venda — chegou no order block, esperando a limpeza
 radar   PUMPUSDT venda — chegou no order block, esperando a limpeza
 radar   FETUSDT venda — chegou no order block, esperando a limpeza
