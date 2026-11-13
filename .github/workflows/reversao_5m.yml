@@ -1,0 +1,59 @@
+name: Reversão em 5 minutos (5 maiores)
+
+on:
+  workflow_dispatch:
+    inputs:
+      inicio:
+        description: 'Mês inicial (YYYY-MM)'
+        required: false
+        default: '2023-01'
+      ativos:
+        description: 'Pares, separados por vírgula'
+        required: false
+        default: 'BTCUSDT,ETHUSDT,SOLUSDT,XRPUSDT,DOGEUSDT'
+
+permissions:
+  contents: read
+
+jobs:
+  cinco:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install requests
+      - name: Data de hoje
+        id: dia
+        run: echo "d=$(date -u +%Y-%m-%d)" >> $GITHUB_OUTPUT
+      - name: Cache do 5m
+        id: cache
+        uses: actions/cache@v4
+        with:
+          path: dados_5m
+          key: cinco5m-${{ inputs.inicio || '2023-01' }}-${{ steps.dia.outputs.d }}
+          restore-keys: cinco5m-${{ inputs.inicio || '2023-01' }}-
+      - name: Baixar 5m
+        if: steps.cache.outputs.cache-hit != 'true'
+        env:
+          BAIXAR_THREADS: '8'
+        run: |
+          set -o pipefail
+          python -u baixar_futuros.py --inicio ${{ inputs.inicio || '2023-01' }} \
+            --intervalo 5m --top 50 --pasta dados_5m \
+            --ativos "${{ inputs.ativos }}" 2>&1 | tail -8
+      - name: O que tem
+        run: |
+          ls -la dados_5m | head
+          du -sh dados_5m
+      - name: Rodar
+        run: |
+          set -o pipefail
+          python -u analise/reversao_5m.py dados_5m \
+            --ativos "${{ inputs.ativos }}" 2>&1 | tee cinco.log
+      - name: Resumo
+        if: always()
+        run: |
+          { echo '```'; cat cinco.log; echo '```'; } >> $GITHUB_STEP_SUMMARY
