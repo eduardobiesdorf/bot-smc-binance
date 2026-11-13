@@ -475,7 +475,27 @@ def main():
     if a.varrer:
         print(f"{len(cru)} maiores · velas de {a.tf}h · {meses:.0f} meses · "
               f"$100 de risco por operação\n")
-    if a.varrer == 3:
+    if a.varrer == 4:
+        # O EMPILHAMENTO FINAL: os tres vencedores juntos.
+        #   contexto alinhado  (+32 a +46/op contra +9 sem ele)
+        #   faixa larga        (triplica as entradas sem mexer no rebaixamento)
+        #   entrada na falha    (mesmo acerto, R:R de 1:1.85 para 1:2.00)
+        # Mais a trava da forca em 3 a 5 velas, que foi onde deu o pico.
+        print("  OS TRÊS VENCEDORES JUNTOS\n")
+        for ap in (0.85, 1.00, 1.20):
+            for me in ('volta', 'falha'):
+                resumo(rodar(dict(CFG5, aperto=ap, pre_modo='alinhado',
+                                  pre_pivo=20, entrada_em=me, forca_apos=4)),
+                       f"{ap:.2f}x {me}")
+        print("\n  e com a folga do nível por cima, na entrada da falha\n")
+        for ap in (1.00, 1.20):
+            for pf in (0.5, 1.0):
+                resumo(rodar(dict(CFG5, aperto=ap, pre_modo='alinhado',
+                                  pre_pivo=20, entrada_em='falha',
+                                  forca_apos=4, pre_folga=pf)),
+                       f"{ap:.2f}x folga {pf:.1f}")
+        print()
+    elif a.varrer == 3:
         # So as duas configuracoes em disputa, para responder rapido se a
         # sequencia de stops e um LOTE (varias moedas no mesmo dia) ou
         # operacoes separadas de verdade.
