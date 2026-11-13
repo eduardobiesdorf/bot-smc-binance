@@ -21,6 +21,8 @@ from explosao import ler, RISCO, TAXA, FUND8
 from lista_operacoes import vol, TRI, BRT
 from alvo_lote import z_de
 from venda_topo import lotes_de
+from explosao import curva
+import itertools
 
 MAXBAR = 120
 
@@ -128,18 +130,22 @@ def painel(rot, ops, meses, larg=30):
     g = [o for o in ops if o['fim'] == 'alvo']
     L = lotes_de(ops)
     lv = [sum(y['liq'] for y in x) for x in L]
+    seq = max((len(list(x)) for k, x in
+               itertools.groupby(ops, key=lambda o: o['fim'] != 'alvo')
+               if k), default=0)
+    tot, dd = curva(v)
     print(f"{rot:<{larg}}{len(ops):>5}{len(ops)/meses:>6.1f}"
           f"{len(g)/len(ops)*100:>8.1f}%"
           f"{statistics.mean(o['rr'] for o in ops):>6.2f}"
           f"{statistics.mean(o['stop_pct'] for o in ops):>7.2f}%"
-          f"{statistics.mean(v):>+9.1f}{sum(v):>+9.0f}{z_de(v):>+7.2f}"
-          f"{len(L):>6}{z_de(lv):>+8.2f}")
+          f"{statistics.mean(v):>+9.1f}{sum(v):>+9.0f}"
+          f"{dd:>8.0f}{seq:>5}{z_de(v):>+7.2f}{z_de(lv):>+8.2f}")
 
 
 def cab(larg=30):
     print(f"{'':<{larg}}{'n':>5}{'/mês':>6}{'acerto':>9}{'R:R':>6}"
-          f"{'stop':>8}{'líq/op':>9}{'total':>9}{'z/op':>7}{'lotes':>6}"
-          f"{'z/LOTE':>8}")
+          f"{'stop':>8}{'líq/op':>9}{'total':>9}{'rebaix.':>8}"
+          f"{'seq':>5}{'z/op':>7}{'z/LOTE':>8}")
 
 
 def main():
