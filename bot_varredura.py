@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Radar da VARREDURA DO ORDER BLOCK — tudo em H1.
+Radar da VARREDURA DO ORDER BLOCK — padrão em H4 desde 13/11/2026.
 
 A regra, no cenario de compra (o de venda e o espelho):
 
@@ -11,16 +11,51 @@ A regra, no cenario de compra (o de venda e o espelho):
   3. ORDER BLOCK: a ultima vela de baixa antes do impulso.
      A zona vai da minima a maxima dela.
   4. VARREDURA: o preco volta e FURA a zona por baixo -- e aqui que
-     morre o stop de quem comprou no order block.
+     morre o stop de quem comprou no order block. O furo tem de ser
+     RASO: no maximo 0,15x a altura do proprio bloco. Afundar mais que
+     isso nao e caca a stop, e o bloco deixando de existir.
   5. REVERSAO: uma vela fecha de volta acima da base da zona, com corpo
      a favor ou pavio longo.
   6. Entrada no fechamento dessa vela. Stop uns ticks abaixo da minima
      da varredura. Alvo no topo que o impulso deixou.
 
-Medido em 2026, top 20 por volume, 199 operacoes:
-  acerto 39,2% | R:R dos ganhos 1:1,96 (empate em 33,8%)
-  risco mediano 1,30% | +0,171R por operacao | +34R no periodo
-Nao validado fora de 2026. Serve como radar, nao como sistema automatico.
+MEDIDO EM 13/11/2026 (universo rolante de 150, 7 anos, so as operacoes
+do trimestre seguinte, risco fixo de 100 USD):
+
+      55 operacoes, 0,7 por mes, 41,8% de acerto, R:R 1:3,26
+      +60,00 por operacao  ·  total +3.299
+      teste do acaso por LOTE z = +1,86
+      bate ENTRADA ALEATORIA por +2,38 desvios
+        (lote real +97 ±50, 16/34 positivos · sorteado -21)
+      2021 -719 (0 alvos/7 op) · 2022 +2.163 (9/13) · 2023 +249 (2/10)
+      2024 +24 (1/3) · 2025 +636 (6/13) · 2026 +945 (5/9)
+      5 de 6 anos positivos, mas 2022 carrega a maior parte
+
+AS DUAS MUDANCAS DE 13/11/2026 e por que:
+
+  H1 -> H4. Na configuracao antiga (H1, sem filtro de profundidade) o
+  setup media -1,00 por operacao no universo rolante. O +9,40 que o
+  validava vinha da lista UNIVERSO[:50], que sao as 50 maiores de
+  NOVEMBRO DE 2026 -- escolher o time depois de ver o campeonato.
+  Mesmas regras: 34,3% de acerto na lista de hoje contra 28,0% na
+  lista de 2023.
+
+  O FILTRO DE FURO RASO. O furo_max estava em 2,5 ATR, que quase nao
+  filtra. Medido na altura do PROPRIO bloco o efeito e enorme e
+  monotono -- e so no H4:
+
+      H4 sem filtro  -12,00/op  ·  0,50x +7,60  ·  0,25x +28,20
+      0,20x +42,90   ·  0,15x +60,00  ·  0,10x +92,70
+      com o mesmo filtro: H1 -1,40, H2 +0,50, H8 -11,50
+
+  E a MESMA regra do encosto raso do setup 3: o preco pode testar o
+  bloco, nao pode destrui-lo. Os dois setups parecem opostos (um quer
+  que o bloco segure, o outro que seja furado e devolvido) mas exigem
+  a mesma coisa do tamanho do movimento contra: tem de ser pequeno.
+
+REGRA PARA TESTES NOVOS: nenhum resultado conta antes de passar pelo
+universo rolante, de ser contado por LOTE e de bater a entrada
+aleatoria. Ver analise/setup1_fundo.py e analise/setup1_honesto.py.
 
 Uso:
     python bot_varredura.py --top 20
@@ -58,7 +93,32 @@ CFG = dict(imp_min=3, imp_max=8, sigma=2.5, frac_direcao=0.7, corpo_imp=0.5,
            ob_busca=6, furo_atr=0.0, furo_max=2.5, corpo_min=0.5,
            pavio_min=0.5, espera_max=60, stop_folga=0.10, rr_min=1.2,
            risco_min_pct=0.0, max_espera_gatilho=4, vol_varr_min=1.2,
-           liq_janela=100, liq_max_r=1.5)
+           liq_janela=100, liq_max_r=1.5,
+           # 13/11/2026 -- o setup passou de H1 para H4 e ganhou o filtro de
+           # PROFUNDIDADE DO FURO medido na altura do PROPRIO BLOCO. Medido no
+           # universo rolante, 7 anos, so as operacoes do trimestre seguinte:
+           #
+           #   H4 · furo <= 0,10x   37 op, 48,6% de acerto, 1:3,19, +92,70/op
+           #   H4 · furo <= 0,15x   55 op, 41,8%,           1:3,26, +60,00/op
+           #   H4 · furo <= 0,20x   73 op, 39,7%,           1:3,14, +42,90/op
+           #   H4 · furo <= 0,25x   90 op, 36,7%,           1:3,29, +28,20/op
+           #   H4 · furo <= 0,50x  147 op, 31,3%,           1:3,40,  +7,60/op
+           #   H4 · sem filtro     412 op, 26,5%,           1:3,07, -12,00/op
+           #   H1 · sem filtro (o de antes) -1,00/op no universo rolante
+           #
+           # Gradiente monotono, e o TOTAL quase nao muda entre 0,10 e 0,20
+           # (3.431, 3.299, 3.129): apertar o filtro nao custa dinheiro, so
+           # troca quantidade por qualidade. So funciona no H4 -- com o mesmo
+           # filtro, H1 da -1,40, H2 +0,50 e H8 -11,50.
+           #
+           # Bate entrada aleatoria por +2,38 desvios (lote real +97 ±50,
+           # 16/34 lotes positivos, sorteado -21). 5 de 6 anos positivos, mas
+           # 2021 deu -719 com ZERO acerto em 7 operacoes e 2022 carrega a
+           # maior parte. Ver analise/setup1_fundo.py.
+           #
+           # O furo raso aqui e a MESMA regra do encosto raso do setup 3: o
+           # preco pode testar o bloco, nao pode destrui-lo.
+           tf='4h', furo_ob=0.15)
 
 
 # ------------------------------------------------------------------ dados
@@ -327,6 +387,14 @@ def seguir(h, a, imp, cfg, mv, tr=None):
                topo + a[fim] * cfg['furo_max']
         if (extremo < fmax) if compra else (extremo > fmax):
             return no(f"furou o order block fundo demais (> {cfg['furo_max']:.1f} ATR): virou continuação, não varredura")
+        # FURO RASO: a profundidade medida na altura do PROPRIO bloco.
+        # O furo_max em ATR acima quase nao filtra; este e o que vale.
+        alt_ob = topo - base
+        if cfg.get('furo_ob') and alt_ob > 0:
+            fund = ((base - extremo) if compra else (extremo - topo)) / alt_ob
+            if fund > cfg['furo_ob']:
+                return no(f"furou {fund:.2f}x a altura do bloco, máximo "
+                          f"{cfg['furo_ob']:.2f}x: afundou demais para ser varredura")
 
         dentro = (cl > base) if compra else (cl < topo)
         rng = hi - lo
@@ -532,7 +600,8 @@ def msg_gatilho(sim, g):
     return (
         f"{seta} <b>{sim.replace('USDT', '/USDT')}</b> — "
         f"<b>{g['lado'].upper()}</b>   <i>{faixa(sim)}</i>\n"
-        f"vela de H1 fechada às {quando(g['vela_ms'])} (Brasília)"
+        f"vela de {CFG['tf'].upper()} fechada às "
+        f"{quando(g['vela_ms'])} (Brasília)"
         + ("  <i>⚠️ a rodada da hora anterior falhou, este gatilho chegou "
            "atrasado</i>" if g.get('atraso') else "") + "\n\n"
         f"entrada  <code>{fmt(g['entrada'])}</code>\n"
@@ -656,7 +725,7 @@ def explicar(sim, velas=400):
     Serve para responder 'por que nao veio gatilho em X'. Usa exatamente a
     mesma funcao seguir() do bot, so que pedindo o motivo da recusa.
     """
-    h = buscar(sim, '1h', velas)
+    h = buscar(sim, CFG['tf'], velas)
     if not h:
         diag(f"{sim}: nao consegui o historico")
         return
@@ -774,7 +843,7 @@ def main():
              + (" (so os que entraram agora)" if a.novos else ""))
         for sim in fila_ping:
             try:
-                h = buscar(sim, '1h', 400)
+                h = buscar(sim, CFG['tf'], 400)
             except Exception:
                 continue
             if len(h) < 150:
@@ -812,7 +881,7 @@ def main():
         if len(usados) >= a.top:
             break
         try:
-            h = buscar(sim, '1h', 400)
+            h = buscar(sim, CFG['tf'], 400)
         except Exception as e:
             diag(f"{sim}: erro ao buscar ({e})")
             continue
@@ -903,7 +972,7 @@ def main():
                  if r.get('status') == 'aberto'} - set(series)
     for sim in sorted(pendentes):
         try:
-            series[sim] = buscar(sim, '1h', 400)
+            series[sim] = buscar(sim, CFG['tf'], 400)
         except Exception as e:
             diag(f"{sim}: nao revisei o aviso aberto ({e})")
 
