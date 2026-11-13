@@ -460,6 +460,22 @@ def main():
     if a.varrer:
         print(f"{len(cru)} maiores · velas de {a.tf}h · {meses:.0f} meses · "
               f"$100 de risco por operação\n")
+    if a.varrer == 2:
+        # QUALIDADE x QUANTIDADE. O contexto alinhado paga +$32.66/op com 2.2
+        # op/mes; afrouxar a faixa leva a 16.8 op/mes com +$8.81. Os dois somam?
+        print("  O CONTEXTO AGUENTA A FAIXA MAIS LARGA?\n")
+        for ap in (0.70, 0.85, 1.00, 1.20):
+            for pm in ('off', 'alinhado'):
+                resumo(rodar(dict(CFG5, aperto=ap, pre_modo=pm, pre_pivo=20)),
+                       f"{ap:.2f}x {pm}")
+        print("\n  E a folga do nível, na faixa mais larga que aguentar\n")
+        for ap in (0.85, 1.00):
+            for pf in (0.0, 0.5, 1.0):
+                resumo(rodar(dict(CFG5, aperto=ap, pre_modo='alinhado',
+                                  pre_pivo=20, pre_folga=pf)),
+                       f"{ap:.2f}x folga {pf:.1f}")
+        print()
+    elif a.varrer:
         print("  JANELA DA LATERALIDADE (velas), com o aperto em "
               f"{CFG5['aperto']:.2f}x o passeio normal\n")
         for L in (30, 60, 100, 150, 200, 300):
