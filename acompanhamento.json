@@ -779,5 +779,17 @@
   "nota": "chegou no order block, esperando a limpeza",
   "vol_varr": 0.0,
   "nucleo": true
+ },
+ "cen-DOTUSDT-1794542400000": {
+  "tipo": "cenario",
+  "sim": "DOTUSDT",
+  "lado": "venda",
+  "status": "aberto",
+  "vela_ms": 1794564000000,
+  "imp_fim_ms": 1794542400000,
+  "alvo": 0.797,
+  "nota": "chegou no order block, esperando a limpeza",
+  "vol_varr": 0.0,
+  "nucleo": false
  }
 }

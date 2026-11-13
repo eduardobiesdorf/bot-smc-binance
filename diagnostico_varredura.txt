@@ -1,19 +1,19 @@
-início 13/11 07:57 BRT
-ETHUSDT: gatilho antigo (39 velas atrás)
-XRPUSDT: gatilho antigo (222 velas atrás)
-SUIUSDT: gatilho antigo (88 velas atrás)
-ZECUSDT: gatilho antigo (176 velas atrás)
-LINKUSDT: gatilho antigo (89 velas atrás)
-LTCUSDT: gatilho antigo (88 velas atrás)
-AAVEUSDT: gatilho antigo (160 velas atrás)
-PENGUUSDT: gatilho antigo (89 velas atrás)
-HBARUSDT: gatilho antigo (101 velas atrás)
-GATILHO ZROUSDT venda vela 13/11 05:00 entrada 1.571 R:R 1:1.66  [recuperado da vela anterior]
-STRKUSDT: gatilho antigo (182 velas atrás)
+início 13/11 08:10 BRT
+ETHUSDT: gatilho antigo (40 velas atrás)
+XRPUSDT: gatilho antigo (223 velas atrás)
+SUIUSDT: gatilho antigo (89 velas atrás)
+ZECUSDT: gatilho antigo (177 velas atrás)
+LINKUSDT: gatilho antigo (90 velas atrás)
+LTCUSDT: gatilho antigo (89 velas atrás)
+AAVEUSDT: gatilho antigo (161 velas atrás)
+PENGUUSDT: gatilho antigo (90 velas atrás)
+HBARUSDT: gatilho antigo (102 velas atrás)
+ZROUSDT: gatilho antigo (2 velas atrás)
+STRKUSDT: gatilho antigo (183 velas atrás)
 pares (50): BTCUSDT, ETHUSDT, SOLUSDT, XRPUSDT, DOGEUSDT, HYPEUSDT, SUIUSDT, BNBUSDT, ADAUSDT, ZECUSDT, ENAUSDT, LINKUSDT, AVAXUSDT, LTCUSDT, TRUMPUSDT, AAVEUSDT, WLDUSDT, TAOUSDT, NEARUSDT, BCHUSDT, FILUSDT, PUMPUSDT, UNIUSDT, DOTUSDT, ASTERUSDT, ONDOUSDT, PENGUUSDT, TRXUSDT, CRVUSDT, ARBUSDT, XLMUSDT, APTUSDT, TIAUSDT, HBARUSDT, OPUSDT, XPLUSDT, VIRTUALUSDT, FETUSDT, INJUSDT, WLFIUSDT, TONUSDT, SEIUSDT, EIGENUSDT, ICPUSDT, PENDLEUSDT, ZROUSDT, REUSDT, POLUSDT, DASHUSDT, STRKUSDT
-gatilhos 1 | cenários 3
+gatilhos 0 | cenários 5
 stop móvel — o que o bot está vendo:
-  ZROUSDT venda: entrada 1.571  stop 1.6228357  preço 1.57  (+0.02R)  | 15m até 13/11 07:30  | 0 estruturas a favor
+  ZROUSDT venda: entrada 1.571  stop 1.6228357  preço 1.584  (-0.25R)  | 15m até 13/11 07:45  | 0 estruturas a favor
 reversão 8h: 150 pares olhados, 0 gatilho(s), 0 encosto(s) esperando
 🧪 reversão de 8h em teste: 0 aberta(s), nenhuma resolvida ainda
 enviados 0 gatilhos, 0 desfechos
