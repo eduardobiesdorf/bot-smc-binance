@@ -355,6 +355,8 @@ def main():
     ap.add_argument('--n', type=int, default=150)
     ap.add_argument('--desenhar', type=int, default=3)
     ap.add_argument('--varrer', type=int, default=1)
+    ap.add_argument('--resultado', default='qualquer',
+                    choices=['qualquer', 'alvo', 'stop'])
     a = ap.parse_args()
     cru = []
     for p in sorted(glob.glob(os.path.join(a.pasta, '*_1h.csv'))):
@@ -434,8 +436,18 @@ def main():
           f"aperto {CFG5['aperto']:.2f}")
     resumo(achados, 'escolhida')
     print()
-    for k, (sim, g, h) in enumerate(achados[-a.desenhar:][::-1], 1):
-        nome = f"setup5_{k}_{sim}.png"
+    # desenha as ultimas que terminaram do jeito pedido (alvo, stop ou tanto faz)
+    fila = []
+    for sim, g, h in achados:
+        if a.resultado != 'qualquer':
+            r = resolver(h, g, a.tf)
+            if not r or r['fim'] != a.resultado:
+                continue
+        fila.append((sim, g, h))
+    print(f"  as {min(a.desenhar, len(fila))} últimas que terminaram em "
+          f"{a.resultado} ({len(fila)} no total)\n")
+    for k, (sim, g, h) in enumerate(fila[-a.desenhar:][::-1], 1):
+        nome = f"setup5_{a.resultado}{k}_{sim}.png"
         r = desenhar(sim, h, g, a.tf, nome)
         q = dt.datetime.fromtimestamp(g['vela_ms']/1000, BRT)
         print(f"  {k}. {sim:<13} {q:%d/%m/%Y %H:%M}  {g['lado']:<6} "
