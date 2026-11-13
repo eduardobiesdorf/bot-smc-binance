@@ -1,31 +1,10 @@
-início 13/11 12:47 BRT
-ETHUSDT: gatilho antigo (44 velas atrás)
-XRPUSDT: gatilho antigo (227 velas atrás)
-SUIUSDT: gatilho antigo (93 velas atrás)
-ZECUSDT: gatilho antigo (181 velas atrás)
-LINKUSDT: gatilho antigo (94 velas atrás)
-LTCUSDT: gatilho antigo (93 velas atrás)
-AAVEUSDT: gatilho antigo (165 velas atrás)
-PENGUUSDT: gatilho antigo (94 velas atrás)
-HBARUSDT: gatilho antigo (106 velas atrás)
-ZROUSDT: gatilho antigo (6 velas atrás)
-STRKUSDT: gatilho antigo (187 velas atrás)
+início 13/11 13:08 BRT
+PENGUUSDT: gatilho antigo (234 velas atrás)
 pares (50): BTCUSDT, ETHUSDT, SOLUSDT, XRPUSDT, DOGEUSDT, HYPEUSDT, SUIUSDT, BNBUSDT, ADAUSDT, ZECUSDT, ENAUSDT, LINKUSDT, AVAXUSDT, LTCUSDT, TRUMPUSDT, AAVEUSDT, WLDUSDT, TAOUSDT, NEARUSDT, BCHUSDT, FILUSDT, PUMPUSDT, UNIUSDT, DOTUSDT, ASTERUSDT, ONDOUSDT, PENGUUSDT, TRXUSDT, CRVUSDT, ARBUSDT, XLMUSDT, APTUSDT, TIAUSDT, HBARUSDT, OPUSDT, XPLUSDT, VIRTUALUSDT, FETUSDT, INJUSDT, WLFIUSDT, TONUSDT, SEIUSDT, EIGENUSDT, ICPUSDT, PENDLEUSDT, ZROUSDT, REUSDT, POLUSDT, DASHUSDT, STRKUSDT
-gatilhos 0 | cenários 6
+gatilhos 0 | cenários 0
 reversão 8h: 150 pares olhados, 0 gatilho(s), 0 encosto(s) esperando
 🧪 reversão de 8h em teste: 0 aberta(s), nenhuma resolvida ainda
-TOKEN: ok 46 chars | CHAT_ID: ok 10 chars
-HTTP 200: {"ok":true,"result":{"message_id":330,"from":{"id":9205915638,"is_bot":true,"first_name":"SMC Trading Bot","username":"smc_crypto_alerts_bot"},"chat":{"id":[removido],"first_name":"Eduardo","last_name
-desfecho: ⚪ <b>FET/USDT</b> — cenário de venda encerrado <b>sem entrada</b> | <i>piscina a 1.9R da entrada, máximo 1.5R</i>
-TOKEN: ok 46 chars | CHAT_ID: ok 10 chars
-HTTP 200: {"ok":true,"result":{"message_id":331,"from":{"id":9205915638,"is_bot":true,"first_name":"SMC Trading Bot","username":"smc_crypto_alerts_bot"},"chat":{"id":[removido],"first_name":"Eduardo","last_name
-desfecho: ⚪ <b>SOL/USDT</b> — cenário de venda encerrado <b>sem entrada</b> | <i>piscina a 1.6R da entrada, máximo 1.5R</i>
-TOKEN: ok 46 chars | CHAT_ID: ok 10 chars
-HTTP 200: {"ok":true,"result":{"message_id":332,"from":{"id":9205915638,"is_bot":true,"first_name":"SMC Trading Bot","username":"smc_crypto_alerts_bot"},"chat":{"id":[removido],"first_name":"Eduardo","last_name
-desfecho: ⚪ <b>ENA/USDT</b> — cenário de venda encerrado <b>sem entrada</b> | <i>piscina a 4.7R da entrada, máximo 1.5R</i>
-TOKEN: ok 46 chars | CHAT_ID: ok 10 chars
-HTTP 200: {"ok":true,"result":{"message_id":333,"from":{"id":9205915638,"is_bot":true,"first_name":"SMC Trading Bot","username":"smc_crypto_alerts_bot"},"chat":{"id":[removido],"first_name":"Eduardo","last_name
-enviados 0 gatilhos, 3 desfechos
+enviados 0 gatilhos, 0 desfechos
 placar  9 fechados: 3 gain / 6 loss  (33%)  total +3.98R  ·  0 abertos  ·  36 cenários encerrados sem entrada
 por que os cenários morreram:
   12x  nem varreu o order block nem chegou perto dele
