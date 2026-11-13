@@ -57,29 +57,55 @@ alvo no TOPO da vela de explosao, risco fixo de 100 USD por operacao)
   dependia de regime, nao o setup: o alvo de 1:5 so paga quando o
   mercado rasga, e 2020-2023 nao rasgou. A observacao e do Eduardo.
 
-  POR QUE SO COMPRA. A venda perdeu para a entrada aleatoria:
+  OS DOIS LADOS, desde 13/11 a noite. A venda foi desligada mais cedo
+  no mesmo dia porque perdeu para a entrada aleatoria por -0,29
+  desvios -- mas aquilo foi medido com a projecao de 90%, o alvo
+  errado. Com o alvo no FUNDO da vela de explosao ela muda de figura:
 
-      a venda do setup      31 op, 29,0% de acerto, -3,30/op
-      venda aleatoria      580 op, 31,9% de acerto, +5,60/op
-      diferenca  -8,90/op  ->  -0,29 DESVIOS
+      venda, alvo em        acerto    R:R  liq/op  z/LOTE  vs acaso
+      projecao 90%           28,2%   3,15   +1,90   +0,08     -0,29
+      o FUNDO da vela        50,0%   1,36  +10,10   +0,63     +0,70
 
-  Sao 31 operacoes, entao isso nao prova que a venda e ruim -- prova
-  que nao ha indicio de que ela leia nada. CFG['so_compra'] = False
-  religa. A VENDA NAO FOI REMEDIDA COM O ALVO NO TOPO: pode ser que ela
-  tambem estivesse sendo julgada pelo alvo errado. A medir.
+  O acerto saltou de 28% para 50% so trocando o alvo. Mas +0,70 nao e
+  vantagem demonstrada e +10,10 por operacao e quase zero: a venda
+  SOZINHA nao esta provada.
 
-  A ENTRADA ALEATORIA, medida com os alvos antigos. Para cada operacao
+  Ela entra porque NAO DILUI, e diversifica:
+
+      configuracao      n  /mes  acerto   R:R  liq/op   total  z/LOTE  lotes+  maior
+      so compra        91   1,1   57,1%  2,00  +51,90   4.723   +2,04   23/37    38%
+      compra + venda  129   1,6   55,0%  1,81  +39,60   5.108   +2,10   27/44    35%
+
+  Rende menos por operacao e mais no total, com z/lote maior e
+  concentracao menor. E ano a ano a venda carrega o que a compra nao
+  pega: 2020 venda +215 contra compra -42; 2022 venda +374.
+
+      venda, ano a ano: 2020 +215(3 alvos/5 op) · 2021 -207(0/2) ·
+      2022 +374(3/4) · 2023 +206(4/8) · 2024 -266(1/4) ·
+      2025 -89(5/10) · 2026 +151(3/5)
+
+  CFG['so_compra'] = True desliga a venda.
+
+  A ENTRADA ALEATORIA. Para cada operacao
   real, 20 compras na MESMA moeda com o MESMO stop em %, o MESMO R:R e
   a MESMA janela, em momento sorteado:
 
-      por operacao, alvo 1:5   setup 47,7% +178,40/op · controle 13,2%
-                               -25,60/op  ->  +4,51 desvios
-      por LOTE, alvo 1:5       lote real +159 ±146 · lote sorteado -21
-                               ->  +1,24 desvios (7 anos)
+      COMPRA, alvo no topo, por LOTE, 7 anos:
+        lotes de 7 dias    real +93 ±40 (26/51 positivos) · sorteado
+                           -13   ->  +2,65 DESVIOS
+        lotes de 14 dias   real +128 ±59 (23/37) · sorteado -17
+                           ->  +2,45 DESVIOS
+      VENDA, alvo no fundo, lotes de 14 dias:
+        real +16 ±26 (12/24) · sorteado -2  ->  +0,70 desvios
+
+      para comparar, com o alvo de 1:5 que ficou no bot por 3 horas:
+        compra, lotes de 14 dias  ->  +1,24 desvios
+
+  Trocar o alvo DOBROU a significancia contra o acaso: +1,24 -> +2,45.
 
   O controle PERDE dinheiro nas mesmas moedas e no mesmo periodo. A
   direcao nunca inverteu em teste nenhum; o que encolheu foi a certeza.
-  FALTA refazer o controle com o alvo no topo.
+  A direcao nunca inverteu em teste nenhum.
 
   ATENCAO -- OS NUMEROS ANTIGOS DESTE ARQUIVO ERAM VICIADOS. Ate
   13/11/2026 este bloco dizia 48,6% de acerto, 1:3,69 e +116,10 por
@@ -151,7 +177,7 @@ CFG = dict(
     alvo_proj=0.0,       # 0 = o alvo e o TOPO da vela de explosao, sem projecao
     alvo_rr=None,        # multiplo de risco fixo; None usa alvo_proj
     tf_h=8,               # horas da vela do padrao; 24 roda no diario
-    so_compra=True,       # a venda perdeu para o aleatorio; ver explosoes
+    so_compra=False,      # OS DOIS LADOS; ver o comentario em explosoes
 )
 
 
@@ -510,9 +536,9 @@ def msg(sim, g, quando, fmt, msg_mao):
         f"<i>gatilho com {g['vol_gat']:.1f}x o volume médio</i>\n"
         + msg_mao(g['risco_pct'])
         +
-        f"\n\n<i>No histórico de 7 anos: 57% de acerto, risco/retorno "
-        f"1:2, 1,1 alerta por mês, positivo em 6 dos 7 anos. "
-        f"Só compra. "
+        f"\n\n<i>No histórico de 7 anos: 55% de acerto, risco/retorno "
+        f"1:1,8, 1,6 alerta por mês. A compra bate entrada "
+        f"aleatória por 2,5 desvios; a venda por 0,7. "
         f"Em teste: anota, não opera.</i>")
 
 
@@ -625,5 +651,5 @@ def placar(d):
             f"({len(g)/len(fech)*100:.0f}%) · {len(abertas)} abertas\n"
             f"soma: <b>{soma:+.0f}</b> para cada 100 arriscados por operação\n"
             f"média: <b>{soma/len(fech):+.0f}</b> por operação\n"
-            f"<i>o backtest esperava 57% de acerto e ~+52 por operação. "
+            f"<i>o backtest esperava 55% de acerto e ~+40 por operação. "
             f"Decisão em 20 operações.</i>")
