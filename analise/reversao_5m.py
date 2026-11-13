@@ -135,6 +135,19 @@ def painel(rot, sel, meses, larg=30):
           f"{z:>8}{bons}/{len(anos)}  {' '.join(por)}")
 
 
+VAR = [
+    ('ancorado · sem mínimo',      'ancorado', 0.0, 1.2),
+    ('ancorado · stop >= 0,8%',    'ancorado', 0.8, 1.2),
+    ('ancorado · stop >= 1,0%',    'ancorado', 1.0, 1.2),
+    ('ancorado · stop >= 1,2%',    'ancorado', 1.2, 1.2),
+    ('ancorado · stop >= 1,5%',    'ancorado', 1.5, 1.2),
+    ('ancorado · >=1,0% s/ volume', 'ancorado', 1.0, 0.0),
+    ('meio · sem mínimo',          'meio',     0.0, 1.2),
+    ('meio · stop >= 1,0%',        'meio',     1.0, 1.2),
+    ('fractal · stop >= 1,0%',     'fractal',  1.0, 1.2),
+]
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('pasta')
@@ -142,52 +155,43 @@ def main():
     a = ap.parse_args()
     alvos = [x.strip().upper() for x in a.ativos.split(',') if x.strip()]
     arqs = sorted(glob.glob(os.path.join(a.pasta, '*_5m.csv')))
-    cru = []
-    for p in arqs:
-        s = os.path.basename(p).replace('_5m.csv', '')
-        if alvos and s not in alvos:
+    cfgs = {n: cfg5(n) for n in ('fractal', 'meio', 'ancorado')}
+    res = {r: [] for r, _, _, _ in VAR}
+    n_moedas, maxv = 0, 0
+    for caminho in arqs:
+        sim = os.path.basename(caminho).replace('_5m.csv', '')
+        if alvos and sim not in alvos:
             continue
-        h = ler(p)
-        if len(h) >= 20000:
-            cru.append((s, h))
-    if not cru:
-        print("sem dados de 5m"); return
-    meses = max(len(h) for _, h in cru) / (12*24*30.4)
-    print(f"{len(cru)} ativos · velas de 5 minutos · {meses:.0f} meses")
-    print(f"  {', '.join(s for s, _ in cru)}\n")
+        h = ler(caminho)
+        if len(h) < 20000:
+            del h
+            continue
+        n_moedas += 1
+        maxv = max(maxv, len(h))
+        for rot, nome, sm, vg in VAR:
+            res[rot] += rodar(h, cfgs[nome], vol_gat=vg, stop_min=sm)
+        del h
+        if n_moedas % 25 == 0:
+            print(f"  ... {n_moedas} moedas", flush=True)
+    if not n_moedas:
+        print("sem dados de 5m")
+        return
+    meses = maxv / (12*24*30.4)
+    print(f"\n{n_moedas} ativos · velas de 5 minutos · {meses:.0f} meses\n")
     print(f"{'':<30}{'n':>5}{'/mês':>7}{'acerto':>9}{'R:R':>7}{'stop':>8}"
           f"{'bruto':>9}{'taxa':>7}{'líq/op':>9}{'total':>9}{'rb':>8}"
           f"{'seq':>5}{'z':>8}{'anos+':>4}  por ano")
-    for nome, rot in (('ancorado', 'ancorado (mesmos 7 dias)'),
-                      ('meio', 'meio-termo (janelas de horas)'),
-                      ('fractal', 'fractal (mesmas contagens)')):
-        cfg = cfg5(nome)
-        ops = []
-        for s, h in cru:
-            ops += rodar(h, cfg)
-        ops.sort(key=lambda o: o['q'])
-        painel(rot, ops, meses)
-        ops2 = []
-        for s, h in cru:
-            ops2 += rodar(h, cfg, vol_gat=0.0)
-        ops2.sort(key=lambda o: o['q'])
-        painel(f'  {nome}, sem volume', ops2, meses)
-
-    print()
-    print('  o stop mínimo: a taxa escala com a posição, e a posição é')
-    print('  $100 dividido pelo stop. Um stop maior = posição menor =')
-    print('  taxa menor. Só vale se o padrão sobreviver ao filtro.')
-    print()
-    for nome in ('ancorado', 'meio'):
-        cfg = cfg5(nome)
-        for sm in (0.0, 1.0, 1.5, 2.0, 3.0, 4.0):
-            ops = []
-            for s, h in cru:
-                ops += rodar(h, cfg, stop_min=sm)
-            ops.sort(key=lambda o: o['q'])
-            painel(f'{nome} · stop ≥ {sm:.1f}%' if sm else
-                   f'{nome} · sem mínimo', ops, meses)
-        print()
+    for rot, _, _, _ in VAR:
+        painel(rot, sorted(res[rot], key=lambda o: o['q']), meses)
+    print("\n  concentração — se as 3 melhores são quase tudo, não presta")
+    for rot, _, _, _ in VAR:
+        v = [o['liq'] for o in res[rot]]
+        if len(v) < 10:
+            continue
+        tot = sum(v)
+        top3 = sum(sorted(v)[-3:])
+        print(f"  {rot:<30} 3 melhores = "
+              f"{(top3/tot*100 if tot else 0):>6.0f}% do total")
 
 
 if __name__ == '__main__':

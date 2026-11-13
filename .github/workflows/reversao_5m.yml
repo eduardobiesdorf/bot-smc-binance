@@ -1,4 +1,4 @@
-name: Reversão em 5 minutos (5 maiores)
+name: Reversão em 5 minutos
 
 on:
   workflow_dispatch:
@@ -7,10 +7,14 @@ on:
         description: 'Mês inicial (YYYY-MM)'
         required: false
         default: '2023-01'
-      ativos:
-        description: 'Pares, separados por vírgula'
+      top:
+        description: 'Quantas moedas (as maiores)'
         required: false
-        default: 'BTCUSDT,ETHUSDT,SOLUSDT,XRPUSDT,DOGEUSDT'
+        default: '150'
+      ativos:
+        description: 'Pares específicos (vazio = usa as maiores)'
+        required: false
+        default: ''
 
 permissions:
   contents: read
@@ -18,13 +22,18 @@ permissions:
 jobs:
   cinco:
     runs-on: ubuntu-latest
-    timeout-minutes: 180
+    timeout-minutes: 350
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
       - run: pip install requests
+      - name: Espaço em disco
+        run: |
+          df -h / | tail -1
+          sudo rm -rf /usr/local/lib/android /opt/ghc /usr/share/dotnet || true
+          df -h / | tail -1
       - name: Data de hoje
         id: dia
         run: echo "d=$(date -u +%Y-%m-%d)" >> $GITHUB_OUTPUT
@@ -33,26 +42,32 @@ jobs:
         uses: actions/cache@v4
         with:
           path: dados_5m
-          key: cinco5m-${{ inputs.inicio || '2023-01' }}-${{ steps.dia.outputs.d }}
-          restore-keys: cinco5m-${{ inputs.inicio || '2023-01' }}-
+          key: cinco5m-${{ inputs.top || '150' }}-${{ inputs.inicio || '2023-01' }}-${{ steps.dia.outputs.d }}
+          restore-keys: cinco5m-${{ inputs.top || '150' }}-${{ inputs.inicio || '2023-01' }}-
       - name: Baixar 5m
         if: steps.cache.outputs.cache-hit != 'true'
         env:
-          BAIXAR_THREADS: '8'
+          BAIXAR_THREADS: '16'
+          ATIVOS: ${{ inputs.ativos }}
         run: |
           set -o pipefail
+          EXTRA=""
+          if [ -n "$ATIVOS" ]; then EXTRA="--ativos $ATIVOS"; fi
           python -u baixar_futuros.py --inicio ${{ inputs.inicio || '2023-01' }} \
-            --intervalo 5m --top 50 --pasta dados_5m \
-            --ativos "${{ inputs.ativos }}" 2>&1 | tail -8
+            --intervalo 5m --top ${{ inputs.top || '150' }} --pasta dados_5m \
+            $EXTRA 2>&1 | tail -8
       - name: O que tem
         run: |
-          ls -la dados_5m | head
+          ls dados_5m | wc -l
           du -sh dados_5m
+          df -h / | tail -1
       - name: Rodar
+        env:
+          ATIVOS: ${{ inputs.ativos }}
         run: |
           set -o pipefail
-          python -u analise/reversao_5m.py dados_5m \
-            --ativos "${{ inputs.ativos }}" 2>&1 | tee cinco.log
+          python -u analise/reversao_5m.py dados_5m --ativos "$ATIVOS" \
+            2>&1 | tee cinco.log
       - name: Resumo
         if: always()
         run: |
