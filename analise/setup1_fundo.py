@@ -149,6 +149,79 @@ def main():
 
     print(f"universo rolante de {a.n} · {meses:.0f} meses · setup 1\n")
 
+    print(f"{'='*134}\n  A) O FURO RASO EM TODOS OS TEMPOS GRÁFICOS\n"
+          f"     (o filtro só tinha sido medido em H1 e H4)\n{'='*134}")
+    cab()
+    melhor = None
+    for tf in (1, 2, 4, 8):
+        for f in (None, 0.10, 0.15, 0.20, 0.25, 0.35, 0.50):
+            ops = rolante(tf=tf, furo_ob=f)
+            rot = f"H{tf} · " + (f"furo <= {f:.2f}x" if f else "sem filtro")
+            painel(rot, ops, meses)
+            if f and len(ops) >= 40:
+                v = [o['liq'] for o in ops]
+                L = lotes_de(ops)
+                zl = z_de([sum(y['liq'] for y in x) for x in L])
+                if melhor is None or zl > melhor[0]:
+                    melhor = (zl, tf, f, ops)
+        print()
+
+    if melhor:
+        zl, tf, f, ops = melhor
+        print(f"{'='*134}\n  B) O MELHOR (H{tf}, furo <= {f:.2f}x) CONTRA ENTRADA "
+              f"ALEATÓRIA, POR LOTE\n{'='*134}")
+        import random as _r
+        rng = _r.Random(41)
+        h8c = {}
+        for o in ops:
+            if o['sim'] not in h8c:
+                h8c[o['sim']] = (rev.juntar(serie[o['sim']], tf) if tf > 1
+                                 else serie[o['sim']])
+        L = lotes_de(ops)
+        reais = [sum(y['liq'] for y in x) for x in L]
+        sort = []
+        for x in L:
+            for _ in range(200):
+                s_, ok = 0.0, 0
+                for o in x:
+                    hp = h8c[o['sim']]
+                    lo_i, hi_i = 30, len(hp) - MAXBAR - 1
+                    if hi_i <= lo_i:
+                        continue
+                    i2 = rng.randrange(lo_i, hi_i)
+                    ent = hp[i2][4]
+                    stop = ent*(1 - o['stop_pct']/100)
+                    alvo = ent + (ent-stop)*o['rr']
+                    fim = saida = None
+                    for m in range(i2+1, min(i2+1+MAXBAR, len(hp))):
+                        if hp[m][3] <= stop: fim, saida = 1, stop; break
+                        if hp[m][2] >= alvo: fim, saida = 1, alvo; break
+                    if fim is None:
+                        continue
+                    pos = RISCO/(o['stop_pct']/100)
+                    s_ += pos*(saida-ent)/ent - pos*TAXA*2 - \
+                        pos*((m-i2)*tf/8)*FUND8
+                    ok += 1
+                if ok:
+                    sort.append(s_*len(x)/ok)
+        mr, ms_ = statistics.mean(reais), statistics.mean(sort)
+        er = statistics.pstdev(reais)/len(reais)**.5
+        es = statistics.pstdev(sort)/len(sort)**.5
+        d = mr - ms_; e = (er**2 + es**2) ** .5
+        print(f"  lote REAL     {mr:>+8.0f} ±{er:<5.0f} "
+              f"({sum(1 for x in reais if x>0)}/{len(reais)} positivos)")
+        print(f"  lote SORTEADO {ms_:>+8.0f} ±{es:<5.0f}")
+        print(f"  diferença     {d:>+8.0f} ±{e:<5.0f}  ->  "
+              f"{d/e if e else 0:+.2f} DESVIOS")
+        print(f"\n  ano a ano:")
+        for y in range(2020, 2027):
+            sel = [o for o in ops if o['q'].year == y]
+            if not sel:
+                continue
+            al = sum(1 for o in sel if o['fim'] == 'alvo')
+            print(f"    {y}: {sum(o['liq'] for o in sel):>+8.0f}  "
+                  f"({al} alvos / {len(sel)} op)")
+
     print(f"{'='*134}\n  A) O TEMPO GRÁFICO — nunca saiu do H1\n{'='*134}")
     cab()
     for tf in (1, 2, 4, 8):
