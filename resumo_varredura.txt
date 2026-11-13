@@ -1,10 +1,7 @@
-13/11 11:19 BRT
-radar   SOLUSDT venda — limpou o order block, esperando a reversão
+13/11 12:48 BRT
 radar   DOGEUSDT venda — limpou o order block, esperando a reversão
-radar   ENAUSDT venda — limpou o order block, esperando a reversão
 radar   TRUMPUSDT venda — limpou o order block, esperando a reversão
 radar   WLDUSDT venda — limpou o order block, esperando a reversão
 radar   FILUSDT venda — chegou no order block, esperando a limpeza
 radar   DOTUSDT venda — limpou o order block, esperando a reversão
 radar   OPUSDT venda — chegou no order block, esperando a limpeza
-radar   FETUSDT venda — limpou o order block, esperando a reversão
