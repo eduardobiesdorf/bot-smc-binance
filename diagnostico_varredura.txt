@@ -1,9 +1,8 @@
-início 13/11 23:48 BRT
-PENGUUSDT: gatilho antigo (236 velas atrás)
+início 14/11 01:50 BRT
+PENGUUSDT: gatilho antigo (237 velas atrás)
 pares (50): BTCUSDT, ETHUSDT, SOLUSDT, XRPUSDT, DOGEUSDT, HYPEUSDT, SUIUSDT, BNBUSDT, ADAUSDT, ZECUSDT, ENAUSDT, LINKUSDT, AVAXUSDT, LTCUSDT, TRUMPUSDT, AAVEUSDT, WLDUSDT, TAOUSDT, NEARUSDT, BCHUSDT, FILUSDT, PUMPUSDT, UNIUSDT, DOTUSDT, ASTERUSDT, ONDOUSDT, PENGUUSDT, TRXUSDT, CRVUSDT, ARBUSDT, XLMUSDT, APTUSDT, TIAUSDT, HBARUSDT, OPUSDT, XPLUSDT, VIRTUALUSDT, FETUSDT, INJUSDT, WLFIUSDT, TONUSDT, SEIUSDT, EIGENUSDT, ICPUSDT, PENDLEUSDT, ZROUSDT, REUSDT, POLUSDT, DASHUSDT, STRKUSDT
 gatilhos 0 | cenários 0
-ENCOSTO 8h OSMOUSDT compra tocou 13/11 19:00 há 3h, faltam 45h · preço 0.034 stop 0.03108982 R:R 1:2.54 afundou 19% até o meio
-reversão 8h: 150 pares olhados, 0 gatilho(s), 1 encosto(s) esperando
+reversão 8h: 150 pares olhados, 0 gatilho(s), 0 encosto(s) esperando
 🧪 reversão de 8h em teste: 0 aberta(s), nenhuma resolvida ainda
 enviados 0 gatilhos, 0 desfechos
 placar (H4, desde 13/11)  0 gatilhos (0 abertos)  ·  48 cenários, 36 encerrados sem entrada  ·  <i>9 do H1 antigo, fora da conta</i>
