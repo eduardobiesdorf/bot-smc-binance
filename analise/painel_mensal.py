@@ -1,8 +1,12 @@
 """Os TRES setups que rodam no bot, mes a mes, em 2026.
 
-  Setup 1  varredura de liquidez, em H4   (50 maiores)
+  Setup 1  varredura de liquidez, em H4   (150 maiores)
   Setup 3  reversao de 8h, entrada no H1  (150 maiores)
   Setup 5  rompimento falso, em H1        (150 maiores)
+
+14/11/2026 -- o setup 1 passou de 50 para 150 pares no bot, e as acoes
+tokenizadas e stablecoins saem da base aqui tambem, para o backteste medir
+exatamente o que o bot vai olhar.
 
 Universo ROLANTE: a cada trimestre, as N maiores pelo volume mediano do
 trimestre ANTERIOR, e so contam as operacoes daquele trimestre. Nada de
@@ -130,11 +134,18 @@ def main():
     ap.add_argument('pasta')
     ap.add_argument('--ano', type=int, default=2026)
     a = ap.parse_args()
-    serie = {}
+    fora = bot.STABLE | bot.COMMODITY | bot.ACOES
+    serie, cortados = {}, []
     for p in sorted(glob.glob(os.path.join(a.pasta, '*_1h.csv'))):
+        sim = os.path.basename(p).replace('_1h.csv', '')
+        if sim.endswith('USDT') and sim[:-4] in fora:
+            cortados.append(sim)
+            continue
         h = ler(p)
         if len(h) >= 400:
-            serie[os.path.basename(p).replace('_1h.csv', '')] = h
+            serie[sim] = h
+    if cortados:
+        print(f"fora da base ({len(cortados)}): {', '.join(cortados)}\n")
     t0 = min(h[0][0] for h in serie.values())
     t1 = max(h[-1][0] for h in serie.values())
     print(f"{len(serie)} pares · base até "
@@ -144,7 +155,7 @@ def main():
     cfg1 = dict(bot.CFG)
     g = {}
     g['setup 1 (H4)'] = rolante(
-        serie, t0, t1, 50,
+        serie, t0, t1, 150,
         lambda h, s: rodar1(rev.juntar(h, 4), s, cfg1, trailing=True))
     g['setup 3 (H8)'] = rolante(serie, t0, t1, 150,
                                 lambda h, s: reversao(h, s))
