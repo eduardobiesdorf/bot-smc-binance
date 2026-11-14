@@ -81,6 +81,15 @@ on:
         required: false
         default: false
         type: boolean
+      falha5_ping:
+        description: 'Mandar amostra do quarto alerta (rompimento falso)'
+        required: false
+        default: false
+        type: boolean
+      falha5_exemplos:
+        description: 'Quantos exemplos mandar com falha5_ping'
+        required: false
+        default: '2'
       sem_falha5:
         description: 'Desligar o quarto alerta (rompimento falso em H1, em teste)'
         required: false
@@ -146,6 +155,8 @@ jobs:
           [ "${{ inputs.teste }}" = "true" ] && ARGS="$ARGS --teste"
           [ "${{ inputs.sem_reversao8 }}" = "true" ] && ARGS="$ARGS --sem-reversao8"
           [ "${{ inputs.sem_falha5 }}" = "true" ] && ARGS="$ARGS --sem-falha5"
+          [ "${{ inputs.falha5_ping }}" = "true" ] && ARGS="$ARGS --falha5-ping"
+          ARGS="$ARGS --falha5-exemplos ${{ inputs.falha5_exemplos || '2' }}"
           ARGS="$ARGS --falha5-top ${{ inputs.falha5_top || '150' }}"
           ARGS="$ARGS --rev-top ${{ inputs.rev_top || '150' }}"
           ARGS="$ARGS --exemplos ${{ inputs.exemplos || '2' }}"

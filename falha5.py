@@ -483,3 +483,50 @@ def placar(d):
             f"média: <b>{soma/len(fech):+.0f}</b> por operação\n"
             f"<i>o backtest esperava 52% de acerto e ~+48 por operação. "
             f"Decisão em 20 operações.</i>")
+
+
+# ------------------------------------------------------------ exemplos
+def exemplos(h, cfg=None):
+    """Os gatilhos que esta serie contem, para reenviar como amostra.
+
+    Pula montagens sobrepostas do mesmo jeito que o backtest faz: depois
+    de uma entrada, a varredura retoma DEPOIS dela. Sem isso a mesma
+    entrada aparece por dois caminhos (404 contra 230 em 83 meses).
+
+    Devolve pares (entrada, contexto) -- o contexto montado como ele teria
+    saido na hora da vela de forca, para dar para ver os dois formatos.
+    """
+    cfg = cfg or CFG
+    if len(h) < cfg['lat_jan'] + cfg['pre_jan'] + 60:
+        return []
+    a, mv = exp8.atr(h, 14), exp8.medvol(h, 20)
+    out, corte = [], -1
+    for m in _montagens(h, cfg, a, mv, 0)[::-1]:
+        if m['i'] <= corte:
+            continue
+        alta = m['alta']
+        for k in range(m['k_forca']+1,
+                       min(m['k_forca']+1+cfg['falha_max'], len(h))):
+            hk, lk, ck = h[k][2], h[k][3], h[k][4]
+            if (hk > m['ext']) if alta else (lk < m['ext']):
+                break
+            if not ((ck < m['forca_lim']) if alta else (ck > m['forca_lim'])):
+                continue
+            n = _numeros(h, m, k, a, cfg, ck)
+            if not n:
+                break
+            g = dict(m, **n)
+            g.update(idx=k, vela_ms=h[k][0], atraso=0,
+                     velas_forca=k - m['k_forca'])
+            # e o aviso de radar como ele teria saido na vela de forca
+            kf = m['k_forca']
+            nc = _numeros(h, m, kf, a, cfg, m['forca_lim'])
+            c = None
+            if nc:
+                c = dict(m, **nc)
+                c.update(idx=kf, ref=h[kf][4], horas=0,
+                         falta=cfg['falha_max'], vela_ms=h[kf][0])
+            out.append((g, c))
+            corte = k
+            break
+    return out

@@ -812,6 +812,11 @@ def main():
     ap.add_argument('--explicar', default='',
                     help='par para auditar: lista todo impulso achado e '
                          'onde cada um foi recusado')
+    ap.add_argument('--falha5-ping', action='store_true',
+                    help='manda os ultimos gatilhos do rompimento falso, '
+                         'so para ver o formato da mensagem')
+    ap.add_argument('--falha5-exemplos', type=int, default=2,
+                    help='quantos exemplos mandar com --falha5-ping')
     ap.add_argument('--sem-falha5', action='store_true',
                     help='desliga o quarto alerta (rompimento falso em H1)')
     ap.add_argument('--falha5-top', type=int, default=150,
@@ -836,6 +841,37 @@ def main():
 
     if a.explicar:
         explicar(a.explicar.strip().upper(), a.velas)
+        return
+
+    if a.falha5_ping:
+        # Reenvia os gatilhos mais recentes do rompimento falso, com o
+        # aviso de radar antes de cada um, so para ver o formato.
+        enviar(f"🧪 <b>amostra do quarto alerta</b> — rompimento falso em "
+               f"H1\n<i>gatilhos do histórico recente, reenviados só para "
+               f"você ver o formato. Não é sinal de agora.</i>")
+        amostras = []
+        fila = candidatos(a.falha5_top)
+        diag(f"amostra do rompimento falso em {len(fila)} pares")
+        for sim in fila:
+            try:
+                v = buscar(sim, '1h', 1300)
+            except Exception:
+                continue
+            if len(v) < 500:
+                continue
+            for g, c in falha5.exemplos(v):
+                amostras.append((g['vela_ms'], sim, g, c))
+        amostras.sort(reverse=True, key=lambda x: x[0])
+        diag(f"achou {len(amostras)} gatilho(s) no histórico de 54 dias")
+        if not amostras:
+            enviar("nenhum gatilho do rompimento falso nos últimos 54 dias "
+                   "— o último foi em 12/10, há mais de um mês")
+        for _, sim, g, c in amostras[:a.falha5_exemplos]:
+            if c:
+                enviar(falha5.msg_contexto(sim, c, quando, fmt, msg_mao))
+            enviar(falha5.msg(sim, g, quando, fmt, msg_mao))
+            diag(f"amostra enviada: {sim} {quando(g['vela_ms'])} "
+                 f"R:R 1:{g['rr']:.2f}")
         return
 
     if a.ping:
