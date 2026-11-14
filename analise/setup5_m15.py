@@ -123,9 +123,11 @@ def main():
           f"{', '.join(escolhidos)}")
     if len(top) > a.n:
         print(f"  (baixados e fora do corte: {', '.join(top[a.n:])})")
+    # a piscina de liquidez: o bot chama de liq_janela=120, o backteste
+    # calcula como faixa*2 -- mesmo numero, nome diferente
     print(f"\n  a mesma configuração, contada em VELAS: faixa {cfg['lat_jan']},"
           f" ida até {cfg['ida_max']}, falha até {cfg['falha_max']},"
-          f" piscina {cfg['liq_janela']}, contexto {cfg['pre_jan']}")
+          f" piscina {cfg['lat_jan']*2}, contexto {cfg['pre_jan']}")
     print(f"  em H1 isso é uma faixa de {cfg['lat_jan']}h; "
           f"em M15, de {cfg['lat_jan']/4:.0f}h\n")
 
