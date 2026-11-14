@@ -887,7 +887,7 @@ def main():
         diag(f"amostra da reversão de 8h em {len(fila)} pares")
         for sim in fila:
             v = serie_1h(sim)
-            if len(v) < 500:
+            if len(v) < 500 or not negocia_sempre(v):
                 continue
             for g in rev8.exemplos(v):
                 amostras.append((g['vela_ms'], sim, g))
@@ -912,7 +912,7 @@ def main():
         diag(f"amostra do rompimento falso em {len(fila)} pares")
         for sim in fila:
             v = serie_1h(sim)
-            if len(v) < 500:
+            if len(v) < 500 or not negocia_sempre(v):
                 continue
             for g, c in falha5.exemplos(v):
                 amostras.append((g['vela_ms'], sim, g, c))
@@ -1140,6 +1140,9 @@ def main():
                 v = serie_1h(sim)
                 if len(v) < 500:
                     continue
+                if not negocia_sempre(v):
+                    diag(f"{sim}: fora (não negocia 24/7)")
+                    continue
                 vistos_r += 1
                 h8r = rev8.juntar(v, 8)
                 if h8r:
@@ -1217,6 +1220,9 @@ def main():
             for sim in sorted(set(fila_f5) | abertos_f5):
                 v = serie_1h(sim)
                 if len(v) < 500:
+                    continue
+                if not negocia_sempre(v):
+                    diag(f"{sim}: fora (não negocia 24/7)")
                     continue
                 vistos_f5 += 1
                 s_f5[sim] = v
