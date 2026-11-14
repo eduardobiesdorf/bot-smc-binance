@@ -1,0 +1,69 @@
+name: Setup 5 em 15 minutos
+
+on:
+  workflow_dispatch:
+    inputs:
+      ativos:
+        description: 'Pares (só os principais, para não pesar)'
+        required: false
+        default: 'BTCUSDT,ETHUSDT,SOLUSDT,XRPUSDT,BNBUSDT,DOGEUSDT'
+      inicio:
+        description: 'Mês inicial (YYYY-MM)'
+        required: false
+        default: '2025-01'
+      n:
+        description: 'Quantos ativos entram na conta'
+        required: false
+        default: '5'
+      desde:
+        description: 'Primeiro ano contado'
+        required: false
+        default: '2025'
+
+permissions:
+  contents: write
+
+jobs:
+  m15:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install requests matplotlib
+      - name: Data de hoje
+        id: dia
+        run: echo "d=$(date -u +%Y-%m-%d)" >> $GITHUB_OUTPUT
+      - name: Cache do dado de 15m
+        uses: actions/cache@v4
+        with:
+          path: dados_m15
+          key: m15-${{ inputs.ativos || 'BTCUSDT,ETHUSDT,SOLUSDT,XRPUSDT,BNBUSDT,DOGEUSDT' }}-${{ inputs.inicio || '2025-01' }}-${{ steps.dia.outputs.d }}
+          restore-keys: |
+            m15-${{ inputs.ativos || 'BTCUSDT,ETHUSDT,SOLUSDT,XRPUSDT,BNBUSDT,DOGEUSDT' }}-${{ inputs.inicio || '2025-01' }}-
+
+      - name: Baixar 15m e 1h dos pares principais
+        run: |
+          set -o pipefail
+          A="${{ inputs.ativos || 'BTCUSDT,ETHUSDT,SOLUSDT,XRPUSDT,BNBUSDT,DOGEUSDT' }}"
+          I="${{ inputs.inicio || '2025-01' }}"
+          for iv in 15m 1h; do
+            python -u baixar_futuros.py --ativos "$A" --intervalo $iv \
+              --inicio "$I" --top 20 --pasta dados_m15 2>&1 | tail -20
+          done
+          ls -la dados_m15/ | head -20
+          du -sh dados_m15/
+
+      - name: Rodar o setup 5 nos dois tempos
+        run: |
+          set -o pipefail
+          python -u analise/setup5_m15.py dados_m15 \
+            --n ${{ inputs.n || '5' }} \
+            --desde ${{ inputs.desde || '2025' }} 2>&1 | tee m15.log
+
+      - name: Resumo
+        if: always()
+        run: |
+          { echo '```'; cat m15.log; echo '```'; } >> $GITHUB_STEP_SUMMARY
