@@ -30,8 +30,17 @@ on:
     # no order block e a atualizacao do stop movel saem a cada 4h em vez de
     # 2h.
     #
-    # Em Brasilia os disparos caem as 21h, 01h, 05h, 09h, 13h e 17h.
-    - cron: '1 */4 * * *'
+    # 14/11/2026, mais tarde -- o MINUTO saiu do :01 para o :37. Medido:
+    # enquanto o cron era de hora em hora, disparou 20 a 24 vezes por dia
+    # (88% dos horarios). No dia 14, ja de 2 em 2 horas, disparou 3 de 7.
+    # O minuto :01 e o mais disputado do GitHub inteiro -- todo mundo agenda
+    # na hora cheia -- e a propria historia deste arquivo ja tinha brigado
+    # com isso usando os minutos 1, 11 e 21. O :37 cai no vazio.
+    #
+    # Em Brasilia os disparos caem as 21h37, 01h37, 05h37, 09h37, 13h37 e
+    # 17h37. O GitHub cria a rodada com ate ~50 min de atraso quando esta
+    # cheio, entao o resultado pode sair mais tarde que isso.
+    - cron: '37 */4 * * *'
   workflow_dispatch:
     inputs:
       top:
