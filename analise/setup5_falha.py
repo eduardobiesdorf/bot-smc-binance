@@ -373,7 +373,12 @@ def desenhar(sim, h, g, tf, caminho):
                 xytext=(0, -24 if venda else 16), textcoords='offset points')
     ax.axvline(d(k), color='#ffffff', linewidth=1.0, alpha=.35,
                linestyle='--', zorder=2)
-    ax.annotate('a volta: entrada', (d(k), g['entrada']), color='#ffffff',
+    rot_ent = {'falha': f"a falha do {'topo' if venda else 'fundo'}: entrada",
+               'impulso': 'a 2ª força contrária: entrada',
+               'estrutura': 'perdeu a estrutura da ida: entrada',
+               'forca': 'a vela de força: entrada',
+               }.get(cfg['entrada_em'], 'a volta à faixa: entrada')
+    ax.annotate(rot_ent, (d(k), g['entrada']), color='#ffffff',
                 fontsize=9.5, ha='center', xytext=(0, 14),
                 textcoords='offset points')
     for y, cor, rot in (
