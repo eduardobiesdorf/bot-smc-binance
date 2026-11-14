@@ -33,16 +33,21 @@ jobs:
         with:
           python-version: '3.11'
       - run: pip install requests matplotlib
-      - name: Data de hoje
+      - name: Chave do cache
         id: dia
-        run: echo "d=$(date -u +%Y-%m-%d)" >> $GITHUB_OUTPUT
+        run: |
+          echo "d=$(date -u +%Y-%m-%d)" >> $GITHUB_OUTPUT
+          # a chave de cache do GitHub NAO aceita virgula: resume a lista
+          # de pares num hash curto.
+          A="${{ inputs.ativos || 'BTCUSDT,ETHUSDT,SOLUSDT,XRPUSDT,BNBUSDT,DOGEUSDT' }}"
+          echo "h=$(printf '%s' "$A" | sha1sum | cut -c1-10)" >> $GITHUB_OUTPUT
       - name: Cache do dado de 15m
         uses: actions/cache@v4
         with:
           path: dados_m15
-          key: m15-${{ inputs.ativos || 'BTCUSDT,ETHUSDT,SOLUSDT,XRPUSDT,BNBUSDT,DOGEUSDT' }}-${{ inputs.inicio || '2025-01' }}-${{ steps.dia.outputs.d }}
+          key: m15-${{ steps.dia.outputs.h }}-${{ inputs.inicio || '2025-01' }}-${{ steps.dia.outputs.d }}
           restore-keys: |
-            m15-${{ inputs.ativos || 'BTCUSDT,ETHUSDT,SOLUSDT,XRPUSDT,BNBUSDT,DOGEUSDT' }}-${{ inputs.inicio || '2025-01' }}-
+            m15-${{ steps.dia.outputs.h }}-${{ inputs.inicio || '2025-01' }}-
 
       - name: Baixar 15m e 1h dos pares principais
         run: |
