@@ -5,16 +5,28 @@ name: Radar da varredura (H1)
 
 on:
   schedule:
-    # UM disparo por hora, logo apos o fechamento da vela de H1.
+    # UM disparo a cada DUAS horas, nas horas PARES.
     #
-    # Eram tres (minutos 1, 11 e 21) para driblar a fila do Actions. Medido
-    # em 220 execucoes: com tres, o primeiro resultado da hora saia em 33
-    # min (mediana); com um so, sai em 43. Dez minutos a mais, e a entrada
-    # e por ordem limitada valida 4h, entao nao muda o resultado.
+    # Eram tres por hora (minutos 1, 11 e 21) para driblar a fila do
+    # Actions; depois passou a um por hora. Medido em 220 execucoes: com
+    # tres, o primeiro resultado da hora saia em 33 min (mediana); com um
+    # so, sai em 43. A entrada e por ordem limitada valida 4h, entao nao
+    # muda o resultado.
     #
-    # O que muda e o custo: tres crons gastavam ~4.440 min/mes, e a conta
-    # gratuita da ~2.000. Com um cron sao ~1.540 min/mes, dentro da cota.
-    - cron: '1 * * * *'
+    # 13/11/2026 -- passou para DE 2 EM 2 HORAS. A estimativa antiga de
+    # ~1.540 min/mes com um cron estava baixa: medido em 20 execucoes, cada
+    # varredura leva 3,3 min, o que da 80 min/dia e ~2.399 min/mes. A conta
+    # gratuita da 2.000, entao o bot sozinho ja estourava a cota TODO mes --
+    # e no dia 13/11 estourou de vez e o Actions parou de rodar.
+    #
+    # As horas PARES pegam todo fechamento que interessa, sem perder nada:
+    # o setup 1 roda em H4 (fecha 00/04/08/12/16/20 UTC) e o setup 3 em H8
+    # (fecha 00/08/16 UTC) -- todas pares. O unico custo e que o aviso de
+    # encosto no order block e a atualizacao do stop movel passam a sair a
+    # cada 2h em vez de 1h.
+    #
+    # Novo custo: ~1.200 min/mes, metade da cota gratuita.
+    - cron: '1 */2 * * *'
   workflow_dispatch:
     inputs:
       top:
