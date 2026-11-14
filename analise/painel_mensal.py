@@ -17,7 +17,7 @@ total no fim soma os tres como se rodassem juntos, que e o que o bot faz.
 
 Uso:  python3 painel_mensal.py <pasta> [--ano 2026]
 """
-import argparse, glob, os, statistics, sys
+import argparse, glob, os, statistics, sys, time
 import datetime as dt
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -73,17 +73,38 @@ def falso(h1, sim):
     return ops
 
 
-def rolante(serie, t0, t1, n, gerar):
-    """Re-escolhe o universo a cada trimestre e junta as operacoes."""
-    ops, t = [], t0 + TRI
+def universos(serie, t0, t1, n):
+    """Os N maiores de CADA trimestre, pelo volume do trimestre ANTERIOR.
+
+    Calculado uma vez so e reaproveitado pelos tres setups -- a escolha do
+    universo nao depende de qual setup vai rodar nele.
+    """
+    out, t = [], t0 + TRI
     while t < t1:
-        jan = sorted(serie, key=lambda s: -vol(serie[s], t-TRI, t))[:n]
+        out.append((t, sorted(serie, key=lambda s: -vol(serie[s], t-TRI, t))[:n]))
+        t += TRI
+    return out
+
+
+def rolante(serie, janelas, gerar):
+    """Junta as operacoes do universo rolante, trimestre a trimestre.
+
+    14/11/2026 -- antes isso rodava o backteste do par INTEIRO uma vez por
+    trimestre e descartava tudo que caia fora da janela: 150 pares x 28
+    trimestres = 4200 backtestes para aproveitar 150. Com o setup 1 subindo
+    de 50 para 150 pares a rodada passou de 3 horas. Agora cada par roda UMA
+    vez e o trimestre so filtra o que ja esta pronto. O resultado e o mesmo;
+    muda o tempo.
+    """
+    pronto, ops = {}, []
+    for t, jan in janelas:
         for s in jan:
-            for o in gerar(serie[s], s):
+            if s not in pronto:
+                pronto[s] = gerar(serie[s], s)
+            for o in pronto[s]:
                 ms = o['q'].timestamp()*1000
                 if t <= ms < t + TRI:
                     ops.append(o)
-        t += TRI
     return sorted(ops, key=lambda o: o['q'])
 
 
@@ -153,13 +174,19 @@ def main():
           f"(Brasília) · universo rolante · $100 de risco por operação\n")
 
     cfg1 = dict(bot.CFG)
+    jan = universos(serie, t0, t1, 150)
+    print(f"  universo rolante: {len(jan)} trimestres de 150 pares\n")
+
     g = {}
-    g['setup 1 (H4)'] = rolante(
-        serie, t0, t1, 150,
-        lambda h, s: rodar1(rev.juntar(h, 4), s, cfg1, trailing=True))
-    g['setup 3 (H8)'] = rolante(serie, t0, t1, 150,
-                                lambda h, s: reversao(h, s))
-    g['setup 5 (H1)'] = rolante(serie, t0, t1, 150, falso)
+    for nome, gerar in (
+            ('setup 1 (H4)',
+             lambda h, s: rodar1(rev.juntar(h, 4), s, cfg1, trailing=True)),
+            ('setup 3 (H8)', lambda h, s: reversao(h, s)),
+            ('setup 5 (H1)', falso)):
+        rel = time.time()
+        g[nome] = rolante(serie, jan, gerar)
+        print(f"  {nome}: {len(g[nome])} operações "
+              f"em {time.time()-rel:.0f}s", flush=True)
 
     meses_tot = (t1-t0)/(1000*3600*24*30.4)
     print(f"  OS 7 ANOS INTEIROS ({meses_tot:.0f} meses)")
