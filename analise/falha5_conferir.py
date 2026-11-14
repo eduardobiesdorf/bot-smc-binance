@@ -22,11 +22,19 @@ from explosao import ler
 BRT = dt.timezone(dt.timedelta(hours=-3))
 
 
-def ops_vivo(h, cfg):
-    """Todas as entradas que o modulo do bot enxerga nesta serie."""
+def ops_vivo(h, cfg, pular=True):
+    """Todas as entradas que o modulo do bot enxerga nesta serie.
+
+    `pular` reproduz o que o backtest faz: depois de registrar uma
+    operacao ele retoma a varredura DEPOIS da entrada, entao montagens
+    que comecam antes dela nao contam. Sem isso a mesma entrada aparece
+    por dois caminhos e a frequencia infla (404 contra 230 em 83 meses).
+    """
     a, mv = e8.atr(h, 14), e8.medvol(h, 20)
-    out = []
-    for m in falha5._montagens(h, cfg, a, mv, 0):
+    out, corte = [], -1
+    for m in falha5._montagens(h, cfg, a, mv, 0)[::-1]:
+        if pular and m['i'] <= corte:
+            continue
         alta = m['alta']
         for k in range(m['k_forca']+1,
                        min(m['k_forca']+1+cfg['falha_max'], len(h))):
@@ -38,6 +46,7 @@ def ops_vivo(h, cfg):
             n = falha5._numeros(h, m, k, a, cfg, ck)
             if n:
                 out.append(dict(m, **n, idx=k, vela_ms=h[k][0]))
+                corte = k
             break
     return out
 
@@ -60,11 +69,16 @@ def main():
           f"{dt.datetime.fromtimestamp(fim/1000, BRT):%d/%m/%Y %H:%M} "
           f"(Brasília)\n")
 
-    achados = []
+    achados, crus = [], 0
     for sim, h, _ in cru:
+        crus += len(ops_vivo(h, falha5.CFG, pular=False))
         for g in ops_vivo(h, falha5.CFG):
             achados.append((sim, g))
     achados.sort(key=lambda x: x[1]['vela_ms'])
+    print(f"sem pular montagens sobrepostas seriam {crus} "
+          f"(a mesma entrada por dois caminhos)")
+    cp = sum(1 for _, g in achados if g['lado'] == 'compra')
+    print(f"lados: {cp} compra(s) e {len(achados)-cp} venda(s)")
     meses = max(len(h) for _, h, _ in cru)/(24*30.4)
     print(f"o módulo DO BOT achou {len(achados)} entradas em "
           f"{meses:.0f} meses = {len(achados)/meses:.1f} por mês")
