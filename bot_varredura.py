@@ -939,10 +939,14 @@ def main():
         diag(f"ping em {len(fila_ping)} pares"
              + (" (so os que entraram agora)" if a.novos else ""))
         for sim in fila_ping:
-            v = serie_1h(sim)
-            if len(v) < 500:
+            # A amostra puxa H4 direto, com janela longa (1000 velas = 166
+            # dias). Na varredura ao vivo o H4 sai do H1 ja baixado, o que
+            # da 54 dias -- suficiente para um gatilho de agora, curto
+            # demais para achar um EXEMPLO num setup de 1 operacao/mes.
+            try:
+                h = buscar(sim, '4h', 1000)
+            except Exception:
                 continue
-            h = rev8.juntar(v, 4)
             if len(h) < 150:
                 continue
             a_ = atr(h, CFG['atr_periodo'])
@@ -954,7 +958,8 @@ def main():
         achados.sort(reverse=True, key=lambda x: x[0])
         if not achados:
             diag("nenhum gatilho no historico recente")
-            enviar("nenhum gatilho no histórico recente dos 20 pares")
+            enviar(f"nenhum gatilho da varredura no histórico recente "
+                   f"dos {len(fila_ping)} pares")
             return
         for _, sim, g, h in achados[:a.exemplos]:
             g['nucleo'] = sim in NUCLEO
