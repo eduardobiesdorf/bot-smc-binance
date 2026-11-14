@@ -73,6 +73,7 @@ import requests
 import grafico_varredura as graf
 import acompanhamento as acomp
 import reversao8 as rev8
+import falha5
 
 BRT = timezone(timedelta(hours=-3))
 BASE_URL = "https://data-api.binance.vision/api/v3"
@@ -811,6 +812,10 @@ def main():
     ap.add_argument('--explicar', default='',
                     help='par para auditar: lista todo impulso achado e '
                          'onde cada um foi recusado')
+    ap.add_argument('--sem-falha5', action='store_true',
+                    help='desliga o quarto alerta (rompimento falso em H1)')
+    ap.add_argument('--falha5-top', type=int, default=150,
+                    help='quantas moedas o rompimento falso escaneia')
     ap.add_argument('--sem-reversao8', action='store_true',
                     help='não roda o terceiro alerta (reversão de 8h, '
                          'em teste)')
@@ -1088,6 +1093,81 @@ def main():
             diag(rev8.placar(rev_d).replace('<b>', '').replace('</b>', ''))
         except Exception as e:
             diag(f"reversão 8h falhou, o resto segue: {e}")
+
+    # --- quarto alerta: ROMPIMENTO FALSO em H1 (EM TESTE) -----------
+    # Faixa de 60 velas em cima de um topo JA ROMPIDO, o preco rompe a
+    # faixa para o lado contrario ao contexto com volume, vem a vela de
+    # forca contraria (o aviso), e a FALHA do topo dispara a entrada.
+    # Alvo na piscina de liquidez alem de toda a faixa.
+    #
+    # Reaproveita a mesma serie de 1h que a reversao de 8h ja baixou:
+    # nenhuma requisicao a mais. Estado proprio, em falha5_estado.json.
+    if not a.sem_falha5:
+        try:
+            f5_d = falha5.ler()
+            fila_f5 = candidatos(a.falha5_top)
+            abertos_f5 = {r['sim'] for r in f5_d.values()
+                          if r.get('status') == 'aberto'}
+            s_f5, achados_f5, ctx_f5, vistos_f5 = {}, [], [], 0
+            for sim in sorted(set(fila_f5) | abertos_f5):
+                try:
+                    v = buscar(sim, '1h', 1300)
+                except Exception:
+                    continue
+                if len(v) < 500:
+                    continue
+                vistos_f5 += 1
+                s_f5[sim] = v
+                if sim not in fila_f5:
+                    continue
+                g = falha5.achar(v)
+                if g:
+                    achados_f5.append((sim, g))
+                    diag(f"ROMPIMENTO FALSO {sim} {g['lado']} "
+                         f"vela {quando(g['vela_ms'])} "
+                         f"entrada {fmt(g['entrada'])} "
+                         f"R:R 1:{g['rr']:.2f} "
+                         f"ida {g['excur']:.2f}x volume {g['vol_x']:.1f}x")
+                    continue
+                c = falha5.achar_contexto(v)
+                if c:
+                    ctx_f5.append((sim, c))
+                    diag(f"FORÇA CONTRÁRIA {sim} {c['lado']} "
+                         f"força {quando(c['forca_ms'])} "
+                         f"há {c['horas']}h, faltam {c['falta']} velas "
+                         f"· gatilho abaixo de {fmt(c['forca_lim'])} "
+                         f"· R:R 1:{c['rr']:.2f}")
+            diag(f"rompimento falso: {vistos_f5} pares olhados, "
+                 f"{len(achados_f5)} gatilho(s), "
+                 f"{len(ctx_f5)} força(s) esperando a falha")
+            for sim, g in achados_f5:
+                if not falha5.registrar(f5_d, sim, g):
+                    continue
+                texto = falha5.msg(sim, g, quando, fmt, msg_mao)
+                if a.teste:
+                    print(texto, "\n")
+                else:
+                    enviar(texto)
+            for sim, c in ctx_f5:
+                if not falha5.registrar_contexto(f5_d, sim, c):
+                    continue
+                texto = falha5.msg_contexto(sim, c, quando, fmt, msg_mao)
+                if a.teste:
+                    print(texto, "\n")
+                else:
+                    enviar(texto)
+            for m in falha5.revisar(f5_d, s_f5, fmt, quando):
+                if a.teste:
+                    print(m, "\n")
+                else:
+                    enviar(m)
+                diag("rompimento falso, desfecho: "
+                     + m.replace("\n", " | ")[:140])
+            if not a.teste:
+                falha5.gravar(f5_d)
+            diag(falha5.placar(f5_d).replace('<b>', '').replace('</b>', ''))
+        except Exception as e:
+            diag(f"rompimento falso falhou, o resto segue: {e}")
 
     desfechos = acomp.revisar(acomps, series, CFG, seguir, achar_impulsos,
                               atr, media_volume)

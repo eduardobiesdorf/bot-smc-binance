@@ -81,6 +81,15 @@ on:
         required: false
         default: false
         type: boolean
+      sem_falha5:
+        description: 'Desligar o quarto alerta (rompimento falso em H1, em teste)'
+        required: false
+        default: false
+        type: boolean
+      falha5_top:
+        description: 'Quantas moedas o rompimento falso escaneia'
+        required: false
+        default: '150'
       sem_reversao8:
         description: 'Desligar o terceiro alerta (reversão de 8h, em teste)'
         required: false
@@ -136,6 +145,8 @@ jobs:
           [ "${{ inputs.so_gatilho }}" = "true" ] && ARGS="$ARGS --so-gatilho"
           [ "${{ inputs.teste }}" = "true" ] && ARGS="$ARGS --teste"
           [ "${{ inputs.sem_reversao8 }}" = "true" ] && ARGS="$ARGS --sem-reversao8"
+          [ "${{ inputs.sem_falha5 }}" = "true" ] && ARGS="$ARGS --sem-falha5"
+          ARGS="$ARGS --falha5-top ${{ inputs.falha5_top || '150' }}"
           ARGS="$ARGS --rev-top ${{ inputs.rev_top || '150' }}"
           ARGS="$ARGS --exemplos ${{ inputs.exemplos || '2' }}"
           [ "${{ inputs.novos }}" = "true" ] && ARGS="$ARGS --novos"
@@ -155,7 +166,9 @@ jobs:
                    historico_ao_vivo.csv diagnostico_varredura.txt \
                    resumo_varredura.txt \
                    reversao8_estado.json \
-                   historico_reversao8.csv; do
+                   historico_reversao8.csv \
+                   falha5_estado.json \
+                   historico_falha5.csv; do
             if [ -f "$f" ]; then git add "$f"; fi
           done
           if git diff --cached --quiet; then
