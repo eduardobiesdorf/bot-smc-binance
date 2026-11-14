@@ -30,11 +30,11 @@ on:
   workflow_dispatch:
     inputs:
       top:
-        description: 'Quantos pares escanear (lista de 50; os 20 primeiros são o núcleo)'
+        description: 'Quantos pares escanear na varredura (150 desde 14/11/2026)'
         required: false
-        default: '50'
-      dinamico:
-        description: 'Rankear por volume de 24h em vez da lista fixa'
+        default: '150'
+      fixo:
+        description: 'Usar a lista fixa de 50 em vez do volume vivo'
         required: false
         default: false
         type: boolean
@@ -108,6 +108,15 @@ on:
         description: 'Quantas moedas a reversão escaneia'
         required: false
         default: '150'
+      rev8_ping:
+        description: 'Mandar uma amostra do alerta da reversão de 8h'
+        required: false
+        default: false
+        type: boolean
+      rev8_exemplos:
+        description: 'Quantos exemplos mandar com rev8_ping'
+        required: false
+        default: '2'
       explicar:
         description: 'Auditar um par (ex: ETHUSDT): mostra onde cada impulso foi recusado'
         required: false
@@ -143,14 +152,14 @@ jobs:
           TELEGRAM_CHAT_ID: ${{ secrets.CHAT_ID_TELEGRAM || secrets.TELEGRAM_CHAT_ID }}
         run: |
           set -o pipefail
-          ARGS="--top ${{ inputs.top || '50' }}"
+          ARGS="--top ${{ inputs.top || '150' }}"
           ARGS="$ARGS --rr-min ${{ inputs.rr_min || '1.2' }}"
           ARGS="$ARGS --vol-min ${{ inputs.vol_min || '1.2' }}"
           ARGS="$ARGS --liq-max-r ${{ inputs.liq_max_r || '1.5' }}"
           ARGS="$ARGS --caixa ${{ inputs.caixa || '60' }}"
           ARGS="$ARGS --risco-pct ${{ inputs.risco_pct || '2' }}"
           ARGS="$ARGS --alav ${{ inputs.alav || '8' }}"
-          [ "${{ inputs.dinamico }}" = "true" ] && ARGS="$ARGS --dinamico"
+          [ "${{ inputs.fixo }}" = "true" ] && ARGS="$ARGS --fixo"
           [ "${{ inputs.so_gatilho }}" = "true" ] && ARGS="$ARGS --so-gatilho"
           [ "${{ inputs.teste }}" = "true" ] && ARGS="$ARGS --teste"
           [ "${{ inputs.sem_reversao8 }}" = "true" ] && ARGS="$ARGS --sem-reversao8"
@@ -159,6 +168,8 @@ jobs:
           ARGS="$ARGS --falha5-exemplos ${{ inputs.falha5_exemplos || '2' }}"
           ARGS="$ARGS --falha5-top ${{ inputs.falha5_top || '150' }}"
           ARGS="$ARGS --rev-top ${{ inputs.rev_top || '150' }}"
+          [ "${{ inputs.rev8_ping }}" = "true" ] && ARGS="$ARGS --rev8-ping"
+          ARGS="$ARGS --rev8-exemplos ${{ inputs.rev8_exemplos || '2' }}"
           ARGS="$ARGS --exemplos ${{ inputs.exemplos || '2' }}"
           [ "${{ inputs.novos }}" = "true" ] && ARGS="$ARGS --novos"
           [ -n "${{ inputs.explicar }}" ] && ARGS="$ARGS --explicar ${{ inputs.explicar }}"

@@ -133,6 +133,31 @@ def buscar(simbolo, interval='1h', limite=400):
              float(c[5])] for c in r.json() if int(c[6]) < agora]
 
 
+# 14/11/2026 -- UMA serie de 1h por par, por rodada. Antes a reversao de 8h
+# e o rompimento falso baixavam 1h/1300 cada um, e a varredura baixava
+# 4h/400 por fora: 350 requisicoes para 150 pares. Agora sao 150. O H4 e o
+# H8 saem da MESMA serie, do mesmo jeito que o backtest faz (rev8.juntar).
+_CACHE_1H = {}
+_CACHE_CAND = {}
+
+
+def serie_1h(sim, limite=1300):
+    """1300 velas de 1h (54 dias) por par, baixadas uma unica vez."""
+    if sim not in _CACHE_1H:
+        try:
+            _CACHE_1H[sim] = buscar(sim, '1h', limite)
+        except Exception:
+            _CACHE_1H[sim] = []
+    return _CACHE_1H[sim]
+
+
+def fila_viva(n):
+    """candidatos(n) com cache: os tres alertas pedem a mesma lista."""
+    if n not in _CACHE_CAND:
+        _CACHE_CAND[n] = candidatos(n)
+    return _CACHE_CAND[n]
+
+
 # Nao sao cripto: stablecoins, commodities e acoes tokenizadas. As acoes
 # na Binance levam um B no fim do ticker (SNDKB = SanDisk, INTCB = Intel,
 # CRCLB = Circle). Elas seguem o pregao de Nova York, ficam paradas no fim
@@ -726,12 +751,12 @@ def explicar(sim, velas=400):
     Serve para responder 'por que nao veio gatilho em X'. Usa exatamente a
     mesma funcao seguir() do bot, so que pedindo o motivo da recusa.
     """
-    h = buscar(sim, CFG['tf'], velas)
+    h = rev8.juntar(serie_1h(sim), 4)
     if not h:
         diag(f"{sim}: nao consegui o historico")
         return
     a, mv = atr(h, CFG['atr_periodo']), media_volume(h, CFG['vol_periodo'])
-    diag(f"{sim}: {len(h)} velas de H1, de {quando(h[0][0])} "
+    diag(f"{sim}: {len(h)} velas de H4, de {quando(h[0][0])} "
          f"a {quando(h[-1][0])} (Brasília)")
     diag(f"filtros: R:R>={CFG['rr_min']}  volume da varredura>="
          f"{CFG['vol_varr_min']}x  piscina<={CFG['liq_max_r']}R  "
@@ -788,9 +813,12 @@ def depois(h, r):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument('--top', type=int, default=50)
+    ap.add_argument('--top', type=int, default=150,
+                    help='pares da varredura; era 50 até 14/11/2026')
+    ap.add_argument('--fixo', action='store_true',
+                    help='usar a lista fixa UNIVERSO em vez do volume vivo')
     ap.add_argument('--dinamico', action='store_true',
-                    help='rankear por volume de 24h em vez da lista fixa')
+                    help='(sem efeito: o volume vivo agora é o padrão)')
     ap.add_argument('--rr-min', type=float, default=CFG['rr_min'])
     ap.add_argument('--vol-min', type=float, default=CFG['vol_varr_min'],
                     help='volume minimo da vela que varre, x a media de 20')
@@ -826,6 +854,11 @@ def main():
                          'em teste)')
     ap.add_argument('--rev-top', type=int, default=150,
                     help='quantas moedas a reversão escaneia')
+    ap.add_argument('--rev8-ping', action='store_true',
+                    help='manda os gatilhos mais recentes da reversão de 8h '
+                         'só para ver o formato da mensagem')
+    ap.add_argument('--rev8-exemplos', type=int, default=2,
+                    help='quantos gatilhos da reversão mandar no --rev8-ping')
     ap.add_argument('--velas', type=int, default=400,
                     help='quantas velas de H1 puxar no --explicar')
     a = ap.parse_args()
@@ -843,6 +876,31 @@ def main():
         explicar(a.explicar.strip().upper(), a.velas)
         return
 
+    if a.rev8_ping:
+        # Reenvia os gatilhos mais recentes da reversao de 8h, so para ver
+        # o formato. Nao e sinal de agora.
+        enviar("🧪 <b>amostra do terceiro alerta</b> — reversão de 8h\n"
+               "<i>gatilhos do histórico recente, reenviados só para você "
+               "ver o formato. Não é sinal de agora.</i>")
+        amostras = []
+        fila = fila_viva(a.rev_top)
+        diag(f"amostra da reversão de 8h em {len(fila)} pares")
+        for sim in fila:
+            v = serie_1h(sim)
+            if len(v) < 500:
+                continue
+            for g in rev8.exemplos(v):
+                amostras.append((g['vela_ms'], sim, g))
+        amostras.sort(reverse=True, key=lambda x: x[0])
+        diag(f"achou {len(amostras)} gatilho(s) no histórico de 54 dias")
+        if not amostras:
+            enviar("nenhum gatilho da reversão de 8h nos últimos 54 dias")
+        for _, sim, g in amostras[:a.rev8_exemplos]:
+            enviar(rev8.msg(sim, g, quando, fmt, msg_mao))
+            diag(f"amostra enviada: {sim} {quando(g['vela_ms'])} "
+                 f"R:R 1:{g['rr']:.2f}")
+        return
+
     if a.falha5_ping:
         # Reenvia os gatilhos mais recentes do rompimento falso, com o
         # aviso de radar antes de cada um, so para ver o formato.
@@ -850,13 +908,10 @@ def main():
                f"H1\n<i>gatilhos do histórico recente, reenviados só para "
                f"você ver o formato. Não é sinal de agora.</i>")
         amostras = []
-        fila = candidatos(a.falha5_top)
+        fila = fila_viva(a.falha5_top)
         diag(f"amostra do rompimento falso em {len(fila)} pares")
         for sim in fila:
-            try:
-                v = buscar(sim, '1h', 1300)
-            except Exception:
-                continue
+            v = serie_1h(sim)
             if len(v) < 500:
                 continue
             for g, c in falha5.exemplos(v):
@@ -879,14 +934,15 @@ def main():
         # manda tambem o gatilho mais recente do historico, so para voce ver
         # o formato da mensagem e para eu confirmar que a imagem passa.
         achados = []
-        fila_ping = NOVOS if a.novos else UNIVERSO[:a.top]
+        fila_ping = NOVOS if a.novos else (UNIVERSO[:a.top] if a.fixo
+                                           else fila_viva(a.top))
         diag(f"ping em {len(fila_ping)} pares"
              + (" (so os que entraram agora)" if a.novos else ""))
         for sim in fila_ping:
-            try:
-                h = buscar(sim, CFG['tf'], 400)
-            except Exception:
+            v = serie_1h(sim)
+            if len(v) < 500:
                 continue
+            h = rev8.juntar(v, 4)
             if len(h) < 150:
                 continue
             a_ = atr(h, CFG['atr_periodo'])
@@ -917,15 +973,25 @@ def main():
     series = {}          # o acompanhamento reusa estas velas, sem rebaixar
     acomps = acomp.ler()
 
-    fila = candidatos(a.top * 3) if a.dinamico else UNIVERSO[:a.top]
+    # 14/11/2026 -- de 50 para 150 pares, e o H4 montado a partir do H1.
+    # Medido no universo rolante de 7 anos, a config exata do bot:
+    #    50 moedas  20 op  40,0% de acerto  1:2,97  +27,70/op  z/LOTE +0,62
+    #   100 moedas  47 op  40,4%            1:3,26  +54,00/op  z/LOTE +1,75
+    #   150 moedas  56 op  42,9%            1:3,25  +61,30/op  z/LOTE +1,93
+    #   300 moedas  80 op  42,5%            1:3,38  +66,00/op  z/LOTE +2,37
+    # Nas 50 o maior lote valia 108% do lucro: TUDO vinha de um punhado de
+    # operacoes e o resto era negativo (2 anos positivos de 5). A partir de
+    # 100 o setup passa a provar algo: 5 anos positivos de 6, concentracao
+    # de 23-35%. A faixa 51-300, que o bot nao via, paga +78,70/op contra
+    # +27,70 da faixa que ele via. Ver analise/setup1_universo.py.
+    fila = UNIVERSO[:a.top] if a.fixo else fila_viva(a.top)
     for sim in fila:
         if len(usados) >= a.top:
             break
-        try:
-            h = buscar(sim, CFG['tf'], 400)
-        except Exception as e:
-            diag(f"{sim}: erro ao buscar ({e})")
+        v = serie_1h(sim)
+        if len(v) < 500:
             continue
+        h = rev8.juntar(v, 4)
         if len(h) < 150:
             continue
         if not negocia_sempre(h):
@@ -1012,10 +1078,11 @@ def main():
     pendentes = {r['sim'] for r in acomps.values()
                  if r.get('status') == 'aberto'} - set(series)
     for sim in sorted(pendentes):
-        try:
-            series[sim] = buscar(sim, CFG['tf'], 400)
-        except Exception as e:
-            diag(f"{sim}: nao revisei o aviso aberto ({e})")
+        v = serie_1h(sim)
+        if len(v) < 500:
+            diag(f"{sim}: nao revisei o aviso aberto (sem histórico)")
+            continue
+        series[sim] = rev8.juntar(v, 4)
 
     for sim, g, _ in novos:
         acomp.registrar_gatilho(acomps, sim, g)
@@ -1059,16 +1126,13 @@ def main():
     if not a.sem_reversao8:
         try:
             rev_d = rev8.ler()
-            fila_rev = candidatos(a.rev_top)
+            fila_rev = fila_viva(a.rev_top)
             abertos_rev = {r['sim'] for r in rev_d.values()
                            if r.get('status') == 'aberto'}
             s8r, achados_r, vistos_r = {}, [], 0
             encostos_r = []
             for sim in sorted(set(fila_rev) | abertos_rev):
-                try:
-                    v = buscar(sim, '1h', 1300)
-                except Exception:
-                    continue
+                v = serie_1h(sim)
                 if len(v) < 500:
                     continue
                 vistos_r += 1
@@ -1141,15 +1205,12 @@ def main():
     if not a.sem_falha5:
         try:
             f5_d = falha5.ler()
-            fila_f5 = candidatos(a.falha5_top)
+            fila_f5 = fila_viva(a.falha5_top)
             abertos_f5 = {r['sim'] for r in f5_d.values()
                           if r.get('status') == 'aberto'}
             s_f5, achados_f5, ctx_f5, vistos_f5 = {}, [], [], 0
             for sim in sorted(set(fila_f5) | abertos_f5):
-                try:
-                    v = buscar(sim, '1h', 1300)
-                except Exception:
-                    continue
+                v = serie_1h(sim)
                 if len(v) < 500:
                     continue
                 vistos_f5 += 1

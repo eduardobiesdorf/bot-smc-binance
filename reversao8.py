@@ -494,6 +494,26 @@ def registrar_encosto(d, sim, g):
     return True
 
 
+def exemplos(h1, cfg=None):
+    """TODOS os gatilhos do historico desta serie, do mais antigo ao mais
+    novo. Mesma deteccao do achar(), sem o corte de recencia -- serve para
+    mandar uma amostra no Telegram e ver o formato da mensagem."""
+    cfg = cfg or CFG
+    h8 = juntar(h1, cfg['tf_h'])
+    if len(h8) < 60 or len(h1) < 200:
+        return []
+    mv1 = exp8.medvol(h1, 20)
+    pos1 = {v[0]: k for k, v in enumerate(h1)}
+    out = []
+    for e in explosoes(h8, cfg):
+        g = entrada(h1, mv1, e, cfg, pos1)
+        if g:
+            g['atraso'] = len(h1) - 1 - g['idx']
+            out.append(g)
+    out.sort(key=lambda g: g['vela_ms'])
+    return out
+
+
 def achar(h1, cfg=None, atraso_max=1):
     """O gatilho que acabou de fechar, se houver."""
     cfg = cfg or CFG
