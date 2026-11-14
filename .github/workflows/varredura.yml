@@ -1,11 +1,12 @@
 name: Radar da varredura (H1)
 
-# Escaneia os 20 pares USDT de maior volume procurando a varredura do
-# order block. NAO opera -- e radar para voce olhar o grafico.
+# Escaneia os 150 pares USDT de maior volume procurando a varredura do
+# order block, a reversao de 8h e o rompimento falso. NAO opera -- e radar
+# para voce olhar o grafico.
 
 on:
   schedule:
-    # UM disparo a cada DUAS horas, nas horas PARES.
+    # UM disparo a cada QUATRO horas: 00/04/08/12/16/20 UTC.
     #
     # Eram tres por hora (minutos 1, 11 e 21) para driblar a fila do
     # Actions; depois passou a um por hora. Medido em 220 execucoes: com
@@ -13,20 +14,24 @@ on:
     # so, sai em 43. A entrada e por ordem limitada valida 4h, entao nao
     # muda o resultado.
     #
-    # 13/11/2026 -- passou para DE 2 EM 2 HORAS. A estimativa antiga de
-    # ~1.540 min/mes com um cron estava baixa: medido em 20 execucoes, cada
-    # varredura leva 3,3 min, o que da 80 min/dia e ~2.399 min/mes. A conta
-    # gratuita da 2.000, entao o bot sozinho ja estourava a cota TODO mes --
-    # e no dia 13/11 estourou de vez e o Actions parou de rodar.
+    # 13/11/2026 -- passou para de 2 em 2 horas, porque a estimativa antiga
+    # de ~1.540 min/mes estava baixa e o bot sozinho ja estourava a cota.
     #
-    # As horas PARES pegam todo fechamento que interessa, sem perder nada:
-    # o setup 1 roda em H4 (fecha 00/04/08/12/16/20 UTC) e o setup 3 em H8
-    # (fecha 00/08/16 UTC) -- todas pares. O unico custo e que o aviso de
-    # encosto no order block e a atualizacao do stop movel passam a sair a
-    # cada 2h em vez de 1h.
+    # 14/11/2026 -- passou para DE 4 EM 4 HORAS. Medido nas 452 rodadas de
+    # novembro: 3,2 min por varredura, e o GitHub cobra arredondando para
+    # cima, ou seja 4 min por rodada. De 2 em 2 horas eram 12 rodadas/dia =
+    # 48 min/dia = ~1.440 min/mes; somando a pesquisa, novembro fechou em
+    # 2.825 min contra 2.000 da cota gratuita de repositorio privado.
+    # De 4 em 4 horas sao 6 rodadas/dia = 24 min/dia = ~720 min/mes.
     #
-    # Novo custo: ~1.200 min/mes, metade da cota gratuita.
-    - cron: '1 */2 * * *'
+    # Nao perde fechamento nenhum: o setup 1 roda em H4 (fecha
+    # 00/04/08/12/16/20 UTC, exatamente estas horas) e o setup 3 em H8
+    # (fecha 00/08/16 UTC, um subconjunto). O custo e que o aviso de encosto
+    # no order block e a atualizacao do stop movel saem a cada 4h em vez de
+    # 2h.
+    #
+    # Em Brasilia os disparos caem as 21h, 01h, 05h, 09h, 13h e 17h.
+    - cron: '1 */4 * * *'
   workflow_dispatch:
     inputs:
       top:
