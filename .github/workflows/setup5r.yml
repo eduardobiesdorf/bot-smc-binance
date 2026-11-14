@@ -11,6 +11,11 @@ on:
         description: 'Tamanho do universo por trimestre'
         required: false
         default: '150'
+      so_universo:
+        description: 'So a config do bot, variando o universo de 150 a 300'
+        required: false
+        default: false
+        type: boolean
 
 permissions:
   contents: write
@@ -39,7 +44,9 @@ jobs:
         run: |
           set -o pipefail
           python -u analise/setup5_rolante.py dados_universo \
-            --n ${{ inputs.n || '150' }} 2>&1 | tee s5r.log
+            --n ${{ inputs.n || '150' }} \
+            ${{ inputs.so_universo == true && '--so-universo' || '' }} \
+            2>&1 | tee s5r.log
       - name: Resumo
         if: always()
         run: |

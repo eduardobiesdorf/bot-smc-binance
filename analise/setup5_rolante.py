@@ -22,6 +22,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import explosao8 as e8
 import setup5_falha as s5
+import falha5
 from explosao import ler, RISCO, TAXA, FUND8
 from lista_operacoes import vol, TRI, BRT
 from alvo_lote import z_de
@@ -111,6 +112,9 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('pasta')
     ap.add_argument('--n', type=int, default=150)
+    ap.add_argument('--so-universo', action='store_true',
+                    help='so a configuracao do bot, variando o tamanho '
+                         'do universo de 150 a 300')
     a = ap.parse_args()
     serie = {}
     for p in sorted(glob.glob(os.path.join(a.pasta, '*_1h.csv'))):
@@ -148,6 +152,21 @@ def main():
           "do trimestre ANTERIOR.\n  z/op assume que as operações são "
           "independentes — elas não são. O z/LOTE é o que vale:\n  ele "
           "agrupa tudo que cai dentro de 14 dias e conta o sinal do lote.\n")
+    if a.so_universo:
+        # A pergunta do Eduardo: a borda aguenta mais moedas? Os dois
+        # exemplos que foram para o Telegram (SPCXB e MUB) nem existem no
+        # arquivo do backtest -- o bot ao vivo ja olha mais gente do que a
+        # analise mediu. Roda a configuracao EXATA do bot (falha5.CFG),
+        # variando so o tamanho do universo.
+        cfg_bot = dict(s5.CFG5, **{k: v for k, v in falha5.CFG.items()
+                                   if k in s5.CFG5})
+        print("  O TAMANHO DO UNIVERSO, com a configuração do bot\n")
+        cab()
+        for nn in (150, 200, 250, 300):
+            a.n = nn
+            painel(f"as {nn} maiores", rolante(cfg_bot), meses)
+        print()
+        return
     guard = {}
     for rot, cfg in CANDIDATAS:
         guard[rot] = rolante(cfg)
