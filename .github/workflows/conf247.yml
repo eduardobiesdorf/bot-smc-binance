@@ -1,0 +1,29 @@
+name: Conferir quem nao e cripto 24/7
+
+on:
+  workflow_dispatch:
+    inputs:
+      n:
+        description: 'Quantos pares da fila conferir'
+        required: false
+        default: '150'
+
+jobs:
+  c247:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install requests
+      - name: Conferir
+        run: |
+          set -o pipefail
+          python -u analise/conferir_24x7.py --n ${{ inputs.n || '150' }} \
+            2>&1 | tee c247.log
+      - name: Resumo
+        if: always()
+        run: |
+          { echo '```'; cat c247.log; echo '```'; } >> $GITHUB_STEP_SUMMARY
