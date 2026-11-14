@@ -1,0 +1,46 @@
+name: Conferir o modulo ao vivo do setup 5
+
+on:
+  workflow_dispatch:
+    inputs:
+      inicio:
+        description: 'Mês inicial (YYYY-MM)'
+        required: false
+        default: '2020-01'
+      n:
+        description: 'Tamanho do universo por trimestre'
+        required: false
+        default: '150'
+
+permissions:
+  contents: write
+
+jobs:
+  f5c:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install requests matplotlib
+      - name: Data de hoje
+        id: dia
+        run: echo "d=$(date -u +%Y-%m-%d)" >> $GITHUB_OUTPUT
+      - name: Cache dos klines
+        uses: actions/cache@v4
+        with:
+          path: dados_universo
+          key: universo-${{ inputs.inicio || '2020-01' }}-${{ steps.dia.outputs.d }}
+          restore-keys: |
+            universo-${{ inputs.inicio || '2020-01' }}-
+      - name: Rodar
+        run: |
+          set -o pipefail
+          python -u analise/falha5_conferir.py dados_universo \
+            --n ${{ inputs.n || '150' }} 2>&1 | tee f5c.log
+      - name: Resumo
+        if: always()
+        run: |
+          { echo '```'; cat f5c.log; echo '```'; } >> $GITHUB_STEP_SUMMARY
