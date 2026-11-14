@@ -32,11 +32,16 @@ from explosao import ler, RISCO, TAXA, FUND8
 
 BRT = dt.timezone(dt.timedelta(hours=-3))
 
+# 13/11/2026 -- A CONFIGURACAO QUE PASSOU NO UNIVERSO ROLANTE.
+# z por LOTE +2.57, o melhor da tabela; rebaixamento de \$1,032; e o maior
+# lote de 14 dias responde por 22% do lucro, contra 63% da versao sem
+# contexto -- que parecia ganhar mais mas era um evento so disfarcado de
+# estrategia.
 CFG5 = dict(
     lat_jan=60,        # velas da lateralidade. 150 velas (6 dias) perdeu nas OITO
                        # combinacoes testadas, de -18 a -26 por operacao; 30 velas
                        # nao e faixa, e ruido. O ponto doce e 60 velas = 2,5 dias
-    aperto=0.70,       # o quanto a faixa e mais estreita que o normal.
+    aperto=1.00,       # o quanto a faixa e mais estreita que o normal.
                        # Uma janela de L velas anda ~raiz(L) volatilidades por
                        # natureza: 5.5 em 30 velas, 12.2 em 150. Entao o limite e
                        # aperto*raiz(L) volatilidades -- escala sozinho com a
@@ -60,7 +65,7 @@ CFG5 = dict(
                        # cima (risco 5.80%). Ela e o ALERTA: tem de avisar na
                        # hora. 99 = sem trava, como estava
     falha_max=16,      # velas para a falha e a volta acontecerem
-    entrada_em='volta',# ONDE entrar. O Eduardo: 'quero uma minima confirmacao
+    entrada_em='falha',# ONDE entrar. O Eduardo: 'quero uma minima confirmacao
                        # que o preco esta revertendo'. Quatro gatilhos com
                        # confirmacao, mais um controle sem nenhuma:
                        #   'volta'     fecha de volta dentro da faixa (original;
@@ -82,12 +87,12 @@ CFG5 = dict(
                        # 1.0 = a borda oposta, 0.5 = o meio da faixa
     pre_jan=300,       # velas de historico ANTES da faixa, onde se procura o topo
                        # ou fundo anterior que a faixa rompeu
-    pre_pivo=10,       # quantas velas de cada lado definem o pivo. 'Mais
+    pre_pivo=20,       # quantas velas de cada lado definem o pivo. 'Mais
                        # expressivo' e isto -- um topo que e o mais alto de 21
                        # velas --, nao a maxima absoluta da janela
-    pre_folga=0.0,     # o quanto a faixa tem de estar LIMPA do nivel rompido,
+    pre_folga=0.5,     # o quanto a faixa tem de estar LIMPA do nivel rompido,
                        # medido na altura dela. 0.0 = so nao pode encostar
-    pre_modo='off',    # o contexto, pedido pelo Eduardo: a faixa aconteceu DEPOIS
+    pre_modo='alinhado',    # o contexto, pedido pelo Eduardo: a faixa aconteceu DEPOIS
                        # de romper um topo/fundo anterior mais expressivo?
                        #   'off'       -- sem filtro
                        #   'qualquer'  -- exige contexto, de qualquer lado

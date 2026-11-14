@@ -30,21 +30,35 @@ from venda_topo import lotes_de
 # As duas candidatas que sairam do empilhamento, mais os controles.
 BASE = dict(s5.CFG5, lat_jan=60, stop_em='extremo', alvo_em='piscina',
             pre_pivo=20, forca_apos=4)
+ALINHADO = dict(BASE, aperto=1.00, pre_modo='alinhado')
 CANDIDATAS = [
+    # A COMBINADA e o que eu recomendei: folga 0.5 JUNTO com sem trava de
+    # forca. Nunca tinha sido medida -- juntei o melhor de duas linhas
+    # diferentes, o que e exatamente o tipo de coisa que nao se faz sem medir.
+    ('>> COMBINADA  falha, folga 0.5, sem trava',
+     dict(ALINHADO, entrada_em='falha', pre_folga=0.5, forca_apos=99)),
     ('FREQUÊNCIA  1.20x falha',
      dict(BASE, aperto=1.20, pre_modo='alinhado', entrada_em='falha')),
     ('TRANQUILIDADE  1.00x falha folga 0.5',
-     dict(BASE, aperto=1.00, pre_modo='alinhado', entrada_em='falha',
-          pre_folga=0.5)),
-    ('— sem contexto (controle)',
-     dict(BASE, aperto=1.00, pre_modo='off', entrada_em='falha')),
-    ('— CONTRA o contexto (controle)',
-     dict(BASE, aperto=1.00, pre_modo='contra', entrada_em='falha')),
+     dict(ALINHADO, entrada_em='falha', pre_folga=0.5)),
     ('— sem a trava da força',
-     dict(BASE, aperto=1.00, pre_modo='alinhado', entrada_em='falha',
+     dict(ALINHADO, entrada_em='falha', forca_apos=99)),
+    # Os dois pares abaixo comparam FALHA x VOLTA com TUDO o mais igual,
+    # que e o que faltou na primeira tabela.
+    ('— falha, sem trava, folga 0.0',
+     dict(ALINHADO, entrada_em='falha', forca_apos=99, pre_folga=0.0)),
+    ('— volta, sem trava, folga 0.0',
+     dict(ALINHADO, entrada_em='volta', forca_apos=99, pre_folga=0.0)),
+    ('— falha, sem trava, folga 0.5',
+     dict(ALINHADO, entrada_em='falha', forca_apos=99, pre_folga=0.5)),
+    ('— volta, sem trava, folga 0.5',
+     dict(ALINHADO, entrada_em='volta', forca_apos=99, pre_folga=0.5)),
+    ('— sem contexto (controle)',
+     dict(BASE, aperto=1.00, pre_modo='off', entrada_em='falha',
           forca_apos=99)),
-    ('— entrada na volta (o antigo)',
-     dict(BASE, aperto=1.00, pre_modo='alinhado', entrada_em='volta')),
+    ('— CONTRA o contexto (controle)',
+     dict(BASE, aperto=1.00, pre_modo='contra', entrada_em='falha',
+          forca_apos=99)),
 ]
 
 
@@ -134,9 +148,36 @@ def main():
           "do trimestre ANTERIOR.\n  z/op assume que as operações são "
           "independentes — elas não são. O z/LOTE é o que vale:\n  ele "
           "agrupa tudo que cai dentro de 14 dias e conta o sinal do lote.\n")
-    cab()
+    guard = {}
     for rot, cfg in CANDIDATAS:
-        painel(rot, rolante(cfg), meses)
+        guard[rot] = rolante(cfg)
+
+    print(f"{'='*150}\n  OS 7 ANOS INTEIROS\n{'='*150}")
+    cab()
+    for rot, _ in CANDIDATAS:
+        painel(rot, guard[rot], meses)
+
+    # O Eduardo: 'de 2025 para tras ja e muito tempo, ja e um outro tipo de
+    # mercado'. Entao o recorte recente, por conta propria.
+    for ini in (2025, 2026):
+        ops_f = {r: [o for o in v if o['q'].year >= ini]
+                 for r, v in guard.items()}
+        m = max((max(o['q'] for o in v) - min(o['q'] for o in v)).days/30.4
+                for v in ops_f.values() if v)
+        print(f"\n{'='*150}\n  SÓ DE {ini} PARA CÁ  ({m:.0f} meses)\n{'='*150}")
+        cab()
+        for rot, _ in CANDIDATAS:
+            painel(rot, ops_f[rot], m)
+
+    # E o ano a ano das tres que interessam
+    print(f"\n{'='*150}\n  ANO A ANO\n{'='*150}")
+    anos = sorted({o['q'].year for v in guard.values() for o in v})
+    for rot, _ in CANDIDATAS[:4]:
+        print(f"\n  {rot}")
+        cab(larg=38)
+        for y in anos:
+            painel(f"    {y}", [o for o in guard[rot] if o['q'].year == y],
+                   12)
     print()
 
 
