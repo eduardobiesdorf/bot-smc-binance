@@ -1,8 +1,8 @@
-início 14/11 10:48 BRT
+início 14/11 10:59 BRT
 TOKEN: ok 46 chars | CHAT_ID: ok 10 chars
-HTTP 200: {"ok":true,"result":{"message_id":346,"from":{"id":9205915638,"is_bot":true,"first_name":"SMC Trading Bot","username":"smc_crypto_alerts_bot"},"chat":{"id":[removido],"first_name":"Eduardo","last_name
+HTTP 200: {"ok":true,"result":{"message_id":348,"from":{"id":9205915638,"is_bot":true,"first_name":"SMC Trading Bot","username":"smc_crypto_alerts_bot"},"chat":{"id":[removido],"first_name":"Eduardo","last_name
 amostra da reversão de 8h em 150 pares
-achou 3 gatilho(s) no histórico de 54 dias
+achou 1 gatilho(s) no histórico de 54 dias
 TOKEN: ok 46 chars | CHAT_ID: ok 10 chars
-HTTP 200: {"ok":true,"result":{"message_id":347,"from":{"id":9205915638,"is_bot":true,"first_name":"SMC Trading Bot","username":"smc_crypto_alerts_bot"},"chat":{"id":[removido],"first_name":"Eduardo","last_name
-amostra enviada: BMNRBUSDT 24/10 13:00 R:R 1:2.01
+HTTP 200: {"ok":true,"result":{"message_id":349,"from":{"id":9205915638,"is_bot":true,"first_name":"SMC Trading Bot","username":"smc_crypto_alerts_bot"},"chat":{"id":[removido],"first_name":"Eduardo","last_name
+amostra enviada: JUPUSDT 23/10 22:00 R:R 1:2.06
