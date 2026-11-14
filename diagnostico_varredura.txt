@@ -1,21 +1,8 @@
-início 14/11 03:55 BRT
-PENGUUSDT: gatilho antigo (237 velas atrás)
+início 14/11 07:27 BRT
+PENGUUSDT: gatilho antigo (238 velas atrás)
 pares (50): BTCUSDT, ETHUSDT, SOLUSDT, XRPUSDT, DOGEUSDT, HYPEUSDT, SUIUSDT, BNBUSDT, ADAUSDT, ZECUSDT, ENAUSDT, LINKUSDT, AVAXUSDT, LTCUSDT, TRUMPUSDT, AAVEUSDT, WLDUSDT, TAOUSDT, NEARUSDT, BCHUSDT, FILUSDT, PUMPUSDT, UNIUSDT, DOTUSDT, ASTERUSDT, ONDOUSDT, PENGUUSDT, TRXUSDT, CRVUSDT, ARBUSDT, XLMUSDT, APTUSDT, TIAUSDT, HBARUSDT, OPUSDT, XPLUSDT, VIRTUALUSDT, FETUSDT, INJUSDT, WLFIUSDT, TONUSDT, SEIUSDT, EIGENUSDT, ICPUSDT, PENDLEUSDT, ZROUSDT, REUSDT, POLUSDT, DASHUSDT, STRKUSDT
 gatilhos 0 | cenários 0
 reversão 8h: 150 pares olhados, 0 gatilho(s), 0 encosto(s) esperando
 🧪 reversão de 8h em teste: 0 aberta(s), nenhuma resolvida ainda
-enviados 0 gatilhos, 0 desfechos
-placar (H4, desde 13/11)  0 gatilhos (0 abertos)  ·  48 cenários, 36 encerrados sem entrada  ·  <i>9 do H1 antigo, fora da conta</i>
-por que os cenários morreram:
-  12x  nem varreu o order block nem chegou perto dele
-  8x  furou o order block fundo demais (> 2.5 ATR): virou continuação, não varredura
-  6x  varreu mas não reverteu em 4 velas
-  2x  varredura com 1.02x o volume médio, mínimo 1.20x — não vira gatilho
-  1x  varredura com 0.86x o volume médio, mínimo 1.20x — não vira gatilho
-  1x  varredura com 0.63x o volume médio, mínimo 1.20x — não vira gatilho
-  1x  piscina a 1.7R da entrada, máximo 1.5R
-  1x  piscina a 4.6R da entrada, máximo 1.5R
-  1x  piscina a 1.9R da entrada, máximo 1.5R
-  1x  varredura com 0.85x o volume médio, mínimo 1.20x — não vira gatilho
-  1x  piscina a 1.6R da entrada, máximo 1.5R
-  1x  piscina a 4.7R da entrada, máximo 1.5R
+rompimento falso: 150 pares olhados, 0 gatilho(s), 0 força(s) esperando a falha
+🧪 rompimento falso em teste: 0 aberta(s), nenhuma resolvida ainda
