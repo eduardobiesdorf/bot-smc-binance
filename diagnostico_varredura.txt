@@ -1,10 +1,24 @@
-início 14/11 11:02 BRT
-TOKEN: ok 46 chars | CHAT_ID: ok 10 chars
-HTTP 200: {"ok":true,"result":{"message_id":350,"from":{"id":9205915638,"is_bot":true,"first_name":"SMC Trading Bot","username":"smc_crypto_alerts_bot"},"chat":{"id":[removido],"first_name":"Eduardo","last_name
-amostra do rompimento falso em 150 pares
-achou 4 gatilho(s) no histórico de 54 dias
-TOKEN: ok 46 chars | CHAT_ID: ok 10 chars
-HTTP 200: {"ok":true,"result":{"message_id":351,"from":{"id":9205915638,"is_bot":true,"first_name":"SMC Trading Bot","username":"smc_crypto_alerts_bot"},"chat":{"id":[removido],"first_name":"Eduardo","last_name
-TOKEN: ok 46 chars | CHAT_ID: ok 10 chars
-HTTP 200: {"ok":true,"result":{"message_id":352,"from":{"id":9205915638,"is_bot":true,"first_name":"SMC Trading Bot","username":"smc_crypto_alerts_bot"},"chat":{"id":[removido],"first_name":"Eduardo","last_name
-amostra enviada: LINKUSDT 21/10 23:00 R:R 1:1.58
+início 14/11 11:57 BRT
+VETUSDT: gatilho antigo (124 velas atrás)
+pares (149): BTCUSDT, ETHUSDT, SOLUSDT, ZECUSDT, XRPUSDT, BNBUSDT, NEARUSDT, UNIUSDT, SHELLUSDT, HYPEUSDT, PEPEUSDT, DOGEUSDT, ENAUSDT, SUIUSDT, TRXUSDT, AVAXUSDT, LINKUSDT, INJUSDT, TAOUSDT, SOPHUSDT, ADAUSDT, UUSDT, LTCUSDT, WLDUSDT, KAVAUSDT, BERAUSDT, AAVEUSDT, BARDUSDT, TIAUSDT, PUMPUSDT, ONDOUSDT, XLMUSDT, FILUSDT, DODOUSDT, BMTUSDT, HBARUSDT, PENGUUSDT, FETUSDT, ASTERUSDT, ARBUSDT, QNTUSDT, GRAMUSDT, STOUSDT, NIGHTUSDT, ICPUSDT, INITUSDT, TRUMPUSDT, 牛来USDT, WBETHUSDT, ZROUSDT, ERAUSDT, WLFIUSDT, GUNUSDT, BCHUSDT, APTUSDT, RENDERUSDT, DOTUSDT, STRKUSDT, XPLUSDT, ETHFIUSDT, ONEUSDT, MITOUSDT, ARUSDT, SHIBUSDT, BANANAS31USDT, JUPUSDT, BONKUSDT, POLUSDT, DASHUSDT, AEROUSDT, PENDLEUSDT, OPUSDT, ZAMAUSDT, WUSDT, VIRTUALUSDT, PYTHUSDT, PLUMEUSDT, RAYUSDT, AIUSDT, ALTUSDT, CAKEUSDT, WBTCUSDT, JSTUSDT, 币安人生USDT, MARSCOINUSDT, SEIUSDT, STXUSDT, FFUSDT, MEGAUSDT, ZKUSDT, GIGGLEUSDT, EIGENUSDT, CRVUSDT, BEAMXUSDT, ALGOUSDT, KITEUSDT, ATOMUSDT, LDOUSDT, ZENUSDT, WIFUSDT, PEOPLEUSDT, 0GUSDT, ETCUSDT, CHIPUSDT, HUMAUSDT, MORPHOUSDT, FTMUSDT, GRTUSDT, JTOUSDT, SUSDT, AUDIOUSDT, CYBERUSDT, USUALUSDT, SANDUSDT, VANAUSDT, HMSTRUSDT, OMNIUSDT, AMPUSDT, OPENUSDT, BATUSDT, SYRUPUSDT, RSRUSDT, ORDIUSDT, CFGUSDT, OPGUSDT, OSMOUSDT, SKYUSDT, NEXOUSDT, MUBARAKUSDT, LUNCUSDT, SXTUSDT, BOMEUSDT, EOSUSDT, HAEDALUSDT, PROMUSDT, IMXUSDT, CFXUSDT, LOKAUSDT, DEXEUSDT, TUTUSDT, TSTUSDT, BLZUSDT, HIFIUSDT, BNSOLUSDT, NXPCUSDT, VETUSDT, GALAUSDT, PHAUSDT, METUSDT
+descartados (não negociam 24/7): RWUSDUSDT
+gatilhos 0 | cenários 0
+reversão 8h: 150 pares olhados, 0 gatilho(s), 0 encosto(s) esperando
+🧪 reversão de 8h em teste: 0 aberta(s), nenhuma resolvida ainda
+rompimento falso: 150 pares olhados, 0 gatilho(s), 0 força(s) esperando a falha
+🧪 rompimento falso em teste: 0 aberta(s), nenhuma resolvida ainda
+enviados 0 gatilhos, 0 desfechos
+placar (H4, desde 13/11)  0 gatilhos (0 abertos)  ·  48 cenários, 36 encerrados sem entrada  ·  <i>9 do H1 antigo, fora da conta</i>
+por que os cenários morreram:
+  12x  nem varreu o order block nem chegou perto dele
+  8x  furou o order block fundo demais (> 2.5 ATR): virou continuação, não varredura
+  6x  varreu mas não reverteu em 4 velas
+  2x  varredura com 1.02x o volume médio, mínimo 1.20x — não vira gatilho
+  1x  varredura com 0.86x o volume médio, mínimo 1.20x — não vira gatilho
+  1x  varredura com 0.63x o volume médio, mínimo 1.20x — não vira gatilho
+  1x  piscina a 1.7R da entrada, máximo 1.5R
+  1x  piscina a 4.6R da entrada, máximo 1.5R
+  1x  piscina a 1.9R da entrada, máximo 1.5R
+  1x  varredura com 0.85x o volume médio, mínimo 1.20x — não vira gatilho
+  1x  piscina a 1.6R da entrada, máximo 1.5R
+  1x  piscina a 4.7R da entrada, máximo 1.5R
