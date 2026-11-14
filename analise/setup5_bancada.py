@@ -120,6 +120,7 @@ def main():
                 continue
             bruto.setdefault(s, []).append(dict(
                 sim=s, ms=g['vela_ms'], saida_ms=g['vela_ms']+r['horas']*H,
+                q=dt.datetime.fromtimestamp(g['vela_ms']/1000, BRT),
                 lado=g['lado'], rr=g['rr'], risco_pct=g['risco_pct'],
                 excur=g['excur'], fim=r['fim'], liq=r['liq'],
                 horas=r['horas']))

@@ -83,7 +83,7 @@ def rolante(serie, t0, t1, n, gerar):
     return sorted(ops, key=lambda o: o['q'])
 
 
-def linha(rot, ops, larg=16):
+def linha(rot, ops, meses=12, larg=16):
     if not ops:
         print(f"  {rot:<{larg}}{'—':>6}")
         return
@@ -92,7 +92,7 @@ def linha(rot, ops, larg=16):
     for o in ops:
         atual += o['liq']; pico = max(pico, atual)
         pior = min(pior, atual - pico)
-    print(f"  {rot:<{larg}}{len(ops):>6}{len(ops)/12:>7.1f}"
+    print(f"  {rot:<{larg}}{len(ops):>6}{len(ops)/meses:>7.1f}"
           f"{len(g)/len(ops)*100:>8.0f}%"
           f"{statistics.mean(o['rr'] for o in ops):>7.2f}"
           f"{statistics.mean(o['stop_pct'] for o in ops):>8.1f}%"
@@ -154,9 +154,9 @@ def main():
     print(f"  OS 7 ANOS INTEIROS ({meses_tot:.0f} meses)")
     cab()
     for k, v in g.items():
-        linha(k, v)
+        linha(k, v, meses_tot)
     linha('OS TRÊS', sorted([o for v in g.values() for o in v],
-                            key=lambda o: o['q']))
+                            key=lambda o: o['q']), meses_tot)
 
     print(f"\n  SÓ {a.ano}")
     cab()
