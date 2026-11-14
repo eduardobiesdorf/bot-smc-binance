@@ -192,11 +192,21 @@ ANTIGOS = {'BTCUSDT', 'ETHUSDT', 'SOLUSDT', 'XRPUSDT', 'DOGEUSDT', 'BNBUSDT',
 NOVOS = [s for s in UNIVERSO if s not in ANTIGOS]
 
 STABLE = {'USDC', 'FDUSD', 'TUSD', 'BUSD', 'DAI', 'USDP', 'AEUR', 'EURI',
-          'EUR', 'XUSD', 'USD1', 'PYUSD'}
+          'EUR', 'XUSD', 'USD1', 'PYUSD',
+          # 14/11/2026 -- apareceram na fila das 150 com volume de fim de
+          # semana de 12 a 13%, a cara de quem nao oscila
+          'USDE', 'RLUSD', 'BFUSD'}
 COMMODITY = {'XAUT', 'PAXG', 'XAGT'}
 # acoes tokenizadas: seguem o pregao de Nova York, nao sao cripto
 ACOES = {'SNDKB', 'INTCB', 'CRCLB', 'NVDAB', 'TSLAB', 'AAPLB', 'MSTRB',
-         'COINB', 'METAB', 'AMZNB', 'GOOGLB', 'MSFTB', 'HOODB', 'PLTRB'}
+         'COINB', 'METAB', 'AMZNB', 'GOOGLB', 'MSFTB', 'HOODB', 'PLTRB',
+         # 14/11/2026 -- a amostra do terceiro alerta veio em BMNRB
+         # (Bitmine) e as duas do quarto em SPCXB (SpaceX) e MUB (Micron).
+         # Medi a fila das 150 inteira: 16 tokenizadas passando. Acoes e
+         # ETFs de Nova York, nenhuma delas e cripto.
+         'SPYB', 'QQQB', 'TQQQB', 'SOXLB', 'SOXSB', 'KORUB',
+         'AMDB', 'ORCLB', 'MUB', 'NBISB', 'BMNRB', 'BNCB',
+         'SNXXB', 'SKHYB', 'BEB', 'SPCXB', 'DRAMB'}
 
 
 def candidatos(n=60):
@@ -217,14 +227,34 @@ def candidatos(n=60):
     return [x[1] for x in cand[:n]]
 
 
-def negocia_sempre(h, limite=0.03):
-    """Cripto negocia 24/7. Acao tokenizada tem horas mortas no fim de
-    semana e fora do pregao -- velas com volume zero ou sem amplitude.
-    Esse teste pega qualquer tokenizada nova sem eu precisar listar."""
+def negocia_sempre(h, limite=0.03, fds_min=0.12):
+    """Cripto negocia 24/7. Acao tokenizada, nao.
+
+    O teste das velas mortas (volume zero ou sem amplitude) NAO pega as
+    tokenizadas da Binance: medi a fila das 150 em 14/11/2026 e todas as
+    16 deram 0,0% de velas mortas -- formador de mercado cota o papel a
+    noite e no fim de semana, entao a vela existe e tem volume.
+
+    O que separa e QUANTO do volume acontece no fim de semana:
+
+      tokenizadas (SPYB, QQQB, AMDB, BMNRB, MUB, SPCXB...)  2,2% a 11,5%
+      cripto de verdade (a partir de RLUSD)                 12,3% a 54,2%
+
+    A margem e fina, entao a defesa principal e a lista ACOES; isto aqui e
+    a rede embaixo, para a tokenizada nova que entrar na fila antes de eu
+    reparar. Ver analise/conferir_24x7.py, que roda a medicao inteira."""
     if len(h) < 200:
         return False
     mortas = sum(1 for c in h[-300:] if c[5] <= 0 or c[2] <= c[3])
-    return mortas / len(h[-300:]) <= limite
+    if mortas / len(h[-300:]) > limite:
+        return False
+    tot = sum(c[5] for c in h)
+    if tot <= 0:
+        return False
+    fds = sum(c[5] for c in h
+              if datetime.fromtimestamp(c[0]/1000, timezone.utc).weekday()
+              >= 5)
+    return fds / tot >= fds_min
 
 
 # ------------------------------------------------------------------ calculo
