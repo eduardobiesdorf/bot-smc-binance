@@ -1,8 +1,24 @@
-início 14/11 14:22 BRT
-TOKEN: ok 46 chars | CHAT_ID: ok 10 chars
-HTTP 200: {"ok":true,"result":{"message_id":353,"from":{"id":9205915638,"is_bot":true,"first_name":"SMC Trading Bot","username":"smc_crypto_alerts_bot"},"chat":{"id":[removido],"first_name":"Eduardo","last_name
-amostra da reversão de 8h em 150 pares
-achou 1 gatilho(s) no histórico de 54 dias
-TOKEN: ok 46 chars | CHAT_ID: ok 10 chars
-HTTP 200: {"ok":true,"result":{"message_id":354,"from":{"id":9205915638,"is_bot":true,"first_name":"SMC Trading Bot","username":"smc_crypto_alerts_bot"},"chat":{"id":[removido],"first_name":"Eduardo","last_name
-amostra enviada: TUTUSDT 01/11 02:00 R:R 1:2.66
+início 14/11 19:06 BRT
+VETUSDT: gatilho antigo (126 velas atrás)
+pares (149): BTCUSDT, ETHUSDT, SOLUSDT, XRPUSDT, ZECUSDT, BNBUSDT, NEARUSDT, HYPEUSDT, DOGEUSDT, UNIUSDT, PEPEUSDT, SUIUSDT, ENAUSDT, LINKUSDT, ADAUSDT, TRXUSDT, AVAXUSDT, TAOUSDT, ASTERUSDT, INJUSDT, LTCUSDT, UUSDT, SOPHUSDT, KAVAUSDT, SHELLUSDT, WLDUSDT, PENGUUSDT, AAVEUSDT, PUMPUSDT, FILUSDT, ONDOUSDT, XLMUSDT, QNTUSDT, BERAUSDT, TRUMPUSDT, TIAUSDT, ZROUSDT, HBARUSDT, NIGHTUSDT, FETUSDT, DODOUSDT, GRAMUSDT, ARBUSDT, ICPUSDT, 牛来USDT, APTUSDT, XPLUSDT, BCHUSDT, WLFIUSDT, DOTUSDT, INITUSDT, RENDERUSDT, ERAUSDT, BMTUSDT, BARDUSDT, STRKUSDT, ETHFIUSDT, BONKUSDT, SHIBUSDT, DASHUSDT, OPUSDT, CAKEUSDT, JUPUSDT, WBETHUSDT, VIRTUALUSDT, ARUSDT, ZAMAUSDT, WBTCUSDT, BANANAS31USDT, PYTHUSDT, POLUSDT, MEGAUSDT, MARSCOINUSDT, RAYUSDT, AEROUSDT, EIGENUSDT, SEIUSDT, ONEUSDT, MITOUSDT, WUSDT, GIGGLEUSDT, 币安人生USDT, PENDLEUSDT, PLUMEUSDT, CRVUSDT, ATOMUSDT, JSTUSDT, ZKUSDT, ETCUSDT, ALGOUSDT, STXUSDT, AIUSDT, BNSOLUSDT, STOUSDT, WIFUSDT, ALTUSDT, CHIPUSDT, LDOUSDT, MUBARAKUSDT, ZENUSDT, BEAMXUSDT, KITEUSDT, SANDUSDT, 0GUSDT, JTOUSDT, FFUSDT, SOLVUSDT, CFXUSDT, MORPHOUSDT, VANAUSDT, HOMEUSDT, PARTIUSDT, SUSDT, GPSUSDT, ORDIUSDT, LUNCUSDT, SKYUSDT, CYBERUSDT, USUALUSDT, TSTUSDT, GALAUSDT, APEUSDT, GUNUSDT, CFGUSDT, DEXEUSDT, HUMAUSDT, CHZUSDT, AMPUSDT, ATUSDT, BOMEUSDT, AUDIOUSDT, SYRUPUSDT, VETUSDT, HMSTRUSDT, BATUSDT, PEOPLEUSDT, FTMUSDT, IOUSDT, OPGUSDT, RSRUSDT, DYDXUSDT, OPENUSDT, AXSUSDT, ALLOUSDT, SAGAUSDT, TUTUSDT, GRTUSDT, NEIROUSDT, PROMUSDT
+descartados (não negociam 24/7): RWUSDUSDT
+gatilhos 0 | cenários 0
+reversão 8h: 150 pares olhados, 0 gatilho(s), 0 encosto(s) esperando
+🧪 reversão de 8h em teste: 0 aberta(s), nenhuma resolvida ainda
+rompimento falso: 150 pares olhados, 0 gatilho(s), 0 força(s) esperando a falha
+🧪 rompimento falso em teste: 0 aberta(s), nenhuma resolvida ainda
+enviados 0 gatilhos, 0 desfechos
+placar (H4, desde 13/11)  0 gatilhos (0 abertos)  ·  48 cenários, 36 encerrados sem entrada  ·  <i>9 do H1 antigo, fora da conta</i>
+por que os cenários morreram:
+  12x  nem varreu o order block nem chegou perto dele
+  8x  furou o order block fundo demais (> 2.5 ATR): virou continuação, não varredura
+  6x  varreu mas não reverteu em 4 velas
+  2x  varredura com 1.02x o volume médio, mínimo 1.20x — não vira gatilho
+  1x  varredura com 0.86x o volume médio, mínimo 1.20x — não vira gatilho
+  1x  varredura com 0.63x o volume médio, mínimo 1.20x — não vira gatilho
+  1x  piscina a 1.7R da entrada, máximo 1.5R
+  1x  piscina a 4.6R da entrada, máximo 1.5R
+  1x  piscina a 1.9R da entrada, máximo 1.5R
+  1x  varredura com 0.85x o volume médio, mínimo 1.20x — não vira gatilho
+  1x  piscina a 1.6R da entrada, máximo 1.5R
+  1x  piscina a 4.7R da entrada, máximo 1.5R
