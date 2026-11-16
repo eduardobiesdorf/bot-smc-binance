@@ -80,6 +80,7 @@ BASE_URL = "https://data-api.binance.vision/api/v3"
 ESTADO = "varredura_enviados.json"
 DIAG = "diagnostico_varredura.txt"
 RESUMO = "resumo_varredura.txt"
+BATIMENTO = "ultima_rodada.json"
 MAX_CENARIOS = 4   # no maximo 4 imagens de radar por rodada
 
 # Dimensionamento. O que e fixo e a perda em dolar, nao o tamanho da
@@ -727,6 +728,71 @@ def salvar(ch):
         diag(f"nao salvou o estado: {e}")
 
 
+def batimento(limite_h=3.0, esperadas=12):
+    """Avisa quando o bot ficou tempo demais sem rodar, e faz o placar do dia.
+
+    16/11/2026 -- o GitHub descarta horario agendado quando a fila dele
+    enche. Medido: de 9 horarios esperados entre 14 e 16/11, 4 dispararam,
+    com atraso de 36 min a 3h12. O Eduardo passou um fim de semana sem saber
+    se o bot estava vivo ou morto.
+
+    O que isso resolve e o que NAO resolve. Enquanto o bot esta fora ele nao
+    roda, logo nao tem como avisar de dentro -- isso so um vigia de fora
+    resolve (ver PING_VIGIA abaixo). O que da para fazer aqui e avisar assim
+    que ele VOLTA, dizendo quanto tempo ficou cego, e mandar uma vez por dia
+    quantas rodadas sairam de quantas. Pega buraco parcial, que e o caso
+    comum, e custa zero minuto a mais.
+
+    PING_VIGIA: se existir a variavel de ambiente, bate numa URL de vigia
+    (tipo healthchecks.io) a cada rodada. Se o bot morrer de vez, o vigia
+    percebe a falta do sinal e avisa por fora. Sem a variavel, nao faz nada.
+    """
+    agora = time.time()
+    hoje = f"{datetime.now(BRT):%Y-%m-%d}"
+    try:
+        with open(BATIMENTO, encoding="utf-8") as f:
+            d = json.load(f)
+    except Exception:
+        d = {}
+
+    ant, dia_ant, n_ant = d.get('ultima'), d.get('dia'), d.get('rodadas', 0)
+    if dia_ant != hoje:
+        if dia_ant and n_ant:
+            enviar(f"📊 <b>placar de {dia_ant[8:10]}/{dia_ant[5:7]}</b>\n"
+                   f"rodei <b>{n_ant}</b> de {esperadas} varreduras do dia"
+                   + ("" if n_ant >= esperadas else
+                      f"\n<i>o GitHub descartou {esperadas - n_ant} "
+                      f"horário(s) agendado(s)</i>"))
+        d['dia'], d['rodadas'] = hoje, 0
+    d['rodadas'] = d.get('rodadas', 0) + 1
+    d['ultima'] = agora
+    try:
+        with open(BATIMENTO, "w", encoding="utf-8") as f:
+            json.dump(d, f)
+    except Exception as e:
+        diag(f"nao salvou o batimento: {e}")
+
+    if ant:
+        buraco = (agora - ant) / 3600
+        diag(f"buraco desde a rodada anterior: {buraco:.1f}h")
+        if buraco >= limite_h:
+            enviar(f"⚠️ <b>fiquei {buraco:.1f}h sem rodar</b>\n"
+                   f"rodada anterior: "
+                   f"{datetime.fromtimestamp(ant, BRT):%d/%m %H:%M}\n"
+                   f"<i>o GitHub descartou horário agendado. Nesse intervalo "
+                   f"eu não olhei o mercado — pode ter passado entrada.</i>")
+    else:
+        diag("primeira rodada com batimento: sem anterior para comparar")
+
+    vigia = os.getenv("PING_VIGIA")
+    if vigia:
+        try:
+            requests.get(vigia, timeout=10)
+            diag("vigia externo avisado")
+        except Exception as e:
+            diag(f"vigia externo nao respondeu: {e}")
+
+
 def _cru(h, a, mv, imp, r, cfg):
     """Velas cruas do order block ate agora, para conferir no olho.
 
@@ -1001,6 +1067,12 @@ def main():
             diag(f"exemplo enviado: {sim} [{'nucleo' if sim in NUCLEO else 'extra'}] "
                  f"({idade:.0f}h)")
         return
+
+    # Batimento antes de qualquer coisa: se o bot ficou fora, o Eduardo
+    # precisa saber disso ANTES de ler "0 gatilhos" e achar que o mercado
+    # e que estava parado.
+    if not a.teste:
+        batimento()
 
     vistos = carregar()
     gatilhos, cenarios, linhas = [], [], []

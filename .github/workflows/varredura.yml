@@ -30,17 +30,27 @@ on:
     # no order block e a atualizacao do stop movel saem a cada 4h em vez de
     # 2h.
     #
-    # 14/11/2026, mais tarde -- o MINUTO saiu do :01 para o :37. Medido:
-    # enquanto o cron era de hora em hora, disparou 20 a 24 vezes por dia
-    # (88% dos horarios). No dia 14, ja de 2 em 2 horas, disparou 3 de 7.
-    # O minuto :01 e o mais disputado do GitHub inteiro -- todo mundo agenda
-    # na hora cheia -- e a propria historia deste arquivo ja tinha brigado
-    # com isso usando os minutos 1, 11 e 21. O :37 cai no vazio.
+    # 14/11/2026, mais tarde -- o MINUTO saiu do :01 para o :37. O :01 e o
+    # mais disputado do GitHub inteiro, todo mundo agenda na hora cheia.
     #
-    # Em Brasilia os disparos caem as 21h37, 01h37, 05h37, 09h37, 13h37 e
-    # 17h37. O GitHub cria a rodada com ate ~50 min de atraso quando esta
-    # cheio, entao o resultado pode sair mais tarde que isso.
-    - cron: '37 */4 * * *'
+    # 16/11/2026 -- VOLTOU PARA DE 2 EM 2 HORAS, e nao por causa de minuto.
+    # Medido de sabado 21h37 ate segunda 06h50: de 9 horarios esperados,
+    # 4 dispararam (44%), com atraso de 36 min a 3h12. Trocar o minuto nao
+    # resolveu nada: quem descarta e a fila do GitHub em repositorio
+    # privado, e isso nao tem ajuste.
+    #
+    # A saida e redundancia, nao pontualidade: com 12 horarios por dia e
+    # ~44% de aproveitamento saem ~5 varreduras/dia, que e perto da
+    # cobertura que 6 horarios dariam se todos disparassem. Importa para o
+    # setup 1, cuja entrada e ordem limitada valida 4h -- com buraco de 9h
+    # nasce e morre entrada sem ninguem ver.
+    #
+    # Custo: ~1.440 min/mes em vez de ~720. O Eduardo preferiu pagar a
+    # diferenca a ficar cego.
+    #
+    # Em Brasilia os disparos caem as 01h37, 03h37, 05h37 e assim por
+    # diante, nas horas IMPARES. O GitHub ainda atrasa.
+    - cron: '37 */2 * * *'
   workflow_dispatch:
     inputs:
       top:
@@ -164,6 +174,11 @@ jobs:
         env:
           TELEGRAM_TOKEN: ${{ secrets.TOKEN_TELEGRAM || secrets.TELEGRAM_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.CHAT_ID_TELEGRAM || secrets.TELEGRAM_CHAT_ID }}
+          # Opcional: URL de um vigia externo (healthchecks.io e parecidos).
+          # O bot bate nela a cada rodada; se o bot morrer de vez, o vigia
+          # percebe a falta do sinal e avisa por fora do GitHub. Sem o
+          # segredo, o bot simplesmente nao bate em nada.
+          PING_VIGIA: ${{ secrets.PING_VIGIA }}
         run: |
           set -o pipefail
           ARGS="--top ${{ inputs.top || '150' }}"
@@ -199,6 +214,7 @@ jobs:
           # historico_ao_vivo.csv so nasce quando a primeira operacao
           # resolve. Resultado: nada era salvo desde 03/11. Adiciona um a um.
           for f in varredura_enviados.json acompanhamento.json \
+                   ultima_rodada.json \
                    historico_ao_vivo.csv diagnostico_varredura.txt \
                    resumo_varredura.txt \
                    reversao8_estado.json \
