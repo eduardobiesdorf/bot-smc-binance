@@ -279,6 +279,22 @@ def diag(linha):
         pass
 
 
+def resposta_limpa(r):
+    """So o essencial da resposta do Telegram, sem dado pessoal.
+
+    16/11/2026 -- a resposta do Telegram devolve o nome e o id do chat
+    dentro de 'result'. Em repositorio publico o log do Actions e publico,
+    entao o corpo inteiro nao pode mais ir para o log.
+    """
+    try:
+        d = r.json()
+    except Exception:
+        return "resposta ilegivel"
+    if d.get('ok'):
+        return "ok"
+    return f"erro: {str(d.get('description'))[:120]}"
+
+
 def enviar(texto, html=True):
     tok = os.getenv("TELEGRAM_TOKEN") or os.getenv("TOKEN_TELEGRAM")
     chat = os.getenv("TELEGRAM_CHAT_ID") or os.getenv("CHAT_ID_TELEGRAM")
@@ -293,7 +309,7 @@ def enviar(texto, html=True):
     try:
         r = requests.post(f"https://api.telegram.org/bot{tok}/sendMessage",
                           data=dados, timeout=20)
-        diag(f"HTTP {r.status_code}: {r.text[:300]}")
+        diag(f"HTTP {r.status_code}: {resposta_limpa(r)}")
         if not r.ok and html:
             diag("-> tentando de novo SEM formatacao HTML")
             return enviar(texto.replace('<b>', '').replace('</b>', '')

@@ -581,6 +581,25 @@ def diag(linha):
         pass
 
 
+def resposta_limpa(r):
+    """So o essencial da resposta do Telegram, sem dado pessoal.
+
+    16/11/2026 -- antes isto gravava r.text inteiro. A resposta do Telegram
+    devolve o nome e o id do chat dentro de 'result', o diagnostico e
+    commitado, e em repositorio publico o log do Actions tambem fica
+    publico: virava vazamento a cada rodada. Agora sai 'ok' quando deu
+    certo e, quando deu errado, so a descricao do erro -- que e o que
+    presta para depurar.
+    """
+    try:
+        d = r.json()
+    except Exception:
+        return "resposta ilegível"
+    if d.get('ok'):
+        return "ok"
+    return f"erro: {str(d.get('description'))[:120]}"
+
+
 def enviar(texto, html=True):
     tok = os.getenv("TELEGRAM_TOKEN") or os.getenv("TOKEN_TELEGRAM")
     chat = os.getenv("TELEGRAM_CHAT_ID") or os.getenv("CHAT_ID_TELEGRAM")
@@ -594,7 +613,7 @@ def enviar(texto, html=True):
     try:
         r = requests.post(f"https://api.telegram.org/bot{tok}/sendMessage",
                           data=dados, timeout=20)
-        diag(f"HTTP {r.status_code}: {r.text[:200]}")
+        diag(f"HTTP {r.status_code}: {resposta_limpa(r)}")
         if not r.ok and html:
             for t in ('<b>', '</b>', '<i>', '</i>', '<code>', '</code>'):
                 texto = texto.replace(t, '')

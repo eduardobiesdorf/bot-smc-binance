@@ -144,6 +144,22 @@ def desenhar(sim, h, m, cfg, caminho):
     return gat
 
 
+def resposta_limpa(r):
+    """So o essencial da resposta do Telegram, sem dado pessoal.
+
+    16/11/2026 -- a resposta do Telegram devolve o nome e o id do chat
+    dentro de 'result'. Em repositorio publico o log do Actions e publico,
+    entao o corpo inteiro nao pode mais ir para o log.
+    """
+    try:
+        d = r.json()
+    except Exception:
+        return "resposta ilegivel"
+    if d.get('ok'):
+        return "ok"
+    return f"erro: {str(d.get('description'))[:120]}"
+
+
 def enviar_foto(caminho, legenda):
     tok = os.getenv("TELEGRAM_TOKEN") or os.getenv("TOKEN_TELEGRAM")
     chat = os.getenv("TELEGRAM_CHAT_ID") or os.getenv("CHAT_ID_TELEGRAM")
@@ -155,7 +171,7 @@ def enviar_foto(caminho, legenda):
                           data={'chat_id': chat, 'caption': legenda,
                                 'parse_mode': 'HTML'},
                           files={'photo': f}, timeout=60)
-    print(f"HTTP {r.status_code}: {r.text[:200]}")
+    print(f"HTTP {r.status_code}: {resposta_limpa(r)}")
     return r.ok
 
 
