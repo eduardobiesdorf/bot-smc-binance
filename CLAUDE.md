@@ -22,13 +22,24 @@ aqui tem gatilho `on: push`. Só o disparo de workflow precisa de aprovação.
 
 ## O cron do bot
 
-`varredura.yml` roda de 4 em 4 horas (`1 */4 * * *`): 00/04/08/12/16/20
-UTC, que em Brasília é 21h, 01h, 05h, 09h, 13h e 17h. São 6 rodadas/dia,
-cobradas como 4 min cada (o GitHub arredonda para cima) = ~720 min/mês.
+`varredura.yml` roda de 2 em 2 horas (`37 */2 * * *`), nas horas ÍMPARES
+em Brasília: 01h37, 03h37, 05h37 e assim por diante.
 
-Não mexer nisso sem falar com ele: a frequência foi escolhida para caber na
-cota, e as horas foram escolhidas para pegar todo fechamento de H4 (setup 1)
-e de H8 (setup 3).
+Por que 2h e não 4h: medido entre 14 e 16/11, o GitHub só disparou 44% dos
+horários agendados, com atraso de 36 min a 3h12. Com 4h de espaçamento, um
+horário descartado deixava 8 horas cego — e a entrada do setup 1 é ordem
+limitada válida 4h, ou seja, nascia e morria entrada sem ninguém ver. A
+saída foi redundância, não pontualidade.
+
+Por que o minuto :37 e não :01: o :01 é o minuto mais disputado do GitHub.
+Trocar sozinho não resolveu o descarte, mas não custa nada e ajuda.
+
+O bot avisa sozinho quando fica fora: `batimento()` manda no Telegram
+quanto tempo ficou cego ao voltar de um buraco de 3h ou mais, e uma vez por
+dia manda o placar (rodadas feitas de 12). Se existir o segredo
+`PING_VIGIA`, bate numa URL de vigia externo a cada rodada — é o único
+jeito de pegar o caso em que o bot morre de vez e não consegue avisar de
+dentro.
 
 ## Coisas que já me pegaram
 
