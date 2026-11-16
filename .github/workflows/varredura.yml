@@ -39,18 +39,27 @@ on:
     # resolveu nada: quem descarta e a fila do GitHub em repositorio
     # privado, e isso nao tem ajuste.
     #
-    # A saida e redundancia, nao pontualidade: com 12 horarios por dia e
-    # ~44% de aproveitamento saem ~5 varreduras/dia, que e perto da
-    # cobertura que 6 horarios dariam se todos disparassem. Importa para o
-    # setup 1, cuja entrada e ordem limitada valida 4h -- com buraco de 9h
-    # nasce e morre entrada sem ninguem ver.
+    # 16/11/2026, fim da tarde -- DUAS VEZES POR HORA, nos minutos 7 e 37.
     #
-    # Custo: ~1.440 min/mes em vez de ~720. O Eduardo preferiu pagar a
-    # diferenca a ficar cego.
+    # O repositorio virou PUBLICO, entao minuto de Actions e ilimitado e de
+    # graca: nao ha mais motivo para economizar horario. E economizar era
+    # justamente o problema, porque o GitHub descarta horario agendado sem
+    # avisar e sem deixar rastro (nao aparece como cancelada nem pulada --
+    # a rodada simplesmente nao nasce).
     #
-    # Em Brasilia os disparos caem as 01h37, 03h37, 05h37 e assim por
-    # diante, nas horas IMPARES. O GitHub ainda atrasa.
-    - cron: '37 */2 * * *'
+    # O placar que levou a isto: com '37 */4' disparou 4 de 6 por dia; com
+    # '37 */2' disparou ZERO em 9h30. E quando o cron era de hora em hora,
+    # la no comeco de novembro, disparava 20 a 24 vezes por dia -- 88%. O
+    # que mais funcionou foi justamente ter MUITOS horarios.
+    #
+    # Dois por hora atacam o sintoma sem precisar provar a causa: se o
+    # descarte e por sorteio, duas chances por hora mudam a conta. Disparar
+    # as duas nao gera alerta repetido -- a trava de duplicata por chave ja
+    # existe em todos os tres setups, e e para isto que ela serve.
+    #
+    # Em Brasilia: :07 e :37 de toda hora.
+    - cron: '7 * * * *'
+    - cron: '37 * * * *'
   workflow_dispatch:
     inputs:
       top:
@@ -154,9 +163,19 @@ on:
 permissions:
   contents: write
 
+# 16/11/2026 -- cancel-in-progress passou de false para TRUE. Com false a
+# rodada nova ESPERAVA a antiga, e o GitHub so guarda uma na espera: com os
+# atrasos de 2 a 3 horas dele, horario empilhava e sumia. Era inofensivo
+# quando o cron era de 4 em 4 horas e virou suspeito quando apertou.
+#
+# Com true, a rodada nova cancela a velha presa na fila -- que e o certo
+# para um radar: interessa a varredura de AGORA, nao a de tres horas atras.
+# A cancelada ainda salva o estado, porque o passo "Guardar o estado" roda
+# com if: always(). Sem isso, uma cancelada no meio mandaria alerta sem
+# gravar a chave e o alerta repetiria na rodada seguinte.
 concurrency:
   group: varredura
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   varredura:
