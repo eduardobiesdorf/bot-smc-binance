@@ -44,9 +44,17 @@ e de H8 (setup 3).
   e `data-api.binance.vision` dão `403 Forbidden` no túnel. Todo teste que
   precise de dado ao vivo tem de rodar no Actions. O CDN público
   `data.binance.vision` funciona de dentro do Actions.
-- O `diagnostico_telegram.txt` está commitado e tem o **nome completo** e o
-  **chat_id** do Eduardo. O token não está lá. Limpar isso (inclusive o
-  histórico) antes de qualquer conversa sobre tornar o repositório público.
+- **16/11/2026 — o histórico foi reescrito e limpo** (`git filter-repo`),
+  porque o repositório ia virar público. Saíram de TODOS os 743 commits: o
+  `diagnostico_telegram.txt` inteiro, o chat_id do Telegram e o sobrenome;
+  e o único commit assinado com o e-mail pessoal passou a usar o
+  `@users.noreply.github.com`. Nenhum token jamais foi commitado — isso foi
+  verificado varrendo todos os blobs do histórico.
+- **Em repositório público o log do Actions também é público.** Por isso
+  `resposta_limpa()` existe em `bot_varredura.py`, `bot_alertas.py`,
+  `grafico_varredura.py` e `grafico_setup.py`: a resposta do Telegram traz
+  nome e id do chat dentro de `result`, e isso não pode ir para o log.
+  Nunca voltar a logar `r.text` de um envio ao Telegram.
 
 ## Como ele quer as respostas
 
