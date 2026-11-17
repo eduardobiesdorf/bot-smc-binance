@@ -1,0 +1,146 @@
+name: "02 · RADAR CONTÍNUO (fica vivo ~6h e se renova)"
+
+# Por que este workflow existe.
+#
+# O cron do GitHub parou de servir nesta conta. Medido entre 14 e 17/11:
+# com 4h, 2h, de hora em hora, minuto :01, minuto :37, e depois com tres
+# arquivos novos e separados -- em todas as configuracoes o GitHub disparou
+# uma vez por dia, de madrugada, e descartou todo o resto. Nao e ajuste de
+# cron: a fila dele simplesmente nao processa os horarios desta conta.
+#
+# A saida e parar de depender de 24 disparos por dia e depender de UM.
+# Este workflow nao termina em 3 minutos: ele fica VIVO por quase 6 horas
+# (o teto do GitHub e 6h por job), varrendo de hora em hora por dentro. Um
+# unico disparo cobre 6 horas de vigilancia de verdade.
+#
+# E no fim ele dispara A SI MESMO, virando uma corrente que nao para:
+#   6h de vigilancia -> se redispara -> 6h -> se redispara -> ...
+#
+# Isso exige o segredo TOKEN_RENOVA, porque o GITHUB_TOKEN automatico e
+# proibido de disparar workflow (protecao do GitHub contra loop infinito).
+# O TOKEN_RENOVA e um token de escopo fino: UM repositorio, UMA permissao
+# (Actions: read and write). Nao le segredo, nao da push, nao apaga nada.
+#
+# SEM o segredo o workflow funciona igual -- so nao se renova no fim, e aí
+# depende do cron da madrugada ou de um clique. Nada quebra.
+#
+# E se a corrente quebrar (uma rodada falha, a Binance cai, o token vence),
+# o cron abaixo reinicia tudo sozinho na madrugada seguinte. Auto-cura.
+
+on:
+  schedule:
+    # Rede de seguranca, nao o mecanismo principal: se a corrente quebrar,
+    # um destes reinicia. Sao varios porque o GitHub descarta quase todos.
+    - cron: '15 */3 * * *'
+  workflow_dispatch:
+    inputs:
+      horas:
+        description: 'Quantas horas ficar vivo (máx 5.7)'
+        required: false
+        default: '5.7'
+      renovar:
+        description: 'Redisparar a si mesmo no fim'
+        required: false
+        default: 'true'
+
+permissions:
+  contents: write
+
+concurrency:
+  # Um radar vivo por vez. cancel-in-progress true para que um disparo novo
+  # (manual, ou a renovacao) substitua o velho em vez de ficar na fila --
+  # fila com espera longa foi justamente o que sumiu com horario antes.
+  group: radar-continuo
+  cancel-in-progress: true
+
+jobs:
+  continuo:
+    runs-on: ubuntu-latest
+    timeout-minutes: 355
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+          cache-dependency-path: requisitos.txt
+      - run: pip install -r requisitos.txt
+
+      - name: Vigiar de hora em hora
+        env:
+          TELEGRAM_TOKEN: ${{ secrets.TOKEN_TELEGRAM || secrets.TELEGRAM_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.CHAT_ID_TELEGRAM || secrets.TELEGRAM_CHAT_ID }}
+          PING_VIGIA: ${{ secrets.PING_VIGIA }}
+        run: |
+          set -o pipefail
+          HORAS="${{ inputs.horas || '5.7' }}"
+          FIM=$(python -c "import time;print(int(time.time()+${HORAS}*3600))")
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          VOLTA=0
+          while [ "$(date +%s)" -lt "$FIM" ]; do
+            VOLTA=$((VOLTA + 1))
+            echo "::group::volta $VOLTA — $(TZ=America/Sao_Paulo date '+%d/%m %H:%M') BRT"
+
+            # Os tres setups numa passada so, reaproveitando a MESMA serie
+            # de 1h baixada -- 150 requisicoes em vez de 450.
+            python -u bot_varredura.py \
+              --rotulo cont --esperadas 24 \
+              --top 150 --rev-top 150 --falha5-top 150 \
+              --caixa 60 --risco-pct 2 --alav 8 \
+              2>&1 | tail -30 || echo "a volta $VOLTA falhou, seguindo"
+
+            # Guarda o estado a cada volta: se o job for cancelado no meio,
+            # nao se perde o que ja foi avisado (senao repetiria alerta).
+            for f in varredura_enviados.json acompanhamento.json \
+                     historico_ao_vivo.csv reversao8_estado.json \
+                     historico_reversao8.csv falha5_estado.json \
+                     historico_falha5.csv \
+                     diagnostico_cont.txt resumo_cont.txt \
+                     ultima_rodada_cont.json; do
+              [ -f "$f" ] && git add "$f"
+            done
+            if ! git diff --cached --quiet; then
+              git commit -q -m "radar contínuo: estado [skip ci]"
+              for t in 1 2 3 4 5; do
+                git push -q origin HEAD:main && break
+                git pull --rebase --autostash -q origin main || break
+                sleep $((t * 5))
+              done
+            fi
+            echo "::endgroup::"
+
+            # Dorme ate o minuto 0 da hora seguinte. Se faltar menos de 6
+            # minutos para o fim da janela, para por aqui.
+            AGORA=$(date +%s)
+            PROX=$(( (AGORA / 3600 + 1) * 3600 ))
+            [ "$PROX" -ge "$FIM" ] && break
+            sleep $(( PROX - AGORA ))
+          done
+          echo "fim da janela depois de $VOLTA voltas"
+
+      - name: Renovar a corrente
+        if: always() && (inputs.renovar != 'false')
+        env:
+          GH_TOKEN: ${{ secrets.TOKEN_RENOVA }}
+        run: |
+          if [ -z "$GH_TOKEN" ]; then
+            echo "Sem o segredo TOKEN_RENOVA: a corrente NAO se renova." \
+              >> $GITHUB_STEP_SUMMARY
+            echo "O radar volta no proximo cron ou num clique manual." \
+              >> $GITHUB_STEP_SUMMARY
+            exit 0
+          fi
+          # Uma folga antes de redisparar, para o job atual encerrar e
+          # liberar o grupo de concorrencia.
+          sleep 20
+          if gh workflow run continuo.yml --ref main; then
+            echo "corrente renovada: proxima janela de 6h disparada" \
+              >> $GITHUB_STEP_SUMMARY
+          else
+            echo "NAO consegui renovar. Confira se o TOKEN_RENOVA tem" \
+              >> $GITHUB_STEP_SUMMARY
+            echo "permissao 'Actions: read and write' neste repositorio." \
+              >> $GITHUB_STEP_SUMMARY
+          fi
