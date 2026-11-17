@@ -1,4 +1,4 @@
-name: "01 · Setup 1 — varredura de liquidez (H4) · roda :05"
+name: "11 · Setup 1 sozinho (manual, reserva)"
 
 # Varredura do order block em H4. Dono do acompanhamento:
 # stop movel, desfechos e placar sao deste workflow, nao dos outros.
@@ -22,8 +22,12 @@ name: "01 · Setup 1 — varredura de liquidez (H4) · roda :05"
 # empurrarem commit ao mesmo tempo. Cada rodada leva uns 2 a 3 minutos.
 
 on:
-  schedule:
-    - cron: '5 * * * *'
+  # 17/11/2026 -- SEM CRON. Quem vigia agora e o continuo.yml, que
+  # fica vivo 6h e se renova. Estes tres viraram RESERVA MANUAL:
+  # servem para rodar um setup isolado quando se quer depurar so
+  # ele. Com cron, cada um dispararia uma vez por dia e o batimento
+  # mandaria '⚠️ fiquei 23h sem rodar' -- tres alarmes falsos por
+  # dia, porque a meta deles era de hora em hora.
   workflow_dispatch:
     inputs:
       teste:
