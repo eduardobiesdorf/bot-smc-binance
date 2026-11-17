@@ -1,19 +1,23 @@
-início 17/11 05:30 BRT
-TOKEN: ok 46 chars | CHAT_ID: ok 10 chars
-HTTP 200: ok
-buraco desde a rodada anterior: 8.4h
+início 17/11 09:37 BRT
+buraco desde a rodada anterior: 4.1h
 TOKEN: ok 46 chars | CHAT_ID: ok 10 chars
 HTTP 200: ok
 setup 1 desligado nesta rodada (--sem-varredura)
 pares (0): 
 gatilhos 0 | cenários 0
+stop móvel — o que o bot está vendo:
+  MMTUSDT venda: entrada 0.1136  stop 0.11859857  preço 0.1253  (-2.34R)  | 15m até 17/11 09:15  | 0 estruturas a favor
+AAOIBUSDT: fora (não negocia 24/7)
 AGPUBUSDT: fora (não negocia 24/7)
 AVGOBUSDT: fora (não negocia 24/7)
 BABABUSDT: fora (não negocia 24/7)
 CBRSBUSDT: fora (não negocia 24/7)
+HAEDALUSDT: fora (não negocia 24/7)
+HUMAUSDT: fora (não negocia 24/7)
 INTWBUSDT: fora (não negocia 24/7)
 IRENBUSDT: fora (não negocia 24/7)
+LITEBUSDT: fora (não negocia 24/7)
 MRVLBUSDT: fora (não negocia 24/7)
-rompimento falso: 143 pares olhados, 0 gatilho(s), 0 força(s) esperando a falha
+rompimento falso: 139 pares olhados, 0 gatilho(s), 0 força(s) esperando a falha
 🧪 rompimento falso em teste: 0 aberta(s), nenhuma resolvida ainda
 enviados 0 gatilhos, 0 desfechos
