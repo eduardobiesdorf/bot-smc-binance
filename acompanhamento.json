@@ -883,5 +883,17 @@
   "nota": "chegou no order block, esperando a limpeza",
   "vol_varr": 0.0,
   "nucleo": false
+ },
+ "cen-MMTUSDT-1794686400000": {
+  "tipo": "cenario",
+  "sim": "MMTUSDT",
+  "lado": "venda",
+  "status": "aberto",
+  "vela_ms": 1794902400000,
+  "imp_fim_ms": 1794686400000,
+  "alvo": 0.0945,
+  "nota": "limpou o order block, esperando a reversão",
+  "vol_varr": 2.3083397695624845,
+  "nucleo": false
  }
 }
