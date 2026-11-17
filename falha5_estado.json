@@ -1,1 +1,11 @@
-{}
+{
+ "ctx-STXUSDT-1794927600000": {
+  "sim": "STXUSDT",
+  "tipo": "contexto",
+  "lado": "venda",
+  "forca_ms": 1794927600000,
+  "stop": 0.28128482213825345,
+  "alvo": 0.2531,
+  "status": "avisado"
+ }
+}

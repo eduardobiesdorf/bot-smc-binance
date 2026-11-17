@@ -10,5 +10,17 @@
   "alvo": 0.0414,
   "stop": 0.031089824471681377,
   "status": "avisado"
+ },
+ "enc-BARDUSDT-1794499200000": {
+  "sim": "BARDUSDT",
+  "tipo": "encosto",
+  "lado": "compra",
+  "toque_ms": 1794927600000,
+  "exp_ms": 1794499200000,
+  "ob_base": 0.0801,
+  "ob_topo": 0.0915,
+  "alvo": 0.143,
+  "stop": 0.07923085513956318,
+  "status": "avisado"
  }
 }
