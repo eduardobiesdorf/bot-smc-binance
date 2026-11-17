@@ -1,4 +1,4 @@
-name: Painel mensal dos tres setups
+name: "pesquisa · Painel mensal dos tres setups"
 
 on:
   workflow_dispatch:

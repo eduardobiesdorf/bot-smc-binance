@@ -1,4 +1,4 @@
-name: O mapa - o que preve o retorno
+name: "pesquisa · O mapa - o que preve o retorno"
 
 on:
   workflow_dispatch:

@@ -1,4 +1,4 @@
-name: Baixar o histórico de funding
+name: "pesquisa · Baixar o histórico de funding"
 
 on:
   workflow_dispatch:

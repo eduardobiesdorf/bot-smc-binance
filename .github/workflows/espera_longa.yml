@@ -1,4 +1,4 @@
-name: Espera longa e o diário
+name: "pesquisa · Espera longa e o diário"
 
 on:
   workflow_dispatch:

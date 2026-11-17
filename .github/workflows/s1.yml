@@ -1,4 +1,4 @@
-name: Setup 1 — varredura de liquidez (H4)
+name: "01 · Setup 1 — varredura de liquidez (H4) · roda :05"
 
 # Varredura do order block em H4. Dono do acompanhamento:
 # stop movel, desfechos e placar sao deste workflow, nao dos outros.

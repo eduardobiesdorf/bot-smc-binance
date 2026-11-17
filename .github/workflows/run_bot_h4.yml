@@ -1,4 +1,4 @@
-name: Backtest SMC H4
+name: "pesquisa · Backtest SMC H4"
 
 # Aba Actions -> "Run workflow"
 on:

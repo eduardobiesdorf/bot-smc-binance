@@ -1,4 +1,4 @@
-name: Imagens dos últimos gatilhos dos dois setups
+name: "pesquisa · Imagens dos últimos gatilhos dos dois setups"
 
 on:
   workflow_dispatch:

@@ -1,4 +1,4 @@
-name: Setup 1 como o bot roda (com trailing)
+name: "pesquisa · Setup 1 como o bot roda (com trailing)"
 
 on:
   workflow_dispatch:

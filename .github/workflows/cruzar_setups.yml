@@ -1,4 +1,4 @@
-name: Os dois setups — cruzamento e stop mínimo
+name: "pesquisa · Os dois setups — cruzamento e stop mínimo"
 
 on:
   workflow_dispatch:

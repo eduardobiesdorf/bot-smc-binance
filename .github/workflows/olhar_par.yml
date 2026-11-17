@@ -1,4 +1,4 @@
-name: Olhar um par ao vivo
+name: "pesquisa · Olhar um par ao vivo"
 
 on:
   workflow_dispatch:

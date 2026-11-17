@@ -1,4 +1,4 @@
-name: O stop na vela do gatilho
+name: "pesquisa · O stop na vela do gatilho"
 
 on:
   workflow_dispatch:

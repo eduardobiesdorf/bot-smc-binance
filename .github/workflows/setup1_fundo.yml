@@ -1,4 +1,4 @@
-name: Setup 1 - as alavancas grandes
+name: "pesquisa · Setup 1 - as alavancas grandes"
 
 on:
   workflow_dispatch:

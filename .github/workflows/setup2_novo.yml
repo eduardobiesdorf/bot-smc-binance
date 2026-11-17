@@ -1,4 +1,4 @@
-name: Setup 2 reavaliado
+name: "pesquisa · Setup 2 reavaliado"
 
 on:
   workflow_dispatch:

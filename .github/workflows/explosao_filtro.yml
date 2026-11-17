@@ -1,4 +1,4 @@
-name: Explosão com filtro (universo inteiro)
+name: "pesquisa · Explosão com filtro (universo inteiro)"
 
 # Mesma baixa do teste anterior, mas rodando a versao com os filtros
 # que apareceram no H8: RSI depois da explosao >= 70 e extensao >= 0.5

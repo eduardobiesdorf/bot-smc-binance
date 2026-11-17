@@ -1,4 +1,4 @@
-name: A janela ancorada no funding
+name: "pesquisa · A janela ancorada no funding"
 
 on:
   workflow_dispatch:

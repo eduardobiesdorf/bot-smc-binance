@@ -1,4 +1,4 @@
-name: Setup 5 - bancada (3 maos)
+name: "pesquisa · Setup 5 - bancada (3 maos)"
 
 on:
   workflow_dispatch:

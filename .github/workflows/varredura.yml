@@ -1,4 +1,4 @@
-name: Radar da varredura (H1)
+name: "00 · RODAR OS TRÊS DE UMA VEZ (manual)"
 
 # Escaneia os 150 pares USDT de maior volume procurando a varredura do
 # order block, a reversao de 8h e o rompimento falso. NAO opera -- e radar

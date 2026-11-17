@@ -1,4 +1,4 @@
-name: Cada par na grade do seu ciclo de funding
+name: "pesquisa · Cada par na grade do seu ciclo de funding"
 
 on:
   workflow_dispatch:

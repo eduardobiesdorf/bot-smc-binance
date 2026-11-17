@@ -1,4 +1,4 @@
-name: Baixar futuros (USD-M)
+name: "pesquisa · Baixar futuros (USD-M)"
 
 # Pega o historico de USD-M Futures no CDN publico da Binance.
 # A API fapi.binance.com recusa IP dos EUA, onde ficam os runners.

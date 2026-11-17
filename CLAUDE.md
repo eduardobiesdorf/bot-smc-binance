@@ -41,6 +41,29 @@ dia manda o placar (rodadas feitas de 12). Se existir o segredo
 jeito de pegar o caso em que o bot morre de vez e não consegue avisar de
 dentro.
 
+## Os workflows: quais estão vivos
+
+Só QUATRO interessam. Os nomes foram prefixados para a lista do Actions
+(que ordena por nome) deixar os vivos no topo:
+
+```
+00 · RODAR OS TRÊS DE UMA VEZ (manual)   varredura.yml  -- sem cron
+01 · Setup 1 — varredura de liquidez     s1.yml         -- cron :05
+03 · Setup 3 — reversão de 8h            s3.yml         -- cron :25
+05 · Setup 5 — rompimento falso          s5.yml         -- cron :45
+pesquisa · ...                           os outros 50   -- sem cron, não rodar
+```
+
+O GitHub NÃO aceita subpasta em `.github/workflows/` — tem de ser plano.
+A organização é pelo nome, por isso o prefixo. Ao criar workflow novo,
+seguir a convenção: vivo ganha número, pesquisa ganha `pesquisa · `.
+
+Cada setup roda sozinho com `--sem-varredura` / `--sem-reversao8` /
+`--sem-falha5`, e com `--rotulo s1|s3|s5` para ter o seu próprio
+diagnóstico, resumo e batimento — senão os três brigam pelo mesmo arquivo
+no git a cada hora. O acompanhamento do setup 1 (stop móvel, desfechos,
+placar) só roda em quem roda o setup 1, senão sai desfecho em triplicata.
+
 ## Coisas que já me pegaram
 
 - O dono do repositório é **eduardobiesdorf**, não `dubiesdorf`. Os

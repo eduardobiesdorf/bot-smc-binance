@@ -1,4 +1,4 @@
-name: O setup bate o acaso por lote
+name: "pesquisa · O setup bate o acaso por lote"
 
 on:
   workflow_dispatch:

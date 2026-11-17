@@ -1,4 +1,4 @@
-name: Reversão em 5 minutos
+name: "pesquisa · Reversão em 5 minutos"
 
 on:
   workflow_dispatch:

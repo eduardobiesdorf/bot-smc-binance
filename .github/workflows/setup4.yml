@@ -1,4 +1,4 @@
-name: Setup 4 - a primeira força depois da queda
+name: "pesquisa · Setup 4 - a primeira força depois da queda"
 
 on:
   workflow_dispatch:

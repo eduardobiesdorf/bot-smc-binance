@@ -1,4 +1,4 @@
-name: Backtest Reversao
+name: "pesquisa · Backtest Reversao"
 
 on:
   workflow_dispatch:

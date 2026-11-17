@@ -1,4 +1,4 @@
-name: Explosão de vela única (universo inteiro)
+name: "pesquisa · Explosão de vela única (universo inteiro)"
 
 # Baixa TODOS os pares USDT de futuros para uma pasta temporaria, roda o
 # teste da explosao de vela unica em H1/H4/H8/H12/diario e joga as tabelas

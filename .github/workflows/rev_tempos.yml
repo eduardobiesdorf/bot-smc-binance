@@ -1,4 +1,4 @@
-name: A reversao em H1 H2 H4 e H8 com o alvo novo
+name: "pesquisa · A reversao em H1 H2 H4 e H8 com o alvo novo"
 
 on:
   workflow_dispatch:

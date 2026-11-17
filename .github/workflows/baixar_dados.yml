@@ -1,4 +1,4 @@
-name: Baixar dados
+name: "pesquisa · Baixar dados"
 
 # Baixa o historico da Binance e COMMITA os CSVs em dados/.
 # Roda uma vez (ou quando quiser atualizar) -- depois os backtests leem do disco.

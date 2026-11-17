@@ -1,4 +1,4 @@
-name: Lista de operações da reversão
+name: "pesquisa · Lista de operações da reversão"
 
 on:
   workflow_dispatch:

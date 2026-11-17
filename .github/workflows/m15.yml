@@ -1,4 +1,4 @@
-name: Setup 5 em 15 minutos
+name: "pesquisa · Setup 5 em 15 minutos"
 
 on:
   workflow_dispatch:

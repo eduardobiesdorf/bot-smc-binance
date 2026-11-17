@@ -1,4 +1,4 @@
-name: Backtest Momentum
+name: "pesquisa · Backtest Momentum"
 
 on:
   workflow_dispatch:

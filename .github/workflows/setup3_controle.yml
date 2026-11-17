@@ -1,4 +1,4 @@
-name: Setup 3 contra entrada aleatória (controle)
+name: "pesquisa · Setup 3 contra entrada aleatória (controle)"
 
 on:
   workflow_dispatch:

@@ -1,4 +1,4 @@
-name: Reversão validada — detalhe operação por operação
+name: "pesquisa · Reversão validada — detalhe operação por operação"
 
 on:
   workflow_dispatch:

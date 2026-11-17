@@ -1,4 +1,4 @@
-name: Grafico do setup
+name: "pesquisa · Grafico do setup"
 
 on:
   workflow_dispatch:

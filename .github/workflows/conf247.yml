@@ -1,4 +1,4 @@
-name: Conferir quem nao e cripto 24/7
+name: "pesquisa · Conferir quem nao e cripto 24/7"
 
 on:
   workflow_dispatch:

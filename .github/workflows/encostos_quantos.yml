@@ -1,4 +1,4 @@
-name: Quantos avisos de encosto por mês
+name: "pesquisa · Quantos avisos de encosto por mês"
 
 on:
   workflow_dispatch:

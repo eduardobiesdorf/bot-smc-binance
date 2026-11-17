@@ -1,4 +1,4 @@
-name: O H1 vira positivo com funding e volume
+name: "pesquisa · O H1 vira positivo com funding e volume"
 
 on:
   workflow_dispatch:

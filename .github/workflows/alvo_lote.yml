@@ -1,4 +1,4 @@
-name: Qual alvo da mais significancia por lote
+name: "pesquisa · Qual alvo da mais significancia por lote"
 
 on:
   workflow_dispatch:

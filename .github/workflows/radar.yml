@@ -1,4 +1,4 @@
-name: Radar SMC (alertas)
+name: "pesquisa · Radar SMC (alertas)"
 
 # Escaneia a cesta e manda os gatilhos no Telegram.
 # NAO opera -- e so radar para voce olhar o grafico.

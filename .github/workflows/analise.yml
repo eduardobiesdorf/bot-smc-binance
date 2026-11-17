@@ -1,4 +1,4 @@
-name: Analise (dado grande, sem commitar)
+name: "pesquisa · Analise (dado grande, sem commitar)"
 
 # Baixa o intervalo pedido para uma pasta temporaria, roda a analise
 # ali dentro e joga o resultado no log. O dado nao entra no repositorio:

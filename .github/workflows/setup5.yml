@@ -1,4 +1,4 @@
-name: Setup 5 - rompimento falso e volta a faixa
+name: "pesquisa · Setup 5 - rompimento falso e volta a faixa"
 
 on:
   workflow_dispatch:

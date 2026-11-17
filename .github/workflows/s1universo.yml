@@ -1,4 +1,4 @@
-name: Setup 1 - tamanho do universo
+name: "pesquisa · Setup 1 - tamanho do universo"
 
 on:
   workflow_dispatch:

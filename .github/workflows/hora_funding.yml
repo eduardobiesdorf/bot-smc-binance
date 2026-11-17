@@ -1,4 +1,4 @@
-name: A hora da entrada e o funding
+name: "pesquisa · A hora da entrada e o funding"
 
 on:
   workflow_dispatch:

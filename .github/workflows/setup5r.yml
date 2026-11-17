@@ -1,4 +1,4 @@
-name: Setup 5 - universo rolante
+name: "pesquisa · Setup 5 - universo rolante"
 
 on:
   workflow_dispatch:

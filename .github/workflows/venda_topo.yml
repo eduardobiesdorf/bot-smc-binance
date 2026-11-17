@@ -1,4 +1,4 @@
-name: A venda com o alvo certo
+name: "pesquisa · A venda com o alvo certo"
 
 on:
   workflow_dispatch:
