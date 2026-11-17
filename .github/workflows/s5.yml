@@ -1,0 +1,96 @@
+name: Setup 5 — rompimento falso (H1)
+
+# Rompimento que falha e volta para a faixa, em H1.
+#
+# 16/11/2026 -- UM WORKFLOW POR SETUP. Antes os tres rodavam num arquivo so
+# (varredura.yml), que continua existindo para disparo manual mas ja NAO
+# tem cron. Dois motivos para separar:
+#
+#   1. Isolamento. Se um setup quebra ou trava numa requisicao, os outros
+#      dois seguem avisando. No arquivo unico, um erro cedo derrubava tudo.
+#   2. Registro novo de agendamento. O cron do varredura.yml parou de
+#      disparar em 16/11 as 04h13 e nao voltou, com tres configuracoes
+#      diferentes testadas no mesmo dia. Arquivo de workflow NOVO recebe
+#      registro NOVO do GitHub -- e a unica alavanca que ainda nao foi
+#      puxada.
+#
+# Cada um escreve o SEU diagnostico e o SEU batimento (--rotulo), senao os
+# tres brigariam pelo mesmo arquivo no git a cada hora.
+#
+# Os horarios sao escalonados (:05, :25, :45) para as tres rodadas nunca
+# empurrarem commit ao mesmo tempo. Cada rodada leva uns 2 a 3 minutos.
+
+on:
+  schedule:
+    - cron: '45 * * * *'
+  workflow_dispatch:
+    inputs:
+      teste:
+        description: 'Só imprimir, não mandar no Telegram'
+        required: false
+        default: 'false'
+      top:
+        description: 'Quantos pares escanear'
+        required: false
+        default: '150'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: s5
+  cancel-in-progress: true
+
+jobs:
+  s5:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+          cache-dependency-path: requisitos.txt
+      - run: pip install -r requisitos.txt
+
+      - name: Escanear
+        env:
+          TELEGRAM_TOKEN: ${{ secrets.TOKEN_TELEGRAM || secrets.TELEGRAM_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.CHAT_ID_TELEGRAM || secrets.TELEGRAM_CHAT_ID }}
+          PING_VIGIA: ${{ secrets.PING_VIGIA }}
+        run: |
+          set -o pipefail
+          ARGS="--rotulo s5 --sem-varredura --sem-reversao8"
+          ARGS="$ARGS --top ${{ inputs.top || '150' }}"
+          ARGS="$ARGS --rev-top ${{ inputs.top || '150' }}"
+          ARGS="$ARGS --falha5-top ${{ inputs.top || '150' }}"
+          ARGS="$ARGS --caixa 60 --risco-pct 2 --alav 8"
+          [ "${{ inputs.teste }}" = "true" ] && ARGS="$ARGS --teste"
+          python -u bot_varredura.py $ARGS 2>&1 | tee s5.log
+
+      - name: Guardar o estado (evita alerta repetido)
+        if: always()
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          for f in falha5_estado.json historico_falha5.csv \
+                   diagnostico_s5.txt resumo_s5.txt \
+                   ultima_rodada_s5.json; do
+            if [ -f "$f" ]; then git add "$f"; fi
+          done
+          if git diff --cached --quiet; then
+            echo "nada mudou no estado" >> $GITHUB_STEP_SUMMARY
+            exit 0
+          fi
+          git commit -m "s5: estado dos alertas [skip ci]"
+          for t in 1 2 3 4 5; do
+            git push origin HEAD:main && exit 0
+            git pull --rebase --autostash origin main || exit 0
+            sleep $((t * 5))
+          done
+
+      - name: Resumo
+        if: always()
+        run: |
+          { echo '```'; tail -40 s5.log; echo '```'; } >> $GITHUB_STEP_SUMMARY

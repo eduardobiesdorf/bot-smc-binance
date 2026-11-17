@@ -960,6 +960,13 @@ def main():
                          'so para ver o formato da mensagem')
     ap.add_argument('--falha5-exemplos', type=int, default=2,
                     help='quantos exemplos mandar com --falha5-ping')
+    ap.add_argument('--sem-varredura', action='store_true',
+                    help='pular o setup 1 (varredura de liquidez) e o '
+                         'acompanhamento dele')
+    ap.add_argument('--rotulo', default='',
+                    help='sufixo dos arquivos de diagnóstico e batimento, '
+                         'para cada workflow ter os seus e não brigarem '
+                         'no git (ex: s1, s3, s5)')
     ap.add_argument('--sem-falha5', action='store_true',
                     help='desliga o quarto alerta (rompimento falso em H1)')
     ap.add_argument('--falha5-top', type=int, default=150,
@@ -977,6 +984,16 @@ def main():
     ap.add_argument('--velas', type=int, default=400,
                     help='quantas velas de H1 puxar no --explicar')
     a = ap.parse_args()
+
+    # 16/11/2026 -- cada workflow escreve o SEU diagnostico e o SEU
+    # batimento. Sem isto os tres sobrescreveriam o mesmo arquivo e
+    # brigariam no git toda hora; e o batimento daria sempre buraco zero,
+    # porque um workflow carimbaria a hora do outro.
+    if a.rotulo:
+        globals()['DIAG'] = f"diagnostico_{a.rotulo}.txt"
+        globals()['RESUMO'] = f"resumo_{a.rotulo}.txt"
+        globals()['BATIMENTO'] = f"ultima_rodada_{a.rotulo}.json"
+
     CFG['rr_min'] = a.rr_min
     CFG['vol_varr_min'] = a.vol_min
     CFG['liq_max_r'] = a.liq_max_r
@@ -1110,7 +1127,13 @@ def main():
     # 100 o setup passa a provar algo: 5 anos positivos de 6, concentracao
     # de 23-35%. A faixa 51-300, que o bot nao via, paga +78,70/op contra
     # +27,70 da faixa que ele via. Ver analise/setup1_universo.py.
-    fila = UNIVERSO[:a.top] if a.fixo else fila_viva(a.top)
+    # 16/11/2026 -- cada setup pode rodar sozinho, num workflow proprio.
+    # Com --sem-varredura a fila nasce vazia e o laco inteiro nao roda.
+    if a.sem_varredura:
+        fila = []
+        diag("setup 1 desligado nesta rodada (--sem-varredura)")
+    else:
+        fila = UNIVERSO[:a.top] if a.fixo else fila_viva(a.top)
     for sim in fila:
         if len(usados) >= a.top:
             break
@@ -1398,27 +1421,33 @@ def main():
         except Exception as e:
             diag(f"rompimento falso falhou, o resto segue: {e}")
 
-    desfechos = acomp.revisar(acomps, series, CFG, seguir, achar_impulsos,
-                              atr, media_volume)
-    for m in desfechos:
+    # O acompanhamento (stop movel, desfechos, placar) e do setup 1: so
+    # roda em quem roda o setup 1, senao tres workflows mandariam o mesmo
+    # desfecho tres vezes.
+    desfechos = []
+    if not a.sem_varredura:
+        desfechos = acomp.revisar(acomps, series, CFG, seguir,
+                                  achar_impulsos, atr, media_volume)
+        for m in desfechos:
+            if a.teste:
+                print(m, "\n")
+            else:
+                enviar(m)
+            diag("desfecho: " + m.replace("\n", " | ")[:140])
+        if desfechos and not a.teste:
+            enviar(acomp.placar(acomps))
         if a.teste:
-            print(m, "\n")
-        else:
-            enviar(m)
-        diag("desfecho: " + m.replace("\n", " | ")[:140])
-    if desfechos and not a.teste:
-        enviar(acomp.placar(acomps))
-    if a.teste:
-        print(acomp.placar(acomps))
-        return
-    acomp.gravar(acomps)
+            print(acomp.placar(acomps))
+            return
+        acomp.gravar(acomps)
 
     salvar(vistos)
     diag(f"enviados {len(novos)} gatilhos, {len(desfechos)} desfechos")
-    diag(acomp.placar(acomps).replace('<b>', '').replace('</b>', ''))
-    mot = acomp.motivos(acomps)
-    if mot:
-        diag("por que os cenários morreram:\n" + mot)
+    if not a.sem_varredura:
+        diag(acomp.placar(acomps).replace('<b>', '').replace('</b>', ''))
+        mot = acomp.motivos(acomps)
+        if mot:
+            diag("por que os cenários morreram:\n" + mot)
 
 
 if __name__ == "__main__":

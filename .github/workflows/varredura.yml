@@ -5,61 +5,13 @@ name: Radar da varredura (H1)
 # para voce olhar o grafico.
 
 on:
-  schedule:
-    # UM disparo a cada QUATRO horas: 00/04/08/12/16/20 UTC.
-    #
-    # Eram tres por hora (minutos 1, 11 e 21) para driblar a fila do
-    # Actions; depois passou a um por hora. Medido em 220 execucoes: com
-    # tres, o primeiro resultado da hora saia em 33 min (mediana); com um
-    # so, sai em 43. A entrada e por ordem limitada valida 4h, entao nao
-    # muda o resultado.
-    #
-    # 13/11/2026 -- passou para de 2 em 2 horas, porque a estimativa antiga
-    # de ~1.540 min/mes estava baixa e o bot sozinho ja estourava a cota.
-    #
-    # 14/11/2026 -- passou para DE 4 EM 4 HORAS. Medido nas 452 rodadas de
-    # novembro: 3,2 min por varredura, e o GitHub cobra arredondando para
-    # cima, ou seja 4 min por rodada. De 2 em 2 horas eram 12 rodadas/dia =
-    # 48 min/dia = ~1.440 min/mes; somando a pesquisa, novembro fechou em
-    # 2.825 min contra 2.000 da cota gratuita de repositorio privado.
-    # De 4 em 4 horas sao 6 rodadas/dia = 24 min/dia = ~720 min/mes.
-    #
-    # Nao perde fechamento nenhum: o setup 1 roda em H4 (fecha
-    # 00/04/08/12/16/20 UTC, exatamente estas horas) e o setup 3 em H8
-    # (fecha 00/08/16 UTC, um subconjunto). O custo e que o aviso de encosto
-    # no order block e a atualizacao do stop movel saem a cada 4h em vez de
-    # 2h.
-    #
-    # 14/11/2026, mais tarde -- o MINUTO saiu do :01 para o :37. O :01 e o
-    # mais disputado do GitHub inteiro, todo mundo agenda na hora cheia.
-    #
-    # 16/11/2026 -- VOLTOU PARA DE 2 EM 2 HORAS, e nao por causa de minuto.
-    # Medido de sabado 21h37 ate segunda 06h50: de 9 horarios esperados,
-    # 4 dispararam (44%), com atraso de 36 min a 3h12. Trocar o minuto nao
-    # resolveu nada: quem descarta e a fila do GitHub em repositorio
-    # privado, e isso nao tem ajuste.
-    #
-    # 16/11/2026, fim da tarde -- DUAS VEZES POR HORA, nos minutos 7 e 37.
-    #
-    # O repositorio virou PUBLICO, entao minuto de Actions e ilimitado e de
-    # graca: nao ha mais motivo para economizar horario. E economizar era
-    # justamente o problema, porque o GitHub descarta horario agendado sem
-    # avisar e sem deixar rastro (nao aparece como cancelada nem pulada --
-    # a rodada simplesmente nao nasce).
-    #
-    # O placar que levou a isto: com '37 */4' disparou 4 de 6 por dia; com
-    # '37 */2' disparou ZERO em 9h30. E quando o cron era de hora em hora,
-    # la no comeco de novembro, disparava 20 a 24 vezes por dia -- 88%. O
-    # que mais funcionou foi justamente ter MUITOS horarios.
-    #
-    # Dois por hora atacam o sintoma sem precisar provar a causa: se o
-    # descarte e por sorteio, duas chances por hora mudam a conta. Disparar
-    # as duas nao gera alerta repetido -- a trava de duplicata por chave ja
-    # existe em todos os tres setups, e e para isto que ela serve.
-    #
-    # Em Brasilia: :07 e :37 de toda hora.
-    - cron: '7 * * * *'
-    - cron: '37 * * * *'
+  # 16/11/2026 -- SEM CRON. O agendamento mudou para um workflow por setup:
+  # s1.yml (:05), s3.yml (:25) e s5.yml (:45). Este arquivo continua aqui
+  # para DISPARO MANUAL, quando se quer rodar os tres de uma vez na mesma
+  # serie de 1h baixada -- util para conferir tudo junto ou para os pings
+  # de exemplo. Se voltar a ter cron, ele duplicaria o trabalho dos outros
+  # tres (sem mandar alerta repetido, porque a trava por chave segura, mas
+  # sem motivo).
   workflow_dispatch:
     inputs:
       top:
