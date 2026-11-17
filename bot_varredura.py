@@ -960,6 +960,14 @@ def main():
                          'so para ver o formato da mensagem')
     ap.add_argument('--falha5-exemplos', type=int, default=2,
                     help='quantos exemplos mandar com --falha5-ping')
+    ap.add_argument('--sem-batimento', action='store_true',
+                    help='não medir buraco nem mandar placar: para o '
+                         'workflow MANUAL, que só roda quando alguém '
+                         'clica e por isso sempre teria buraco gigante')
+    ap.add_argument('--esperadas', type=int, default=24,
+                    help='quantas rodadas por dia este workflow deveria '
+                         'fazer, para o placar diário (24 = de hora em '
+                         'hora)')
     ap.add_argument('--sem-varredura', action='store_true',
                     help='pular o setup 1 (varredura de liquidez) e o '
                          'acompanhamento dele')
@@ -1107,8 +1115,8 @@ def main():
     # Batimento antes de qualquer coisa: se o bot ficou fora, o Eduardo
     # precisa saber disso ANTES de ler "0 gatilhos" e achar que o mercado
     # e que estava parado.
-    if not a.teste:
-        batimento()
+    if not a.teste and not a.sem_batimento:
+        batimento(esperadas=a.esperadas)
 
     vistos = carregar()
     gatilhos, cenarios, linhas = [], [], []

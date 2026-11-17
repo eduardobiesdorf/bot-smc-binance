@@ -152,7 +152,10 @@ jobs:
           PING_VIGIA: ${{ secrets.PING_VIGIA }}
         run: |
           set -o pipefail
-          ARGS="--top ${{ inputs.top || '150' }}"
+          # Workflow MANUAL: sem batimento. Ele so roda quando
+          # alguem clica, entao mediria "buraco" de horas toda vez.
+          ARGS="--sem-batimento --rotulo manual"
+          ARGS="$ARGS --top ${{ inputs.top || '150' }}"
           ARGS="$ARGS --rr-min ${{ inputs.rr_min || '1.2' }}"
           ARGS="$ARGS --vol-min ${{ inputs.vol_min || '1.2' }}"
           ARGS="$ARGS --liq-max-r ${{ inputs.liq_max_r || '1.5' }}"

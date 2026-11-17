@@ -62,7 +62,7 @@ jobs:
           PING_VIGIA: ${{ secrets.PING_VIGIA }}
         run: |
           set -o pipefail
-          ARGS="--rotulo s1 --sem-reversao8 --sem-falha5"
+          ARGS="--esperadas 24 --rotulo s1 --sem-reversao8 --sem-falha5"
           ARGS="$ARGS --top ${{ inputs.top || '150' }}"
           ARGS="$ARGS --rev-top ${{ inputs.top || '150' }}"
           ARGS="$ARGS --falha5-top ${{ inputs.top || '150' }}"
