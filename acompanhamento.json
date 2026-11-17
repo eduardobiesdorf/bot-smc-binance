@@ -888,12 +888,38 @@
   "tipo": "cenario",
   "sim": "MMTUSDT",
   "lado": "venda",
-  "status": "aberto",
+  "status": "virou_gatilho",
   "vela_ms": 1794902400000,
   "imp_fim_ms": 1794686400000,
   "alvo": 0.0945,
   "nota": "limpou o order block, esperando a reversão",
   "vol_varr": 2.3083397695624845,
+  "nucleo": false
+ },
+ "gat-MMTUSDT-1794902400000": {
+  "tipo": "gatilho",
+  "sim": "MMTUSDT",
+  "lado": "venda",
+  "status": "aberto",
+  "vela_ms": 1794902400000,
+  "entrada": 0.1136,
+  "stop": 0.11859857142857143,
+  "stop_ini": 0.11859857142857143,
+  "movs": 0,
+  "degraus": [
+   [
+    1794902400000,
+    0.11859857142857143
+   ]
+  ],
+  "alvo": 0.0945,
+  "rr": 3.8210917404972915,
+  "risco_pct": 4.400150905432589,
+  "vol_varr": 2.3083397695624845,
+  "liq_r": 1.200342955130037,
+  "rsi_varr": 58.99699801493283,
+  "rsi_gat": 57.67339361084533,
+  "rsi_varr_norm": 41.00300198506717,
   "nucleo": false
  }
 }
