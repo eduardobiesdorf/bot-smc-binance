@@ -1,14 +1,19 @@
-início 16/11 21:06 BRT
-primeira rodada com batimento: sem anterior para comparar
+início 17/11 05:10 BRT
+TOKEN: ok 46 chars | CHAT_ID: ok 10 chars
+HTTP 200: ok
+buraco desde a rodada anterior: 8.1h
+TOKEN: ok 46 chars | CHAT_ID: ok 10 chars
+HTTP 200: ok
 setup 1 desligado nesta rodada (--sem-varredura)
 pares (0): 
 gatilhos 0 | cenários 0
 AGPUBUSDT: fora (não negocia 24/7)
 AVGOBUSDT: fora (não negocia 24/7)
+BABABUSDT: fora (não negocia 24/7)
 CBRSBUSDT: fora (não negocia 24/7)
 INTWBUSDT: fora (não negocia 24/7)
 IRENBUSDT: fora (não negocia 24/7)
 MRVLBUSDT: fora (não negocia 24/7)
-reversão 8h: 144 pares olhados, 0 gatilho(s), 0 encosto(s) esperando
+reversão 8h: 143 pares olhados, 0 gatilho(s), 0 encosto(s) esperando
 🧪 reversão de 8h em teste: 0 aberta(s), nenhuma resolvida ainda
 enviados 0 gatilhos, 0 desfechos
