@@ -900,7 +900,7 @@
   "tipo": "gatilho",
   "sim": "MMTUSDT",
   "lado": "venda",
-  "status": "aberto",
+  "status": "stop",
   "vela_ms": 1794902400000,
   "entrada": 0.1136,
   "stop": 0.11859857142857143,
@@ -920,6 +920,9 @@
   "rsi_varr": 58.99699801493283,
   "rsi_gat": 57.67339361084533,
   "rsi_varr_norm": 41.00300198506717,
-  "nucleo": false
+  "nucleo": false,
+  "fim_ms": 1794916800000,
+  "horas": 1,
+  "resultado_r": -1.0
  }
 }
