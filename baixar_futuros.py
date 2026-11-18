@@ -23,6 +23,33 @@ from datetime import datetime, timezone
 
 import requests
 
+# As listas de exclusao vivem no bot, para nao divergirem. Importadas por
+# leitura do arquivo: importar o modulo puxaria matplotlib junto.
+def _fora_do_bot():
+    import ast as _ast
+    import os as _os
+    alvo = _os.path.join(_os.path.dirname(_os.path.abspath(__file__)),
+                         'bot_varredura.py')
+    try:
+        arv = _ast.parse(open(alvo, encoding='utf-8').read())
+    except Exception:
+        return set()
+    achado, nomes = {}, ('STABLE', 'COMMODITY', '_ACOES_BASE')
+    for no in arv.body:
+        if isinstance(no, _ast.Assign) and no.targets and \
+                getattr(no.targets[0], 'id', None) in nomes:
+            try:
+                achado[no.targets[0].id] = _ast.literal_eval(no.value)
+            except Exception:
+                pass
+    base = set()
+    for v in achado.values():
+        base |= set(v)
+    return base | {t + 'B' for t in achado.get('_ACOES_BASE', ())}
+
+
+_FORA_BOT = _fora_do_bot()
+
 CDN = "https://data.binance.vision/data/futures/um/monthly/klines"
 CDN_DIA = "https://data.binance.vision/data/futures/um/daily/klines"
 SPOT = "https://data-api.binance.vision/api/v3"
@@ -124,18 +151,35 @@ def listar_cdn():
     return cripto
 
 
+FUT = "https://www.binance.com/fapi/v1"
+CABECA = {'User-Agent': 'Mozilla/5.0 (compatible; radar-smc/1.0)'}
+
+
 def candidatos(n):
-    """A lista de candidatos vem do volume do SPOT, que e acessivel daqui.
-    O ranking de verdade e refeito depois, com o volume dos futuros."""
-    r = requests.get(f"{SPOT}/ticker/24hr", timeout=60)
-    r.raise_for_status()
+    """Os candidatos pelo volume dos FUTUROS, igual ao bot ao vivo.
+
+    18/11/2026 -- isto escolhia pelo volume do SPOT, porque o endpoint de
+    futuros dava 451. Resultado: o backteste e o bot ao vivo montavam
+    universos diferentes e os numeros nao eram comparaveis. Agora os dois
+    usam a MESMA fonte (www.binance.com/fapi, a unica porta aberta dos
+    runners) e o MESMO corte de acao, ETF e commodity -- importado do bot
+    para nao haver duas listas divergindo.
+    """
+    try:
+        r = requests.get(f"{FUT}/ticker/24hr", headers=CABECA, timeout=60)
+        r.raise_for_status()
+        diag("candidatos pelo volume dos FUTUROS")
+    except Exception as e:
+        diag(f"futuros nao responderam ({e}); caindo para o volume do spot")
+        r = requests.get(f"{SPOT}/ticker/24hr", timeout=60)
+        r.raise_for_status()
     cand = []
     for d in r.json():
         s = d.get('symbol', '')
         if not s.endswith('USDT'):
             continue
         base = s[:-4]
-        if base in FORA:
+        if base in FORA or base in _FORA_BOT:
             continue
         # acao tokenizada no spot: ticker + B. Nao existe em futuros.
         if 4 <= len(base) <= 6 and base.endswith('B') and base[:-1].isalpha():

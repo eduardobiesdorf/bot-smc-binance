@@ -1,0 +1,74 @@
+name: "pesquisa · PAINEL no universo de FUTUROS (o que vale hoje)"
+
+# 18/11/2026 -- refaz o painel dos tres setups no MESMO universo que o bot
+# ao vivo passou a vigiar: pares escolhidos pelo volume dos FUTUROS (nao do
+# spot) e com o corte de acao, ETF e commodity na forma dos futuros.
+#
+# O painel anterior, de 14/11, rodou em dados escolhidos pelo volume do
+# SPOT e com a lista de acoes na forma do spot (com B no fim) -- nos
+# futuros ela nao pegava nada. Os numeros de la nao descrevem o que o bot
+# olha hoje.
+#
+# Baixa 250 do topo porque ~30% caem nos filtros; sobram ~170, e o painel
+# re-escolhe as 150 maiores a cada trimestre pelo volume do trimestre
+# ANTERIOR (universo rolante, sem olhar o futuro).
+
+on:
+  workflow_dispatch:
+    inputs:
+      inicio:
+        description: 'Mês inicial (YYYY-MM)'
+        required: false
+        default: '2020-01'
+      top:
+        description: 'Quantos pares baixar'
+        required: false
+        default: '250'
+      ano:
+        description: 'Ano do detalhe mês a mês'
+        required: false
+        default: '2026'
+
+permissions:
+  contents: read
+
+jobs:
+  pf:
+    runs-on: ubuntu-latest
+    timeout-minutes: 330
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install requests matplotlib
+      - name: Chave do cache
+        id: k
+        run: echo "d=$(date -u +%Y-%m-%d)" >> $GITHUB_OUTPUT
+      - name: Cache dos klines de futuros
+        uses: actions/cache@v4
+        with:
+          path: dados_fut_painel
+          key: futpainel-${{ inputs.inicio || '2020-01' }}-${{ inputs.top || '250' }}-${{ steps.k.outputs.d }}
+          restore-keys: |
+            futpainel-${{ inputs.inicio || '2020-01' }}-${{ inputs.top || '250' }}-
+            futpainel-${{ inputs.inicio || '2020-01' }}-
+      - name: Baixar futuros
+        run: |
+          set -o pipefail
+          python -u baixar_futuros.py \
+            --inicio ${{ inputs.inicio || '2020-01' }} \
+            --intervalo 1h \
+            --top ${{ inputs.top || '250' }} \
+            --pasta dados_fut_painel 2>&1 | tail -25
+          echo "pares na pasta: $(ls dados_fut_painel | wc -l)"
+          du -sh dados_fut_painel
+      - name: Rodar o painel
+        run: |
+          set -o pipefail
+          python -u analise/painel_mensal.py dados_fut_painel \
+            --ano ${{ inputs.ano || '2026' }} 2>&1 | tee pf.log
+      - name: Resumo
+        if: always()
+        run: |
+          { echo '```'; tail -120 pf.log; echo '```'; } >> $GITHUB_STEP_SUMMARY
