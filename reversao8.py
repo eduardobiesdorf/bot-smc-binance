@@ -354,6 +354,9 @@ def entrada(h1, mv1, e, cfg, pos1):
         return dict(lado='compra' if alta else 'venda', entrada=ent,
                     stop=stop, alvo=alvo, rr=dist/risco, idx=k,
                     vela_ms=h1[k][0], topo=pico, exp_ms=e['exp_ms'],
+                    # 18/11/2026 -- a zona vai junto para o grafico poder
+                    # desenha-la; o dicionario do encosto ja a tinha
+                    ob_base=e['ob_base'], ob_topo=e['ob_topo'],
                     risco_pct=risco/ent*100, queda=e['queda'],
                     vol_gat=(h1[k][5]/mv1[k]) if mv1[k] > 0 else 0.0)
 

@@ -72,6 +72,7 @@ from datetime import datetime, timedelta, timezone
 import requests
 
 import grafico_varredura as graf
+import grafico_setups as graf2
 import acompanhamento as acomp
 import reversao8 as rev8
 import falha5
@@ -830,6 +831,34 @@ def msg_cenario(sim, c):
     return t
 
 
+def manda_setup(sim, g, h1, texto, desenhar, etq):
+    """Imagem com a legenda; se nao der, texto puro. Serve os setups 3 e 5.
+
+    18/11/2026 -- o Eduardo pediu grafico nos tres alertas, nao so no
+    setup 1: ver o desenho e decidir, em vez de ler numero e ter de abrir
+    o grafico para conferir.
+
+    O Telegram corta legenda de foto em 1024 caracteres e as mensagens
+    destes dois setups passam disso. Quando passa, vai a imagem com uma
+    legenda curta e o texto completo logo em seguida, em vez de entregar
+    um alerta truncado no meio do stop.
+    """
+    caminho = f"/tmp/{sim}_{etq}.png"
+    try:
+        if not desenhar(sim, h1, g, caminho):
+            return enviar(texto)
+        if len(texto) <= 1000:
+            if graf.enviar_foto(caminho, texto):
+                return True
+        else:
+            curta = texto.split("\n")[0][:300]
+            graf.enviar_foto(caminho, curta)
+            return enviar(texto)
+    except Exception as ex:
+        diag(f"{sim}: não consegui desenhar ({ex})")
+    return enviar(texto)
+
+
 def manda_com_grafico(sim, e, h, texto):
     """Tenta mandar a imagem com a legenda. Se falhar, manda so o texto."""
     caminho = f"/tmp/{sim}_{e['fase']}.png"
@@ -1453,7 +1482,8 @@ def main():
                 if a.teste:
                     print(texto, "\n")
                 else:
-                    enviar(texto)
+                    manda_setup(sim, g, serie_1h(sim), texto,
+                                graf2.desenhar_rev8, 'rev8gat')
             for sim, enc in encostos_r:
                 if not rev8.registrar_encosto(rev_d, sim, enc):
                     continue
@@ -1461,7 +1491,8 @@ def main():
                 if a.teste:
                     print(texto, "\n")
                 else:
-                    enviar(texto)
+                    manda_setup(sim, enc, serie_1h(sim), texto,
+                                graf2.desenhar_rev8, 'rev8enc')
             for m in rev8.revisar(rev_d, s8r, fmt, quando):
                 if a.teste:
                     print(m, "\n")
@@ -1527,7 +1558,8 @@ def main():
                 if a.teste:
                     print(texto, "\n")
                 else:
-                    enviar(texto)
+                    manda_setup(sim, g, s_f5.get(sim) or serie_1h(sim),
+                                texto, graf2.desenhar_falha5, 'f5gat')
             for sim, c in ctx_f5:
                 if not falha5.registrar_contexto(f5_d, sim, c):
                     continue
@@ -1535,7 +1567,8 @@ def main():
                 if a.teste:
                     print(texto, "\n")
                 else:
-                    enviar(texto)
+                    manda_setup(sim, c, s_f5.get(sim) or serie_1h(sim),
+                                texto, graf2.desenhar_falha5, 'f5ctx')
             for m in falha5.revisar(f5_d, s_f5, fmt, quando):
                 if a.teste:
                     print(m, "\n")
