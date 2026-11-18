@@ -10,7 +10,7 @@ on:
       top:
         description: 'Quantas moedas (as maiores)'
         required: false
-        default: '150'
+        default: '215'
       ativos:
         description: 'Pares específicos (vazio = usa as maiores)'
         required: false
@@ -42,8 +42,8 @@ jobs:
         uses: actions/cache@v4
         with:
           path: dados_5m
-          key: cinco5m-${{ inputs.top || '150' }}-${{ inputs.inicio || '2023-01' }}-${{ steps.dia.outputs.d }}
-          restore-keys: cinco5m-${{ inputs.top || '150' }}-${{ inputs.inicio || '2023-01' }}-
+          key: cinco5m-${{ inputs.top || '215' }}-${{ inputs.inicio || '2023-01' }}-${{ steps.dia.outputs.d }}
+          restore-keys: cinco5m-${{ inputs.top || '215' }}-${{ inputs.inicio || '2023-01' }}-
       - name: Baixar 5m
         if: steps.cache.outputs.cache-hit != 'true'
         env:
@@ -54,7 +54,7 @@ jobs:
           EXTRA=""
           if [ -n "$ATIVOS" ]; then EXTRA="--ativos $ATIVOS"; fi
           python -u baixar_futuros.py --inicio ${{ inputs.inicio || '2023-01' }} \
-            --intervalo 5m --top ${{ inputs.top || '150' }} --pasta dados_5m \
+            --intervalo 5m --top ${{ inputs.top || '215' }} --pasta dados_5m \
             $EXTRA 2>&1 | tail -8
       - name: O que tem
         run: |

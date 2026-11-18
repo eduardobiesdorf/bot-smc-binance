@@ -87,7 +87,7 @@ jobs:
             # de 1h baixada -- 150 requisicoes em vez de 450.
             python -u bot_varredura.py \
               --rotulo cont --esperadas 24 \
-              --top 150 --rev-top 150 --falha5-top 150 \
+              --top 215 --rev-top 215 --falha5-top 215 \
               --caixa 60 --risco-pct 2 --alav 8 \
               2>&1 | tail -30 || echo "a volta $VOLTA falhou, seguindo"
 

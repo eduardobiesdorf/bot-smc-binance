@@ -1039,8 +1039,13 @@ def depois(h, r):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument('--top', type=int, default=150,
-                    help='pares da varredura; era 50 até 14/11/2026')
+    ap.add_argument('--top', type=int, default=215,
+                    help='pares da varredura. 50 até 14/11/2026, 150 até '
+                         '18/11. Subiu para 215 quando o bot passou a ler '
+                         'FUTUROS: 45 das 150 maiores do perpétuo são ação, '
+                         'ETF ou commodity e caem nos filtros, sobrando 105 '
+                         'criptos. 215 devolve as ~150 criptos que o '
+                         'backteste usou.')
     ap.add_argument('--fixo', action='store_true',
                     help='usar a lista fixa UNIVERSO em vez do volume vivo')
     ap.add_argument('--dinamico', action='store_true',

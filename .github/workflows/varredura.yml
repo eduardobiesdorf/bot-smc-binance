@@ -17,7 +17,7 @@ on:
       top:
         description: 'Quantos pares escanear na varredura (150 desde 14/11/2026)'
         required: false
-        default: '150'
+        default: '215'
       fixo:
         description: 'Usar a lista fixa de 50 em vez do volume vivo'
         required: false
@@ -83,7 +83,7 @@ on:
       falha5_top:
         description: 'Quantas moedas o rompimento falso escaneia'
         required: false
-        default: '150'
+        default: '215'
       sem_reversao8:
         description: 'Desligar o terceiro alerta (reversão de 8h, em teste)'
         required: false
@@ -92,7 +92,7 @@ on:
       rev_top:
         description: 'Quantas moedas a reversão escaneia'
         required: false
-        default: '150'
+        default: '215'
       rev8_ping:
         description: 'Mandar uma amostra do alerta da reversão de 8h'
         required: false
@@ -155,7 +155,7 @@ jobs:
           # Workflow MANUAL: sem batimento. Ele so roda quando
           # alguem clica, entao mediria "buraco" de horas toda vez.
           ARGS="--sem-batimento --rotulo manual"
-          ARGS="$ARGS --top ${{ inputs.top || '150' }}"
+          ARGS="$ARGS --top ${{ inputs.top || '215' }}"
           ARGS="$ARGS --rr-min ${{ inputs.rr_min || '1.2' }}"
           ARGS="$ARGS --vol-min ${{ inputs.vol_min || '1.2' }}"
           ARGS="$ARGS --liq-max-r ${{ inputs.liq_max_r || '1.5' }}"

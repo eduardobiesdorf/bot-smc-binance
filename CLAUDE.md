@@ -64,10 +64,23 @@ placar) só roda em quem roda o setup 1, senão sai desfecho em triplicata.
   arquivos de estado do bot. A receita:
   `git checkout -- diagnostico_varredura.txt` e depois
   `git pull --rebase --autostash -q origin main`.
-- **A Binance é bloqueada por geografia deste contêiner.** `fapi.binance.com`
-  e `data-api.binance.vision` dão `403 Forbidden` no túnel. Todo teste que
-  precise de dado ao vivo tem de rodar no Actions. O CDN público
-  `data.binance.vision` funciona de dentro do Actions.
+- **A Binance é bloqueada por geografia deste contêiner.** Todo teste que
+  precise de dado ao vivo tem de rodar no Actions.
+- **18/11/2026 — o bot passou a ler FUTUROS, pelo `www.binance.com/fapi/v1`.**
+  Antes lia spot, enquanto todo o backteste é em perpétuo (70% de
+  sobreposição de universo). `fapi.binance.com` dá **451** dos runners do
+  GitHub, que ficam nos EUA. Foram testadas 9 portas: `fapi` 451,
+  `fapi1/2/3` 302, `dapi` 451, `data-api.binance.vision/fapi` 404, e a que
+  passa é o mesmo endpoint pelo domínio do site. **Não trocar de volta sem
+  testar: essa é a única porta aberta.** O spread contra o spot no BTC deu
+  -0,056%.
+- **Nos futuros a ação tokenizada NÃO leva o B do spot** (`NVDAUSDT`, não
+  `NVDABUSDT`), e **45 das 150 maiores do perpétuo são ação, ETF ou
+  commodity**. Por isso `_ACOES_BASE` guarda o ticker puro e gera as duas
+  formas, e por isso `--top` é **215**: 215 do topo rendem ~150 criptos,
+  que é o universo do backteste. Quem pega o que a lista não tem é o
+  `negocia_sempre()` (volume de fim de semana ≥ 12%) — num teste ele
+  descartou sozinho SAMSUNG, SQQQ, NATGAS, COPPER, UVXY, XPT, CL e BZ.
 - **16/11/2026 — o histórico foi reescrito e limpo** (`git filter-repo`),
   porque o repositório ia virar público. Saíram de TODOS os 743 commits: o
   `diagnostico_telegram.txt` inteiro, o chat_id do Telegram e o sobrenome;

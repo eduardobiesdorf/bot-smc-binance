@@ -36,7 +36,7 @@ on:
       top:
         description: 'Quantos pares escanear'
         required: false
-        default: '150'
+        default: '215'
 
 permissions:
   contents: write
@@ -66,9 +66,9 @@ jobs:
         run: |
           set -o pipefail
           ARGS="--esperadas 24 --rotulo s3 --sem-varredura --sem-falha5"
-          ARGS="$ARGS --top ${{ inputs.top || '150' }}"
-          ARGS="$ARGS --rev-top ${{ inputs.top || '150' }}"
-          ARGS="$ARGS --falha5-top ${{ inputs.top || '150' }}"
+          ARGS="$ARGS --top ${{ inputs.top || '215' }}"
+          ARGS="$ARGS --rev-top ${{ inputs.top || '215' }}"
+          ARGS="$ARGS --falha5-top ${{ inputs.top || '215' }}"
           ARGS="$ARGS --caixa 60 --risco-pct 2 --alav 8"
           [ "${{ inputs.teste }}" = "true" ] && ARGS="$ARGS --teste"
           python -u bot_varredura.py $ARGS 2>&1 | tee s3.log
