@@ -78,7 +78,8 @@ jobs:
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          for f in reversao8_estado.json historico_reversao8.csv \
+          for f in volume_fila.json \
+                    reversao8_estado.json historico_reversao8.csv \
                    diagnostico_s3.txt resumo_s3.txt \
                    ultima_rodada_s3.json; do
             if [ -f "$f" ]; then git add "$f"; fi

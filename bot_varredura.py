@@ -65,6 +65,7 @@ Uso:
 import argparse
 import json
 import os
+import statistics
 import time
 from datetime import datetime, timedelta, timezone
 
@@ -210,22 +211,100 @@ ACOES = {'SNDKB', 'INTCB', 'CRCLB', 'NVDAB', 'TSLAB', 'AAPLB', 'MSTRB',
          'SNXXB', 'SKHYB', 'BEB', 'SPCXB', 'DRAMB'}
 
 
+FILA_HIST = "volume_fila.json"
+GRUDE_H = 48        # horas que uma moeda segue vigiada depois de cair do top
+DIAS_MED = 7        # janela da mediana de volume
+MIN_DIAS = 4        # dias de historico para a mediana substituir o volume vivo
+
+
+def _ler_fila():
+    try:
+        with open(FILA_HIST, encoding="utf-8") as f:
+            return json.load(f)
+    except Exception:
+        return {}
+
+
+def _gravar_fila(d):
+    try:
+        with open(FILA_HIST, "w", encoding="utf-8") as f:
+            json.dump(d, f, separators=(',', ':'))
+    except Exception as e:
+        diag(f"nao gravou o histórico de volume: {e}")
+
+
 def candidatos(n=60):
-    """Pares USDT por volume de 24h, ja sem stablecoin e commodity."""
+    """Pares USDT por volume, agora COM MEMORIA.
+
+    18/11/2026 -- antes isto ordenava pelo volume das ULTIMAS 24 HORAS,
+    cru, e refazia a fila a cada rodada. Medido em 23 rodadas seguidas:
+    1,6 moeda nova por hora, 160 moedas distintas vistas e so 115
+    presentes em todas -- 45 entravam e saiam da vigilancia. Sinal que
+    nascia numa moeda fora da fila era invisivel e nao deixava rastro.
+
+    Pior: o backteste usa universo ROLANTE TRIMESTRAL (as N maiores pela
+    mediana do trimestre anterior), estavel por 90 dias. Os dois nao
+    estavam medindo a mesma coisa, e o backteste saia otimista.
+
+    Duas correcoes, nenhuma custa requisicao a mais:
+
+    1. MEDIANA DE 7 DIAS. O bot roda de hora em hora, entao guarda o
+       volume de cada moeda uma vez por dia e ordena pela mediana da
+       semana, que e o espirito do backteste. Enquanto nao houver
+       MIN_DIAS dias juntados, usa o volume vivo como antes -- a troca e
+       gradual e por moeda.
+
+    2. GRUDE. Moeda que esteve no top-N segue vigiada por GRUDE_H horas
+       depois de cair fora. Fecha o buraco do giro sem alargar a rede.
+
+    O que isto NAO resolve: moeda que nunca entrou no top-N. Para pegar
+    essas so alargando para 250/300, e isso foi medido como ruido para o
+    setup 5 (+$11/op, 39% de acerto) -- nao compensa.
+    """
     r = requests.get(f"{BASE_URL}/ticker/24hr", timeout=40)
     r.raise_for_status()
     fora = STABLE | COMMODITY | ACOES
-    cand = []
+    vivo = {}
     for d in r.json():
         s = d.get('symbol', '')
         if not s.endswith('USDT') or s[:-4] in fora:
             continue
         try:
-            cand.append((float(d['quoteVolume']), s))
+            vivo[s] = float(d['quoteVolume'])
         except (KeyError, ValueError):
             continue
-    cand.sort(reverse=True)
-    return [x[1] for x in cand[:n]]
+
+    agora = time.time()
+    hoje = f"{datetime.now(BRT):%Y-%m-%d}"
+    corte = f"{datetime.now(BRT) - timedelta(days=DIAS_MED):%Y-%m-%d}"
+    hist = _ler_fila()
+    for s, v in vivo.items():
+        e = hist.setdefault(s, {'d': {}})
+        e['d'][hoje] = v
+        e['d'] = {k: x for k, x in e['d'].items() if k > corte}
+
+    def peso(s):
+        dias = list(hist.get(s, {}).get('d', {}).values())
+        if len(dias) >= MIN_DIAS:
+            return statistics.median(dias)
+        return vivo.get(s, 0.0)
+
+    top = sorted(vivo, key=peso, reverse=True)[:n]
+    for s in top:
+        hist.setdefault(s, {'d': {}})['visto'] = agora
+
+    grude = [s for s, e in hist.items()
+             if s not in top and s in vivo
+             and agora - e.get('visto', 0) <= GRUDE_H*3600]
+    hist = {s: e for s, e in hist.items()
+            if e.get('d') or agora - e.get('visto', 0) <= GRUDE_H*3600}
+    _gravar_fila(hist)
+
+    prontas = sum(1 for s in top
+                  if len(hist.get(s, {}).get('d', {})) >= MIN_DIAS)
+    diag(f"fila: {len(top)} do top + {len(grude)} grudada(s) · "
+         f"mediana de {DIAS_MED}d já valendo em {prontas}/{len(top)}")
+    return top + grude
 
 
 def negocia_sempre(h, limite=0.03, fds_min=0.12):
@@ -1142,8 +1221,12 @@ def main():
         diag("setup 1 desligado nesta rodada (--sem-varredura)")
     else:
         fila = UNIVERSO[:a.top] if a.fixo else fila_viva(a.top)
+    # O teto e o TAMANHO DA FILA, nao --top: desde 18/11 a fila vem maior
+    # que --top de proposito, por causa das moedas grudadas. Usar a.top
+    # aqui descartaria em silencio justamente as que a grude foi buscar.
+    teto_fila = len(fila)
     for sim in fila:
-        if len(usados) >= a.top:
+        if len(usados) >= teto_fila:
             break
         v = serie_1h(sim)
         if len(v) < 500:

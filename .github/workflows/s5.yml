@@ -78,7 +78,8 @@ jobs:
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          for f in falha5_estado.json historico_falha5.csv \
+          for f in volume_fila.json \
+                    falha5_estado.json historico_falha5.csv \
                    diagnostico_s5.txt resumo_s5.txt \
                    ultima_rodada_s5.json; do
             if [ -f "$f" ]; then git add "$f"; fi

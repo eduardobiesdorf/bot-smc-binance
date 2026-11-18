@@ -94,6 +94,7 @@ jobs:
             # Guarda o estado a cada volta: se o job for cancelado no meio,
             # nao se perde o que ja foi avisado (senao repetiria alerta).
             for f in varredura_enviados.json acompanhamento.json \
+                     volume_fila.json \
                      historico_ao_vivo.csv reversao8_estado.json \
                      historico_reversao8.csv falha5_estado.json \
                      historico_falha5.csv \

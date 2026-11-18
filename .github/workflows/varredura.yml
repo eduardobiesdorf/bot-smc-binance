@@ -188,6 +188,7 @@ jobs:
           # historico_ao_vivo.csv so nasce quando a primeira operacao
           # resolve. Resultado: nada era salvo desde 03/11. Adiciona um a um.
           for f in varredura_enviados.json acompanhamento.json \
+                     volume_fila.json \
                    ultima_rodada.json \
                    historico_ao_vivo.csv diagnostico_varredura.txt \
                    resumo_varredura.txt \
