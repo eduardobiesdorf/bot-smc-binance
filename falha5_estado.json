@@ -16,5 +16,14 @@
   "stop": 0.04457442097579695,
   "alvo": 0.0283,
   "status": "avisado"
+ },
+ "ctx-TUTUSDT-1795003200000": {
+  "sim": "TUTUSDT",
+  "tipo": "contexto",
+  "lado": "venda",
+  "forca_ms": 1795003200000,
+  "stop": 0.014170725325547162,
+  "alvo": 0.0127,
+  "status": "avisado"
  }
 }
