@@ -1,5 +1,7 @@
-início 17/11 15:18 BRT
-buraco desde a rodada anterior: 5.7h
+início 18/11 07:06 BRT
+TOKEN: ok 46 chars | CHAT_ID: ok 10 chars
+HTTP 200: ok
+buraco desde a rodada anterior: 15.8h
 TOKEN: ok 46 chars | CHAT_ID: ok 10 chars
 HTTP 200: ok
 setup 1 desligado nesta rodada (--sem-varredura)
@@ -8,15 +10,17 @@ gatilhos 0 | cenários 0
 AAOIBUSDT: fora (não negocia 24/7)
 AGPUBUSDT: fora (não negocia 24/7)
 AVGOBUSDT: fora (não negocia 24/7)
-BABABUSDT: fora (não negocia 24/7)
-HAEDALUSDT: fora (não negocia 24/7)
+COHRBUSDT: fora (não negocia 24/7)
+CRWVBUSDT: fora (não negocia 24/7)
 HUMAUSDT: fora (não negocia 24/7)
 INTWBUSDT: fora (não negocia 24/7)
-IRENBUSDT: fora (não negocia 24/7)
 LITEBUSDT: fora (não negocia 24/7)
+MMTUSDT: fora (não negocia 24/7)
 MRVLBUSDT: fora (não negocia 24/7)
-FORÇA CONTRÁRIA STXUSDT venda força 17/11 12:00 há 2h, faltam 14 velas · gatilho abaixo de 0.2687 · R:R 1:1.24
+MUUBUSDT: fora (não negocia 24/7)
+MVLLBUSDT: fora (não negocia 24/7)
 TSMBUSDT: fora (não negocia 24/7)
-rompimento falso: 139 pares olhados, 0 gatilho(s), 1 força(s) esperando a falha
+FORÇA CONTRÁRIA ZKPUSDT venda força 18/11 06:00 há 0h, faltam 16 velas · gatilho abaixo de 0.0374 · R:R 1:1.27
+rompimento falso: 137 pares olhados, 0 gatilho(s), 1 força(s) esperando a falha
 🧪 rompimento falso em teste: 0 aberta(s), nenhuma resolvida ainda
 enviados 0 gatilhos, 0 desfechos
