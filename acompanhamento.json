@@ -937,5 +937,17 @@
   "vol_varr": 1.8266141318809803,
   "nucleo": false,
   "motivo": "furou 0.20x a altura do bloco, máximo 0.15x: afundou demais para ser varredura"
+ },
+ "cen-NIGHTUSDT-1794657600000": {
+  "tipo": "cenario",
+  "sim": "NIGHTUSDT",
+  "lado": "compra",
+  "status": "aberto",
+  "vela_ms": 1795003200000,
+  "imp_fim_ms": 1794657600000,
+  "alvo": 0.05125,
+  "nota": "chegou no order block, esperando a limpeza",
+  "vol_varr": 0.0,
+  "nucleo": false
  }
 }
