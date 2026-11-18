@@ -929,12 +929,13 @@
   "tipo": "cenario",
   "sim": "TREEUSDT",
   "lado": "venda",
-  "status": "aberto",
+  "status": "morreu",
   "vela_ms": 1794974400000,
   "imp_fim_ms": 1794686400000,
   "alvo": 0.0266,
   "nota": "limpou o order block, esperando a reversão",
   "vol_varr": 1.8266141318809803,
-  "nucleo": false
+  "nucleo": false,
+  "motivo": "furou 0.20x a altura do bloco, máximo 0.15x: afundou demais para ser varredura"
  }
 }
