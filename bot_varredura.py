@@ -77,7 +77,26 @@ import reversao8 as rev8
 import falha5
 
 BRT = timezone(timedelta(hours=-3))
-BASE_URL = "https://data-api.binance.vision/api/v3"
+# 18/11/2026 -- FUTUROS, nao mais spot.
+#
+# O bot lia spot (data-api.binance.vision/api/v3) enquanto TODO o backteste
+# foi feito em futuros perpetuos. Medido: 70% de sobreposicao de universo,
+# 42 moedas na fila que nunca foram testadas e os perpetuos sem spot
+# invisiveis. O Eduardo opera perpetuo; o radar tinha de ler perpetuo.
+#
+# O endereco oficial de futuros, fapi.binance.com, responde 451 ("indisponivel
+# por motivos legais") dos runners do GitHub, que ficam nos EUA. Testadas 9
+# portas: fapi 451, fapi1/2/3 302, dapi 451, data-api.binance.vision/fapi 404.
+# A que passa e o MESMO endpoint servido pelo dominio do site:
+#
+#   www.binance.com/fapi/v1  ->  200
+#
+# Conferido: klines de 1300 velas em 0,3s com a vela em formacao no fim,
+# ticker de 764 pares USDT, exchangeInfo com 522 perpetuos, e 20 chamadas
+# seguidas em 5s sem limite de taxa. O spread contra o spot no BTC deu
+# -0,056%.
+BASE_URL = "https://www.binance.com/fapi/v1"
+CABECA = {'User-Agent': 'Mozilla/5.0 (compatible; radar-smc/1.0)'}
 ESTADO = "varredura_enviados.json"
 DIAG = "diagnostico_varredura.txt"
 RESUMO = "resumo_varredura.txt"
@@ -128,7 +147,7 @@ CFG = dict(imp_min=3, imp_max=8, sigma=2.5, frac_direcao=0.7, corpo_imp=0.5,
 def buscar(simbolo, interval='1h', limite=400):
     r = requests.get(f"{BASE_URL}/klines",
                      params={'symbol': simbolo, 'interval': interval,
-                             'limit': limite}, timeout=20)
+                             'limit': limite}, headers=CABECA, timeout=20)
     r.raise_for_status()
     agora = int(time.time() * 1000)
     return [[int(c[0]), float(c[1]), float(c[2]), float(c[3]), float(c[4]),
@@ -198,17 +217,30 @@ STABLE = {'USDC', 'FDUSD', 'TUSD', 'BUSD', 'DAI', 'USDP', 'AEUR', 'EURI',
           # 14/11/2026 -- apareceram na fila das 150 com volume de fim de
           # semana de 12 a 13%, a cara de quem nao oscila
           'USDE', 'RLUSD', 'BFUSD'}
-COMMODITY = {'XAUT', 'PAXG', 'XAGT'}
+# 18/11/2026 -- nos FUTUROS o ouro e a prata se chamam XAU/XAG, sem o T
+# do token do spot (XAUT). O XAUUSDT apareceu entre os 8 maiores volumes.
+COMMODITY = {'PAXG', 'XAGT', 'XAUT', 'XAU', 'XAG', 'OIL', 'WTI'}
 # acoes tokenizadas: seguem o pregao de Nova York, nao sao cripto
-ACOES = {'SNDKB', 'INTCB', 'CRCLB', 'NVDAB', 'TSLAB', 'AAPLB', 'MSTRB',
-         'COINB', 'METAB', 'AMZNB', 'GOOGLB', 'MSFTB', 'HOODB', 'PLTRB',
-         # 14/11/2026 -- a amostra do terceiro alerta veio em BMNRB
-         # (Bitmine) e as duas do quarto em SPCXB (SpaceX) e MUB (Micron).
-         # Medi a fila das 150 inteira: 16 tokenizadas passando. Acoes e
-         # ETFs de Nova York, nenhuma delas e cripto.
-         'SPYB', 'QQQB', 'TQQQB', 'SOXLB', 'SOXSB', 'KORUB',
-         'AMDB', 'ORCLB', 'MUB', 'NBISB', 'BMNRB', 'BNCB',
-         'SNXXB', 'SKHYB', 'BEB', 'SPCXB', 'DRAMB'}
+# 18/11/2026 -- a lista agora guarda o TICKER PURO, e as duas formas sao
+# geradas abaixo. No SPOT a acao tokenizada leva um B no fim (NVDAB); nos
+# FUTUROS, nao (NVDAUSDT). Como o bot passou a ler futuros, a lista antiga
+# -- que so tinha a forma com B -- nao pegava nenhuma. No teste, SEIS dos
+# oito maiores volumes dos futuros eram acao ou ouro: SOXL, NVDA, XAU,
+# SNDK, SPCX, SOXS.
+#
+# Gerar as duas formas e seguro porque o casamento e EXATO contra o ticker
+# puro: ARB, BNB e SHIB nunca entram, pois nao estao nesta lista.
+_ACOES_BASE = {
+    'AAPL', 'AMD', 'AMZN', 'BE', 'BMNR', 'BNC', 'COIN', 'CRCL', 'DRAM',
+    'GOOGL', 'HOOD', 'INTC', 'KORU', 'META', 'MSFT', 'MSTR', 'MU', 'NBIS',
+    'NVDA', 'ORCL', 'PLTR', 'QQQ', 'SKHY', 'SNDK', 'SNXX', 'SOXL', 'SOXS',
+    'SPCX', 'SPY', 'TQQQ', 'TSLA',
+    # vistos na fila dos futuros em 18/11
+    'AVGO', 'MRVL', 'AGPU', 'BABA', 'IREN', 'AAOI', 'INTW', 'LITE', 'TSM',
+    'EWY', 'NFLX', 'SMCI', 'ARM', 'CRWD', 'UBER', 'DIS', 'JPM', 'V', 'MA',
+    'WMT', 'COST', 'LLY', 'UNH', 'XOM', 'BRKB', 'GLD', 'SLV', 'IWM', 'DIA',
+}
+ACOES = _ACOES_BASE | {t + 'B' for t in _ACOES_BASE}
 
 
 FILA_HIST = "volume_fila.json"
@@ -261,7 +293,7 @@ def candidatos(n=60):
     essas so alargando para 250/300, e isso foi medido como ruido para o
     setup 5 (+$11/op, 39% de acerto) -- nao compensa.
     """
-    r = requests.get(f"{BASE_URL}/ticker/24hr", timeout=40)
+    r = requests.get(f"{BASE_URL}/ticker/24hr", headers=CABECA, timeout=40)
     r.raise_for_status()
     fora = STABLE | COMMODITY | ACOES
     vivo = {}
