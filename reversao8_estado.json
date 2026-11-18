@@ -22,5 +22,17 @@
   "alvo": 0.143,
   "stop": 0.07923085513956318,
   "status": "avisado"
+ },
+ "enc-\u9f99\u867eUSDT-1794873600000": {
+  "sim": "\u9f99\u867eUSDT",
+  "tipo": "encosto",
+  "lado": "compra",
+  "toque_ms": 1794978000000,
+  "exp_ms": 1794873600000,
+  "ob_base": 0.01297,
+  "ob_topo": 0.01364,
+  "alvo": 0.0234,
+  "stop": 0.012787018352915867,
+  "status": "avisado"
  }
 }

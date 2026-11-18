@@ -25,5 +25,14 @@
   "stop": 0.014170725325547162,
   "alvo": 0.0127,
   "status": "avisado"
+ },
+ "ctx-IRYSUSDT-1795003200000": {
+  "sim": "IRYSUSDT",
+  "tipo": "contexto",
+  "lado": "venda",
+  "forca_ms": 1795003200000,
+  "stop": 0.01871080039934479,
+  "alvo": 0.01357,
+  "status": "avisado"
  }
 }
