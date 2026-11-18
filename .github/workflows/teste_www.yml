@@ -1,0 +1,18 @@
+name: "pesquisa · teste 2: www.binance.com/fapi serve tudo?"
+on:
+  workflow_dispatch:
+jobs:
+  teste:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Bater em tudo que a varredura precisa
+        run: python -u analise/teste_www.py 2>&1 | tee www.log
+      - name: Resumo
+        if: always()
+        run: |
+          { echo '```'; cat www.log; echo '```'; } >> $GITHUB_STEP_SUMMARY
