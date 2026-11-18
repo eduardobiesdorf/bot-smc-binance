@@ -924,5 +924,17 @@
   "fim_ms": 1794916800000,
   "horas": 1,
   "resultado_r": -1.0
+ },
+ "cen-TREEUSDT-1794686400000": {
+  "tipo": "cenario",
+  "sim": "TREEUSDT",
+  "lado": "venda",
+  "status": "aberto",
+  "vela_ms": 1794974400000,
+  "imp_fim_ms": 1794686400000,
+  "alvo": 0.0266,
+  "nota": "limpou o order block, esperando a reversão",
+  "vol_varr": 1.8266141318809803,
+  "nucleo": false
  }
 }
