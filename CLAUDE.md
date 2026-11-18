@@ -1,24 +1,14 @@
 # Regras deste repositório
 
-## TRAVA: não rodar nada no Actions sem aprovação
+## Rodar no Actions: liberado
 
-**Nunca disparar um workflow sem o Eduardo aprovar antes.** Isso vale para
-tudo: `workflow_dispatch`, backtest, painel, ping, download de dado. Os
-minutos do Actions são pagos e a cota é limitada.
+**Pode disparar workflow direto, sem pedir aprovação.** O repositório virou
+público em 16/11/2026 e os minutos do Actions passaram a ser ilimitados e
+gratuitos. Até 18/11 havia uma trava de aprovação aqui, por causa da cota
+paga de repositório privado; o Eduardo a removeu quando o custo zerou.
 
-O procedimento é sempre o mesmo:
-
-1. Dizer o que precisa rodar e **por quê**.
-2. Dizer o **custo estimado em minutos** (a varredura leva 3,2 min; o
-   painel ~11 min; um backtest de universo inteiro de 10 a 60 min).
-3. **Esperar o ok.** Sem resposta, não roda.
-
-Medido em novembro/2026: 2.825 min gastos no mês, dos quais 1.789 foram
-pesquisa. A cota gratuita de repositório privado é 2.000 min/mês. O custo
-por minuto além da cota é $0,008 (Linux).
-
-Empurrar commit (`git push`) é de graça e não dispara nada: nenhum workflow
-aqui tem gatilho `on: push`. Só o disparo de workflow precisa de aprovação.
+Continua valendo o bom senso: dizer o que está rodando e por quê, e não
+disparar backtest pesado em paralelo com o radar sem necessidade.
 
 ## O cron do bot
 
