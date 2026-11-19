@@ -955,12 +955,13 @@
   "tipo": "cenario",
   "sim": "CHIPUSDT",
   "lado": "venda",
-  "status": "aberto",
+  "status": "morreu",
   "vela_ms": 1795060800000,
   "imp_fim_ms": 1794686400000,
   "alvo": 0.0249,
   "nota": "chegou no order block, esperando a limpeza",
   "vol_varr": 0.0,
-  "nucleo": false
+  "nucleo": false,
+  "motivo": "furou 0.29x a altura do bloco, máximo 0.15x: afundou demais para ser varredura"
  }
 }
