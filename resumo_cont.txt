@@ -1,2 +1,2 @@
-19/11 06:01 BRT
-nada
+19/11 07:01 BRT
+radar   NIGHTUSDT compra — chegou no order block, esperando a limpeza
