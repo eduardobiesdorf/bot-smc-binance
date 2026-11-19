@@ -1,0 +1,42 @@
+name: "pesquisa · quanto a ação tokenizada inflava o painel"
+on:
+  workflow_dispatch:
+    inputs:
+      inicio: { description: 'Mês inicial', required: false, default: '2025-01' }
+      top:    { description: 'Pares',       required: false, default: '250' }
+jobs:
+  comp:
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - run: pip install requests matplotlib
+      - uses: actions/cache@v4
+        with:
+          path: dados_fut_painel
+          key: futpainel-${{ inputs.inicio || '2025-01' }}-${{ inputs.top || '250' }}-reuso
+          restore-keys: |
+            futpainel-${{ inputs.inicio || '2025-01' }}-${{ inputs.top || '250' }}-
+            futpainel-${{ inputs.inicio || '2025-01' }}-
+      - name: Completar o que faltar
+        run: |
+          python -u baixar_futuros.py --inicio ${{ inputs.inicio || '2025-01' }} \
+            --intervalo 1h --top ${{ inputs.top || '250' }} \
+            --pasta dados_fut_painel 2>&1 | tail -5
+      - name: COM ação tokenizada (como o painel de 14/11 rodou)
+        run: |
+          set -o pipefail
+          python -u analise/painel_mensal.py dados_fut_painel --ano 2026 \
+            --com-acoes 2>&1 | tee com.log | sed -n '1,40p'
+      - name: SEM ação tokenizada (o correto)
+        run: |
+          set -o pipefail
+          python -u analise/painel_mensal.py dados_fut_painel --ano 2026 \
+            2>&1 | tee sem.log | sed -n '1,40p'
+      - name: Resumo
+        if: always()
+        run: |
+          { echo '## COM ação tokenizada'; echo '```'; sed -n '/OS 7 ANOS/,/OS TRÊS/p' com.log; echo '```';
+            echo '## SEM ação tokenizada'; echo '```'; sed -n '/OS 7 ANOS/,/OS TRÊS/p' sem.log; echo '```'; } >> $GITHUB_STEP_SUMMARY

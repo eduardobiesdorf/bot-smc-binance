@@ -154,8 +154,17 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('pasta')
     ap.add_argument('--ano', type=int, default=2026)
+    ap.add_argument('--com-acoes', action='store_true',
+                    help='NAO cortar acao tokenizada, ETF e commodity. So '
+                         'para medir quanto elas inflavam o resultado -- o '
+                         'painel de 14/11/2026 rodou assim sem querer, '
+                         'porque a lista estava na forma do spot (NVDAB) e '
+                         'os dados sao de futuros (NVDA), entao nao casava '
+                         'com nada e nenhum par era cortado.')
     a = ap.parse_args()
-    fora = bot.STABLE | bot.COMMODITY | bot.ACOES
+    fora = set() if a.com_acoes else (bot.STABLE | bot.COMMODITY | bot.ACOES)
+    if a.com_acoes:
+        print(">>> SEM CORTE: ação, ETF e commodity ENTRAM na base\n")
     serie, cortados = {}, []
     for p in sorted(glob.glob(os.path.join(a.pasta, '*_1h.csv'))):
         sim = os.path.basename(p).replace('_1h.csv', '')
