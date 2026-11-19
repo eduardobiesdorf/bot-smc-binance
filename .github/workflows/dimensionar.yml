@@ -1,0 +1,51 @@
+name: "pesquisa · risco fixo x valor de entrada fixo"
+on:
+  workflow_dispatch:
+    inputs:
+      inicio:
+        description: 'Mês inicial (YYYY-MM)'
+        required: false
+        default: '2025-01'
+      top:
+        description: 'Quantos pares'
+        required: false
+        default: '250'
+      nocional:
+        description: 'Valor fixo de entrada (0 = mediana)'
+        required: false
+        default: '0'
+jobs:
+  dim:
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install requests matplotlib
+      - name: Cache dos klines de futuros
+        uses: actions/cache@v4
+        with:
+          path: dados_fut_painel
+          key: futpainel-${{ inputs.inicio || '2025-01' }}-${{ inputs.top || '250' }}-reuso
+          restore-keys: |
+            futpainel-${{ inputs.inicio || '2025-01' }}-${{ inputs.top || '250' }}-
+            futpainel-${{ inputs.inicio || '2025-01' }}-
+      - name: Completar o que faltar
+        run: |
+          set -o pipefail
+          echo "pares no cache: $(ls dados_fut_painel 2>/dev/null | wc -l)"
+          python -u baixar_futuros.py \
+            --inicio ${{ inputs.inicio || '2025-01' }} --intervalo 1h \
+            --top ${{ inputs.top || '250' }} \
+            --pasta dados_fut_painel 2>&1 | tail -8
+      - name: Comparar os dois dimensionamentos
+        run: |
+          set -o pipefail
+          python -u analise/dimensionamento.py dados_fut_painel \
+            --ano 2026 --nocional ${{ inputs.nocional || '0' }} 2>&1 | tee dim.log
+      - name: Resumo
+        if: always()
+        run: |
+          { echo '```'; tail -90 dim.log; echo '```'; } >> $GITHUB_STEP_SUMMARY
