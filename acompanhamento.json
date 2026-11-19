@@ -968,12 +968,13 @@
   "tipo": "cenario",
   "sim": "QNTUSDT",
   "lado": "venda",
-  "status": "aberto",
+  "status": "morreu",
   "vela_ms": 1795089600000,
   "imp_fim_ms": 1794686400000,
   "alvo": 138.66,
   "nota": "chegou no order block, esperando a limpeza",
   "vol_varr": 0.0,
-  "nucleo": false
+  "nucleo": false,
+  "motivo": "nem varreu o order block nem chegou perto dele"
  }
 }
