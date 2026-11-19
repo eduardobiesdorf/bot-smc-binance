@@ -34,5 +34,23 @@
   "stop": 0.01871080039934479,
   "alvo": 0.01357,
   "status": "avisado"
+ },
+ "ctx-GRASSUSDT-1795100400000": {
+  "sim": "GRASSUSDT",
+  "tipo": "contexto",
+  "lado": "venda",
+  "forca_ms": 1795100400000,
+  "stop": 0.45723016593688137,
+  "alvo": 0.3635,
+  "status": "avisado"
+ },
+ "ctx-XPLUSDT-1795100400000": {
+  "sim": "XPLUSDT",
+  "tipo": "contexto",
+  "lado": "venda",
+  "forca_ms": 1795100400000,
+  "stop": 0.048994272298211995,
+  "alvo": 0.04228,
+  "status": "avisado"
  }
 }
