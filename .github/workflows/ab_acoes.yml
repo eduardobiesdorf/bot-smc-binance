@@ -1,0 +1,37 @@
+name: "pesquisa · A/B: quanto a ação tokenizada valia no painel"
+on: { workflow_dispatch: {} }
+jobs:
+  ab:
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - run: pip install requests matplotlib
+      - uses: actions/cache@v4
+        with:
+          path: dados_ab
+          key: ab-acoes-2025-01-250-v1
+          restore-keys: ab-acoes-2025-01-250-
+      - name: Baixar 250 pares COM ação tokenizada
+        env: { BAIXAR_COM_ACOES: '1' }
+        run: |
+          python -u baixar_futuros.py --inicio 2025-01 --intervalo 1h \
+            --top 250 --pasta dados_ab 2>&1 | tail -6
+          echo "pares: $(ls dados_ab | wc -l)"
+      - name: A — COM ação (como o painel de 14/11 rodou)
+        run: |
+          set -o pipefail
+          python -u analise/painel_mensal.py dados_ab --ano 2026 --com-acoes \
+            2>&1 | tee A.log | grep -E 'pares ·|setup [0-9]|OS TRÊS|ops' | head -16
+      - name: B — SEM ação (o correto)
+        run: |
+          set -o pipefail
+          python -u analise/painel_mensal.py dados_ab --ano 2026 \
+            2>&1 | tee B.log | grep -E 'pares ·|fora da base|setup [0-9]|OS TRÊS|ops' | head -16
+      - name: Resumo
+        if: always()
+        run: |
+          { echo '## A — COM ação tokenizada'; echo '```'; sed -n '/OS 7 ANOS/,/OS TRÊS/p;/SÓ 2026/,/OS TRÊS/p' A.log; echo '```';
+            echo '## B — SEM ação tokenizada'; echo '```'; sed -n '/OS 7 ANOS/,/OS TRÊS/p;/SÓ 2026/,/OS TRÊS/p' B.log; echo '```'; } >> $GITHUB_STEP_SUMMARY

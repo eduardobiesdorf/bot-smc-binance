@@ -50,6 +50,11 @@ def _fora_do_bot():
 
 _FORA_BOT = _fora_do_bot()
 
+# 19/11/2026 -- so para o teste A/B: baixar TAMBEM a acao tokenizada, para
+# medir quanto ela inflava o painel de 14/11 (que rodou com elas dentro
+# sem querer). Nunca ligar isto fora do teste.
+COM_ACOES = __import__('os').getenv('BAIXAR_COM_ACOES') == '1'
+
 CDN = "https://data.binance.vision/data/futures/um/monthly/klines"
 CDN_DIA = "https://data.binance.vision/data/futures/um/daily/klines"
 SPOT = "https://data-api.binance.vision/api/v3"
@@ -179,7 +184,7 @@ def candidatos(n):
         if not s.endswith('USDT'):
             continue
         base = s[:-4]
-        if base in FORA or base in _FORA_BOT:
+        if base in FORA or (base in _FORA_BOT and not COM_ACOES):
             continue
         # acao tokenizada no spot: ticker + B. Nao existe em futuros.
         if 4 <= len(base) <= 6 and base.endswith('B') and base[:-1].isalpha():
