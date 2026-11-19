@@ -950,5 +950,17 @@
   "vol_varr": 0.0,
   "nucleo": false,
   "motivo": "nem varreu o order block nem chegou perto dele"
+ },
+ "cen-CHIPUSDT-1794686400000": {
+  "tipo": "cenario",
+  "sim": "CHIPUSDT",
+  "lado": "venda",
+  "status": "aberto",
+  "vela_ms": 1795060800000,
+  "imp_fim_ms": 1794686400000,
+  "alvo": 0.0249,
+  "nota": "chegou no order block, esperando a limpeza",
+  "vol_varr": 0.0,
+  "nucleo": false
  }
 }
