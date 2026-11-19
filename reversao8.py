@@ -452,38 +452,31 @@ def achar_encosto(h1, cfg=None):
 
 
 def msg_encosto(sim, g, quando, fmt, msg_mao):
+    """Aviso curto, no formato do setup 1: o que dispara e o que cancela.
+
+    19/11/2026 -- a versao anterior tinha 20 linhas, com a volatilidade de
+    7 dias, a fundura no bloco e a explicacao do gatilho. O Eduardo pediu
+    o padrao do setup 1. O grafico, que agora acompanha o alerta, mostra
+    tudo isso sem precisar escrever.
+    """
     seta = "🟡" if g['lado'] == 'compra' else "🟠"
-    direcao = "caindo" if g['lado'] == 'compra' else "subindo"
     return (
-        f"🧪 <b>EM TESTE</b> — reversão de 8h   "
-        f"<i>sem dinheiro, só para medir</i>\n\n"
         f"{seta} <b>{sim.replace('USDT', '/USDT')}</b> — "
-        f"<b>ENCOSTOU NO ORDER BLOCK</b>\n"
-        f"<i>ainda não é entrada: agora começa a janela do gatilho</i>\n\n"
-        f"tocou às {quando(g['toque_ms'])} (Brasília), "
-        f"há {g['horas']}h\n"
-        f"<b>faltam {g['falta']}h</b> para o gatilho aparecer, "
-        f"senão o setup morre\n"
-        f"<i>vinha {direcao} {g['queda']:.1f} volatilidades em 7 dias; "
-        f"a explosão foi em {quando(g['exp_ms'])}</i>\n\n"
-        f"order block  <code>{fmt(g['ob_base'])}</code> a "
+        f"<b>encostou no order block</b> ({g['lado']})   "
+        f"<i>🧪 em teste</i>\n"
+        f"tocou às {quando(g['toque_ms'])} · "
+        f"<b>faltam {g['falta']}h</b>\n\n"
+        f"bloco    <code>{fmt(g['ob_base'])}</code> a "
         f"<code>{fmt(g['ob_topo'])}</code>\n"
-        f"<b>não pode passar de</b> <code>{fmt(g['meio'])}</code>   "
-        f"<i>(o meio do bloco; se afundar, acabou)</i>\n"
-        f"<i>já desceu {g['fundura']*100:.0f}% do caminho até lá</i>\n\n"
-        f"preço agora  <code>{fmt(g['ref'])}</code>   "
-        f"<i>a entrada sai no fechamento da vela de gatilho</i>\n"
+        f"dispara  vela de 1h fechando de volta para fora do bloco\n"
+        f"cancela  se {'afundar de' if g['lado'] == 'compra' else 'subir de'} "
+        f"<code>{fmt(g['meio'])}</code>\n\n"
         f"stop     <code>{fmt(g['stop'])}</code>   "
         f"risco <b>{g['risco_pct']:.2f}%</b>\n"
         f"alvo     <code>{fmt(g['alvo'])}</code>   "
         f"<b>R:R 1:{g['rr']:.2f}</b>\n"
-        f"<i>o alvo é o topo da vela de explosão</i>\n"
         + msg_mao(g['risco_pct']) +
-        f"\n\n<i>Números provisórios, medidos no preço de agora. "
-        f"O gatilho é uma vela de 1h fechando de volta para fora do "
-        f"bloco, a favor, com 1,2x o volume médio. Se vier, chega "
-        f"outro alerta com os números finais.</i>")
-
+        f"\n\n<i>números provisórios; se o gatilho vier, mando os finais.</i>")
 
 def registrar_encosto(d, sim, g):
     """Avisa uma vez por montagem. A chave e a vela da explosao."""
@@ -539,33 +532,23 @@ def achar(h1, cfg=None, atraso_max=1):
 
 # ------------------------------------------------------------ mensagem
 def msg(sim, g, quando, fmt, msg_mao):
+    """Alerta curto, no formato do setup 1."""
     seta = "🟢" if g['lado'] == 'compra' else "🔴"
-    direcao = "caindo" if g['lado'] == 'compra' else "subindo"
     return (
-        f"🧪 <b>EM TESTE</b> — reversão de 8h   "
-        f"<i>sem dinheiro, só para medir</i>\n\n"
         f"{seta} <b>{sim.replace('USDT', '/USDT')}</b> — "
-        f"<b>{g['lado'].upper()}</b>\n"
-        f"gatilho na vela de 1h de {quando(g['vela_ms'])} (Brasília)"
-        + ("  <i>⚠️ chegou atrasado</i>" if g.get('atraso') else "") + "\n"
-        f"<i>vinha {direcao} {g['queda']:.1f} volatilidades em 7 dias; "
-        f"a explosão foi em {quando(g['exp_ms'])}</i>\n\n"
+        f"<b>{g['lado'].upper()}</b>   <i>🧪 em teste</i>\n"
+        f"reversão de 8h · vela de 1h de {quando(g['vela_ms'])} "
+        f"(Brasília)"
+        + ("  <i>⚠️ chegou atrasado</i>" if g.get('atraso') else "") + "\n\n"
         f"entrada  <code>{fmt(g['entrada'])}</code>\n"
         f"stop     <code>{fmt(g['stop'])}</code>   "
         f"risco <b>{g['risco_pct']:.2f}%</b>\n"
         f"alvo     <code>{fmt(g['alvo'])}</code>   "
         f"<b>R:R 1:{g['rr']:.2f}</b>\n"
-        f"<i>o alvo é o topo da vela de explosão</i>\n"
-        f"<i>gatilho com {g['vol_gat']:.1f}x o volume médio</i>\n"
-        + msg_mao(g['risco_pct'])
-        +
-        f"\n\n<i>No histórico de 7 anos: 55% de acerto, risco/retorno "
-        f"1:1,8, 1,6 alerta por mês. A compra bate entrada "
-        f"aleatória por 2,5 desvios; a venda por 0,7. "
-        f"Em teste: anota, não opera.</i>")
+        + msg_mao(g['risco_pct']) +
+        f"\n\n<i>ordem limitada em {fmt(g['entrada'])}. "
+        f"O alvo é o topo da vela de explosão.</i>")
 
-
-# ------------------------------------------------------------- estado
 def ler():
     try:
         with open(ARQUIVO) as f:

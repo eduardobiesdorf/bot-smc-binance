@@ -292,75 +292,50 @@ def _ctx(g):
 
 
 def msg(sim, g, quando, fmt, msg_mao):
+    """Alerta curto, no formato do setup 1.
+
+    19/11/2026 -- a versao anterior tinha 18 linhas, metade explicando o
+    metodo (cruzamentos da faixa, contexto, excursao, estatistica de 7
+    anos). O Eduardo pediu o padrao do setup 1: cabecalho, quando, os
+    numeros, a mao. Quem quiser o porque abre o grafico, que agora vem
+    junto.
+    """
     seta = "🟢" if g['lado'] == 'compra' else "🔴"
-    lado_ida = "para cima" if g['alta'] else "para baixo"
     return (
-        _cab() +
         f"{seta} <b>{sim.replace('USDT', '/USDT')}</b> — "
-        f"<b>{g['lado'].upper()}</b>\n"
-        f"gatilho na vela de 1h de {quando(g['vela_ms'])} (Brasília)"
-        + ("  <i>⚠️ chegou atrasado</i>" if g.get('atraso') else "") + "\n"
-        f"<i>falhou o {'topo' if g['alta'] else 'fundo'}: perdeu o extremo "
-        f"da vela de força {g['velas_forca']} vela(s) depois dela</i>\n\n"
-        f"faixa  <code>{fmt(g['base'])}</code> a "
-        f"<code>{fmt(g['topo'])}</code>   "
-        f"<i>60 velas, {g['cruz']} cruzamentos</i>\n"
-        f"<i>em cima de {_ctx(g)} — o contexto é a favor desta "
-        f"{g['lado']}</i>\n"
-        f"<i>rompeu {lado_ida} andando {g['excur']:.2f}x a altura da faixa, "
-        f"com {g['vol_x']:.1f}x o volume dela, e falhou</i>\n\n"
+        f"<b>{g['lado'].upper()}</b>   <i>🧪 em teste</i>\n"
+        f"rompimento falso · vela de 1h de {quando(g['vela_ms'])} "
+        f"(Brasília)"
+        + ("  <i>⚠️ chegou atrasado</i>" if g.get('atraso') else "") + "\n\n"
         f"entrada  <code>{fmt(g['entrada'])}</code>\n"
-        f"stop     <code>{fmt(g['stop'])}</code>   "
-        f"risco <b>{g['risco_pct']:.2f}%</b>   "
-        f"<i>(acima da máxima da ida)</i>\n"
-        f"alvo     <code>{fmt(g['alvo'])}</code>   "
-        f"<b>R:R 1:{g['rr']:.2f}</b>\n"
-        f"<i>o alvo é a piscina: o último {'fundo' if g['alta'] else 'topo'} "
-        f"não consumido além de toda a faixa</i>\n"
-        + msg_mao(g['risco_pct']) +
-        f"\n\n<i>No universo rolante de 7 anos: 52% de acerto, "
-        f"risco/retorno 1:2,05, 3,6 alertas por mês, +48 para cada 100 "
-        f"arriscados. De 2025 para cá, +55. Sem o filtro de contexto o "
-        f"mesmo padrão perde. Em teste: anota, não opera.</i>")
-
-
-def msg_contexto(sim, g, quando, fmt, msg_mao):
-    seta = "🟡" if g['lado'] == 'compra' else "🟠"
-    lado_ida = "para cima" if g['alta'] else "para baixo"
-    return (
-        _cab() +
-        f"{seta} <b>{sim.replace('USDT', '/USDT')}</b> — "
-        f"<b>VEIO A FORÇA CONTRÁRIA</b>\n"
-        f"<i>ainda não é entrada: agora começa a janela da falha</i>\n\n"
-        f"a vela de força fechou às {quando(g['forca_ms'])} (Brasília), "
-        f"há {g['horas']}h\n"
-        f"<b>faltam {g['falta']} velas</b> para a falha confirmar, "
-        f"senão o setup morre\n\n"
-        f"faixa  <code>{fmt(g['base'])}</code> a "
-        f"<code>{fmt(g['topo'])}</code>   "
-        f"<i>60 velas, {g['cruz']} cruzamentos</i>\n"
-        f"<i>em cima de {_ctx(g)} — o contexto é a favor de uma "
-        f"{g['lado']}</i>\n"
-        f"<i>rompeu {lado_ida} andando {g['excur']:.2f}x a altura da faixa, "
-        f"com {g['vol_x']:.1f}x o volume dela</i>\n\n"
-        f"<b>o gatilho</b> é uma vela de 1h fechando "
-        f"{'abaixo' if g['alta'] else 'acima'} de "
-        f"<code>{fmt(g['forca_lim'])}</code>   "
-        f"<i>(o extremo da vela de força)</i>\n"
-        f"<b>cancela</b> se passar de <code>{fmt(g['ext'])}</code>   "
-        f"<i>(a máxima da ida)</i>\n\n"
-        f"preço agora  <code>{fmt(g['ref'])}</code>\n"
         f"stop     <code>{fmt(g['stop'])}</code>   "
         f"risco <b>{g['risco_pct']:.2f}%</b>\n"
         f"alvo     <code>{fmt(g['alvo'])}</code>   "
         f"<b>R:R 1:{g['rr']:.2f}</b>\n"
         + msg_mao(g['risco_pct']) +
-        f"\n\n<i>Números provisórios, calculados como se a entrada saísse "
-        f"no extremo da vela de força. Se a falha vier, chega outro alerta "
-        f"com os números finais.</i>")
+        f"\n\n<i>ordem limitada em {fmt(g['entrada'])}. A mercado o preço "
+        f"já correu e a vantagem some.</i>")
 
+def msg_contexto(sim, g, quando, fmt, msg_mao):
+    """Aviso curto: o que dispara, o que cancela, e os numeros."""
+    seta = "🟡" if g['lado'] == 'compra' else "🟠"
+    return (
+        f"{seta} <b>{sim.replace('USDT', '/USDT')}</b> — "
+        f"<b>força contrária</b> ({g['lado']})   <i>🧪 em teste</i>\n"
+        f"força às {quando(g['forca_ms'])} · "
+        f"<b>faltam {g['falta']} velas</b>\n\n"
+        f"dispara  vela de 1h fechando "
+        f"{'abaixo' if g['alta'] else 'acima'} de "
+        f"<code>{fmt(g['forca_lim'])}</code>\n"
+        f"cancela  se {'passar de' if g['alta'] else 'cair abaixo de'} "
+        f"<code>{fmt(g['ext'])}</code>\n\n"
+        f"stop     <code>{fmt(g['stop'])}</code>   "
+        f"risco <b>{g['risco_pct']:.2f}%</b>\n"
+        f"alvo     <code>{fmt(g['alvo'])}</code>   "
+        f"<b>R:R 1:{g['rr']:.2f}</b>\n"
+        + msg_mao(g['risco_pct']) +
+        f"\n\n<i>números provisórios; se a falha vier, mando os finais.</i>")
 
-# -------------------------------------------------------------- estado
 def ler():
     try:
         with open(ARQUIVO) as f:
