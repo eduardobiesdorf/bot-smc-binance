@@ -34,5 +34,17 @@
   "alvo": 0.0234,
   "stop": 0.012787018352915867,
   "status": "avisado"
+ },
+ "enc-HOTUSDT-1795190400000": {
+  "sim": "HOTUSDT",
+  "tipo": "encosto",
+  "lado": "compra",
+  "toque_ms": 1795233600000,
+  "exp_ms": 1795190400000,
+  "ob_base": 0.0003059,
+  "ob_topo": 0.000323,
+  "alvo": 0.0003522,
+  "stop": 0.0003040300822212145,
+  "status": "avisado"
  }
 }
