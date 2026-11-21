@@ -65,6 +65,9 @@
   "excur": 0.5649484536082472,
   "vol_x": 3.4186487126764913,
   "ctx": "baixa",
-  "status": "aberto"
+  "status": "alvo",
+  "saida": 0.3635,
+  "resultado_pct": 15.30754892823859,
+  "por_100_risco": 234.121961353411
  }
 }
